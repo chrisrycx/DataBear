@@ -1,6 +1,14 @@
 '''
 A highly simplified version of the Schedule
 library: https://github.com/dbader/schedule
+Copyright (c) 2013 Daniel Bader (http://dbader.org)
+
+In addition to removing portions of the code,
+a "first run" method is added to schedule the 
+first run at the top of the next minute.
+
+Also, the next run is based on the last
+scheduled run, not the last actual run.
 
 Idea...
 Create a .when method for scheduling a job based on
