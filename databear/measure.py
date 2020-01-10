@@ -18,24 +18,29 @@ the measure() method associated with a measurement.
 I think it is only partially implemented though.
 '''
 
+import serial
+import minimalmodbus as mm
+import re #Used to parse serial data
+import datetime
+
 class measureFactory:
     '''
     Outputs measurement method objects
     '''
-    def __init__(self,mtype,settings):
+    def __init__(self):
         self._measuremethods = {}
 
     def register_measuremethod(self,measuretype,measuremethod):
         self._measuremethods[measuretype] = measuremethod
 
-    def get_measuremethod(self,measuretype):
+    def get_measuremethod(self,measuretype,name,settings):
         #Note: .get method on dictionary will return none if not found
         measuremethod = self._measuremethods.get(measuretype)
         if not measuremethod:
             #Evaluates true if measuremethod is none
             raise ValueError(measuremethod)
         
-        return measuremethod
+        return measuremethod(name,settings)
 
 #Instantiate measureFactory for use
 factory = measureFactory()

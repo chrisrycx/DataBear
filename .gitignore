@@ -3,3 +3,5 @@ build
 dist
 .vscode
 *.egg-info
+*.pyc
+*.csv

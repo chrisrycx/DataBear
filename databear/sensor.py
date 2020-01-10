@@ -3,11 +3,6 @@ Defines a sensor class
 
 '''
 
-#Dependencies for different measurements
-import serial
-import minimalmodbus as mm
-import re #Used to parse serial data
-import datetime
 import measure
 
 class Sensor:
@@ -30,7 +25,7 @@ class Sensor:
             - mtype: type of measurement
             - settings: dictionary of settings
         '''
-        self.measurements[name] = measure.measureFactory(mtype,settings)
+        self.measurements[name] = measure.factory.get_measuremethod(mtype,name,settings)
         self.data[name] = []
 
     def measure(self,name):
