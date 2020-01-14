@@ -113,9 +113,33 @@ datalogger = DataLogger('myLogger')
 #-------- Logger configuration ---------
 
 #Measurement settings
+airTsettings = {
+    'port': 'COM7',
+    'address': 3,
+    'regtype': 'float',
+    'register': 210,
+    'timeout': 0.1
+}
+
+bpsettings = {
+    'port': 'COM8',
+    'baud': 9600,
+    'dataRE': r'\d\d\d\d.\d\d',
+    'timeout': 0
+}
+
 #Add Sensors
+datalogger.addSensor('TPH',2222)
+datalogger.addSensor('RMY',3333)
+
 #Add Measurements
+datalogger.addMeasurement('airT','modbus','TPH',airTsettings)
+datalogger.addMeasurement('bp','stream','RMY',bpsettings)
+
 #Schedule Measurement
+datalogger.scheduleMeasurement('airT','TPH',5)
+datalogger.scheduleMeasurement('bp','RMY',10)
+
 #Schedule Storage
 
 
