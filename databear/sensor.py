@@ -3,7 +3,7 @@ Defines a sensor class
 
 '''
 
-import measure
+import databear.measure as measure
 
 class Sensor:
     def __init__(self,name,serialnum):

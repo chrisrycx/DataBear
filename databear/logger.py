@@ -8,24 +8,13 @@ Data Logger
     -- Store
         - Process the measurements: max, min, avg
         - Store data in database at storage frequency
+** Need more documentation here...
 
- - General Algorithm
-    1. Initialization
-        - Read any configuration files
-        - Initialize sensor objects for measurement
-    2. Measure
-        - Check clock for measure time
-            - Measure sensors
-            - Store values in working memory
-    3. Store
-        - Check clock for storage time
-            - Process measurements
-            - Store in database 
 '''
 
-import schedule
+import databear.schedule as schedule
+import databear.sensor as sensor
 import time #For sleeping during execution
-import sensor
 import csv
 import sys #For command line args
 
@@ -99,39 +88,46 @@ class DataLogger:
 
             #Output row to CSV
             self.csvwrite.writerow(datadict)
+
+    def run(self):
+        '''
+        Run the logger
+        ctrl-C to stop
+        '''
+        while True:
+            try:
+                self.logschedule.run_pending()
+                sleeptime = self.logschedule.idle_seconds
+                if sleeptime > 0:
+                    time.sleep(sleeptime)
+            except KeyboardInterrupt:
+                break
+
+        #Close CSV after stopping
+        self.csvfile.close()
             
-#-------- Process command line arguments ------
-#Still developing
-if len(sys.argv) > 1:
-    cmdarg = sys.argv[1]
-    print('Command line arg: {}'.format(cmdarg))
 
-#-------- Logger initialization --------
-#Output CSV will match name passed to DataLogger
-datalogger = DataLogger('myLogger')
+#-------- Run from command line -----
+if __name__ == "__main__":
 
-#-------- Logger configuration ---------
+    #Process command line args
+    #Still developing
+    if len(sys.argv) > 1:
+        cmdarg = sys.argv[1]
+        print('Command line arg: {}'.format(cmdarg))
 
-#Measurement settings
-#Add Sensors
-#Add Measurements
-#Schedule Measurement
-#Schedule Storage
+    datalogger = DataLogger('myLogger')
+
+    #Load logger configuration
+    '''
+    Under development
+    '''
+
+    #Run logger
+    datalogger.run()
 
 
-#-------- Run data logger -----------
-while True:
-    try:
-        datalogger.logschedule.run_pending()
-        sleeptime = datalogger.logschedule.idle_seconds
-        if sleeptime > 0:
-            time.sleep(sleeptime)
 
-    except KeyboardInterrupt:
-        break
-
-#Shut down logger
-datalogger.csvfile.close()
 
 
 
