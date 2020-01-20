@@ -14,6 +14,7 @@ Data Logger
 
 import databear.schedule as schedule
 import databear.sensor as sensor
+import yaml
 import time #For sleeping during execution
 import csv
 import sys #For command line args
@@ -23,33 +24,49 @@ class DataLogger:
     '''
     A data logger
     '''
-    def __init__(self,logname):
+    def __init__(self,configpath):
         '''
         Initialize a new data logger
-        Input - logname. Used with output data file
+        Input - path to configuration file
         '''
-        self.name = logname
+        #Import configuration ***Testing
+        tphmeasures = [{'name':'airT','method':'modbus','port':'COM7','register':210,
+                        'regtype':'float','timeout':0.1}]
+        tph = {'name':'TPH1','serialnumber':6166,'measurements':tphmeasures}
+        rmymeasures = [{'name':'bp','method':'stream','port':'COM8','baud':9600,
+                        'timeout':0,'dataRE':r'\d\d\d\d.\d\d'}]
+        rmy = {'name':'RMY','serialnumber':9999,'measurements':rmymeasures}
+        sensors=[tph,rmy]
+        loggersettings=[{'name':'airT','sensor':'TPH1','sample':5,'process':'sample','store':30},
+                        {'name':'bp','sensor':'TPH1','sample':10,'process':'sample','store':60}]
+
+        datalogger = {'name':'testlogger','settings':loggersettings}
         
-        self.sensors = {}
-        self.measurements = [] #Form (<measurement>,<sensor>)
+        self.name = datalogger['name']
+        
+        #Initialize properties
+        self.sensors = []
+        self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
 
+        #Configure logger
+        for sensor in sensors:
+            self.addSensor(sensor['name'],sensor['serialnumber'],sensor['measurements'])
+
+        for setting in loggersettings:
+            self.scheduleMeasurement(setting['name'],setting['sensor'],setting['sample'])
+            self.scheduleStorage(setting['name'],setting['process'],setting['store'])
+
         #Create output file
-        self.csvfile = open(logname+'.csv','w',newline='')
+        self.csvfile = open(datalogger['name']+'.csv','w',newline='')
         self.csvwrite = csv.DictWriter(self.csvfile,['dt','measurement','value','sensor'])
         self.csvwrite.writeheader()
 
-    def addSensor(self,name,sn):
+    def addSensor(self,name,sn,measurements):
         '''
         Add a sensor to the logger
         '''
-        self.sensors[name] = sensor.Sensor(name,sn)
-
-    def addMeasurement(self,name,mtype,sensor,settings):
-        '''
-        Add a measurement to a sensor
-        '''
-        self.sensors[sensor].add_measurement(name,mtype,settings)
+        self.sensors[name] = sensor.Sensor(name,sn,measurements)
 
     def scheduleMeasurement(self,name,sensor,frequency):
         '''

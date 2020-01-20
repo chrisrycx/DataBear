@@ -6,18 +6,26 @@ Defines a sensor class
 import databear.measure as measure
 
 class Sensor:
-    def __init__(self,name,serialnum):
+    def __init__(self,name,serialnum,measurements):
         '''
         Create a new sensor
         Inputs
             - A name and serial number for the sensor
+            - Measurements: A list of dictionaries
+                    [{'name':<measurename>,'method':<measuremethod>,<other settings>},...]
         '''
         self.name = name
         self.sn = serialnum
         self.measurements = {} #A dictionary of measurement objects
         self.data = {} #Empty data dictionary
 
-    def add_measurement(self,name,mtype,settings):
+        #Load each measurement
+        for measure in measurements:
+            mname = measure.pop('name') #Returns name and removes from list
+            mmethod = measure.pop('method')
+            self.add_measurement(mname,mmethod,measure)
+
+    def add_measurement(self,name,measuremethod,settings):
         '''
         Add a new measurement to the sensor
         Inputs
@@ -25,7 +33,7 @@ class Sensor:
             - mtype: type of measurement
             - settings: dictionary of settings
         '''
-        self.measurements[name] = measure.factory.get_measuremethod(mtype,name,settings)
+        self.measurements[name] = measure.factory.get_measuremethod(measuremethod,name,settings)
         self.data[name] = []
 
     def measure(self,name):

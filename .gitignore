@@ -1,4 +1,5 @@
 .env
+.experiments
 build
 dist
 .vscode
