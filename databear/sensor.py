@@ -23,7 +23,7 @@ class Sensor:
         for measure in measurements:
             mname = measure.pop('name') #Returns name and removes from list
             mmethod = measure.pop('method')
-            self.add_measurement(mname,mmethod,measure)
+            self.add_measurement(mname,mmethod,measure) #Remaining settings get sent to add measurement
 
     def add_measurement(self,name,measuremethod,settings):
         '''

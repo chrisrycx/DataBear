@@ -30,22 +30,23 @@ class DataLogger:
         Input - path to configuration file
         '''
         #Import configuration ***Testing
-        tphmeasures = [{'name':'airT','method':'modbus','port':'COM7','register':210,
-                        'regtype':'float','timeout':0.1}]
+        tphmeasures = [{'name':'airT','method':'modbus','port':'COM7',
+                        'address':4,'register':210,'regtype':'float','timeout':0.3},
+                        {'name':'humidity','method':'modbus','port':'COM7',
+                         'address':4,'register':212,'regtype':'float','timeout':0.3}]
         tph = {'name':'TPH1','serialnumber':6166,'measurements':tphmeasures}
-        rmymeasures = [{'name':'bp','method':'stream','port':'COM8','baud':9600,
-                        'timeout':0,'dataRE':r'\d\d\d\d.\d\d'}]
-        rmy = {'name':'RMY','serialnumber':9999,'measurements':rmymeasures}
-        sensors=[tph,rmy]
+        #rmymeasures = [{'name':'bp','method':'stream','port':'COM8','baud':9600,
+        #               'timeout':0,'dataRE':r'\d\d\d\d.\d\d'}]
+        #rmy = {'name':'RMY','serialnumber':9999,'measurements':rmymeasures}
+        sensors=[tph]
         loggersettings=[{'name':'airT','sensor':'TPH1','sample':5,'process':'sample','store':30},
-                        {'name':'bp','sensor':'TPH1','sample':10,'process':'sample','store':60}]
-
+                        {'name':'humidity','sensor':'TPH1','sample':10,'process':'sample','store':60}]
         datalogger = {'name':'testlogger','settings':loggersettings}
         
         self.name = datalogger['name']
         
         #Initialize properties
-        self.sensors = []
+        self.sensors = {}
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
 
@@ -55,7 +56,7 @@ class DataLogger:
 
         for setting in loggersettings:
             self.scheduleMeasurement(setting['name'],setting['sensor'],setting['sample'])
-            self.scheduleStorage(setting['name'],setting['process'],setting['store'])
+            self.scheduleStorage(setting['name'],setting['sensor'],setting['store'])
 
         #Create output file
         self.csvfile = open(datalogger['name']+'.csv','w',newline='')
@@ -133,12 +134,7 @@ if __name__ == "__main__":
         cmdarg = sys.argv[1]
         print('Command line arg: {}'.format(cmdarg))
 
-    datalogger = DataLogger('myLogger')
-
-    #Load logger configuration
-    '''
-    Under development
-    '''
+    datalogger = DataLogger('config.yaml')
 
     #Run logger
     datalogger.run()
