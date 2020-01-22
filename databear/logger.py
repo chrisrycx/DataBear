@@ -29,19 +29,15 @@ class DataLogger:
         Initialize a new data logger
         Input - path to configuration file
         '''
-        #Import configuration ***Testing
-        tphmeasures = [{'name':'airT','method':'modbus','port':'COM7',
-                        'address':4,'register':210,'regtype':'float','timeout':0.3},
-                        {'name':'humidity','method':'modbus','port':'COM7',
-                         'address':4,'register':212,'regtype':'float','timeout':0.3}]
-        tph = {'name':'TPH1','serialnumber':6166,'measurements':tphmeasures}
-        #rmymeasures = [{'name':'bp','method':'stream','port':'COM8','baud':9600,
-        #               'timeout':0,'dataRE':r'\d\d\d\d.\d\d'}]
-        #rmy = {'name':'RMY','serialnumber':9999,'measurements':rmymeasures}
-        sensors=[tph]
-        loggersettings=[{'name':'airT','sensor':'TPH1','sample':5,'process':'sample','store':30},
-                        {'name':'humidity','sensor':'TPH1','sample':10,'process':'sample','store':60}]
-        datalogger = {'name':'testlogger','settings':loggersettings}
+        #Import configuration from yaml
+        with open(configpath,'rt') as yin:
+            configyaml = yin.read()
+
+        config = yaml.load(configyaml)
+
+        datalogger = config['datalogger']
+        loggersettings = datalogger['settings']
+        sensors = config['sensors']
         
         self.name = datalogger['name']
         
@@ -55,8 +51,8 @@ class DataLogger:
             self.addSensor(sensor['name'],sensor['serialnumber'],sensor['measurements'])
 
         for setting in loggersettings:
-            self.scheduleMeasurement(setting['name'],setting['sensor'],setting['sample'])
-            self.scheduleStorage(setting['name'],setting['sensor'],setting['store'])
+            self.scheduleMeasurement(setting['measurement'],setting['sensor'],setting['sample'])
+            self.scheduleStorage(setting['measurement'],setting['sensor'],setting['store'])
 
         #Create output file
         self.csvfile = open(datalogger['name']+'.csv','w',newline='')
@@ -129,12 +125,14 @@ class DataLogger:
 if __name__ == "__main__":
 
     #Process command line args
-    #Still developing
-    if len(sys.argv) > 1:
-        cmdarg = sys.argv[1]
-        print('Command line arg: {}'.format(cmdarg))
+    if len(sys.argv) < 2:
+        print('Enter path to config file from current directory')
+        exit(0)
 
-    datalogger = DataLogger('config.yaml')
+    confpath = sys.argv[1]
+    print(confpath)
+
+    datalogger = DataLogger(confpath)
 
     #Run logger
     datalogger.run()

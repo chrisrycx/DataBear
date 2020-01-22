@@ -1,0 +1,43 @@
+#Example configuration file for DataBear
+#Create a new file with specific settings
+#Must include datalogger and sensors keys 
+
+#Defines data logger settings
+#Settings key must have at least one set of measurement settings
+datalogger:
+  name: <yourloggername>
+  settings:
+    - measurement: 'mymeasurement'  #Must match name and sensor defined below
+      sensor: 'mysensor'    
+      sample: 10       #Sample frequency in seconds. Can be < 1
+      process: None    #Not yet implemented. Leave as None
+      store: 60        #Data storage frequency in seconds
+    - measurement: 'mymeasurement2'
+      sensor: 'mysensor'
+      sample: 15
+      process: None
+      store: 30
+
+#Must have at least one set of measurement settings per sensor.
+#Key value pairs in measurements vary by method
+sensors: 
+  - name: 'mysensor'
+    serialnumber: 'xxxx'
+    measurements:     #name and method are mandatory key value pairs
+    - name: 'airT'
+      method: modbus
+      address: 4      #other key value pairs are associated with measurement method
+      port: /dev/ttyMAX0
+      register: 210
+      regtype: float
+      timeout: 0.1
+    - name: 'humidity'
+      method: modbus
+      address: 4
+      port: /dev/ttyMAX0
+      register: 210
+      regtype: float
+      timeout: 0.1
+      
+    
+
