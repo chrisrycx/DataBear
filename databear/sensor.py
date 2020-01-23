@@ -16,16 +16,15 @@ class Sensor:
         '''
         self.name = name
         self.sn = serialnum
-        self.measurements = {} #A dictionary of measurement objects
+        self.measurements = {} #
         self.data = {} #Empty data dictionary
 
         #Load each measurement
         for measure in measurements:
             mname = measure.pop('name') #Returns name and removes from list
-            mmethod = measure.pop('method')
-            self.add_measurement(mname,mmethod,measure) #Remaining settings get sent to add measurement
+            self.add_measurement(mname,measure) #Remaining settings get sent to add measurement
 
-    def add_measurement(self,name,measuremethod,settings):
+    def add_measurement(self,name,settings):
         '''
         Add a new measurement to the sensor
         Inputs
@@ -33,8 +32,16 @@ class Sensor:
             - mtype: type of measurement
             - settings: dictionary of settings
         '''
-        self.measurements[name] = measure.factory.get_measuremethod(measuremethod,name,settings)
+        self.measurements[name] = measure.factory.get_measuremethod(settings['method'],name,settings)
         self.data[name] = []
+
+    def change_settings(self,name,settings):
+        '''
+        Changes an existing measurement by deleting measurement object
+        and recreating with new settings
+        '''
+        del self.measurements[name]
+        self.measurements[name] = measure.factory.get_measuremethod(settings['method'],name,settings)
 
     def measure(self,name):
         '''

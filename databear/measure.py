@@ -62,6 +62,7 @@ class measureModbus:
         regtype - 'float' or 'int'
         timeout - length of time waiting for response (float)
         '''
+        self.settings = settings #Useful if all settings needed somewhere
         self.name = name
         self.register = settings['register']
         self.regtype = settings['regtype']
@@ -105,6 +106,7 @@ class measureStream:
         dataRE - A regular expression to extract data from string (string)
         timeout - length of time waiting for response (float)
         '''
+        self.settings = settings #Useful if all settings needed somewhere
         self.name = name
         self.port = settings['port']
         self.baud = settings['baud']

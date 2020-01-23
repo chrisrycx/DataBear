@@ -1,5 +1,5 @@
 '''
-pyDataLogger package setup
+DataBear package setup
 '''
 
 import setuptools
@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="databear",
-    version="0.1.0",
+    version="0.2.0",
     author="Chris Cox",
     author_email="chrisrycx@gmail.com",
     description="A Python based data logger",
@@ -22,5 +22,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    install_requires=['pyyaml'],
+    python_requires='>=3.6'
 )

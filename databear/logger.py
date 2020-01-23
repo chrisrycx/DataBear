@@ -24,16 +24,22 @@ class DataLogger:
     '''
     A data logger
     '''
-    def __init__(self,configpath):
+    def __init__(self,config):
         '''
         Initialize a new data logger
-        Input - path to configuration file
+        Input
+          - configuration: string or dictionary
+            If config is a string it should be
+            the path to the yaml configuration file.
+            If config is a dictionary, it should have
+            the same form as an imported yaml file.
         '''
-        #Import configuration from yaml
-        with open(configpath,'rt') as yin:
-            configyaml = yin.read()
+        if isinstance(config,str):
+            #Import configuration from yaml
+            with open(config,'rt') as yin:
+                configyaml = yin.read()
 
-        config = yaml.load(configyaml)
+            config = yaml.load(configyaml)
 
         datalogger = config['datalogger']
         loggersettings = datalogger['settings']
