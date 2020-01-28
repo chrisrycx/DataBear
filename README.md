@@ -11,7 +11,7 @@ hardware interface provided by the user.
 ### Some potential usage scenarios:
 Here are some random ideas to give a sense for DataBear capabilities (some capabilities under development).
 * Run DataBear on a Raspberry Pi (https://www.raspberrypi.org/) to read a Modbus temperature sensor.  The sensor could be connected to a USB port on the Pi via an RS485 to USB converter and data could be read every second, averaged, and stored to CSV.
-* Integrate DataBear into an existing Linux based measurement platform, such as the Dyacon MDL-700 (dyacon.com). In this case, DataBear is utilized by pyMDL (github.com/dyacon/pyMDL) to schedule measurement and storage, while pyMDL specifies hardware configuration.
+* Integrate DataBear into an existing Linux based measurement platform, such as the Dyacon MDL-700 (https://dyacon.com). In this case, DataBear is utilized by pyMDL (https://github.com/dyacon/pyMDL) to schedule measurement and storage, while pyMDL specifies hardware configuration.
 
 ### Ideal Datalogger Features vs Data Bear 0.2
 | Ideal Feature                                  | Data Bear       |
