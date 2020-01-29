@@ -97,17 +97,19 @@ class DataLogger:
             return
 
         if process=='sample':
-            currentdata = self.sensors[sensor].data[name][-1]
-            dt = currentdata[0].strftime('%Y-%m-%d %H:%M:%S:%f')
-            val = currentdata[1]
-            datadict = {
+            for value in self.sensors[sensor].data[name]:
+                dt = value[0].strftime('%Y-%m-%d %H:%M:%S:%f')
+                val = value[1]
+                datadict = {
                     'dt':dt,
                     'measurement':name,
                     'value':val,
                     'sensor':sensor}
-
-            #Output row to CSV
-            self.csvwrite.writerow(datadict)
+            
+                #Output row to CSV
+                self.csvwrite.writerow(datadict)
+            
+        self.sensors[sensor].cleardata(name)
 
     def run(self):
         '''
