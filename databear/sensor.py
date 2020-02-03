@@ -1,68 +1,44 @@
 '''
-Defines a sensor class
+Sensor factory
+Generates a sensor object of a specific type.
+
+Sensor objects must have the following interface:
+- Attributes
+    * name - User defined name of sensor
+    * sn - Sensor serial number
+    * sensor_type - Unique name identifying type of sensor for factory
+    * measurements - A list of specific measurements associated with the sensor
+    * data - Dictionary with keys for each measurement. Holds associated data.
+- Methods
+    * measure - perform measurement(s) and parse into 'data' attribute
+    * cleardata - clear data for a particular measurement
 
 '''
+import databear.dyaconsensors
 
-import databear.measure as measure
+class sensorFactory:
+    '''
+    Outputs sensor objects of different types
+    '''
+    def __init__(self):
+        self.sensortypes = {}
 
-class Sensor:
-    def __init__(self,name,serialnum,measurements):
-        '''
-        Create a new sensor
-        Inputs
-            - A name and serial number for the sensor
-            - Measurements: A list of dictionaries
-                    [{'name':<measurename>,'method':<measuremethod>,<other settings>},...]
-        '''
-        self.name = name
-        self.sn = serialnum
-        self.measurements = {} #
-        self.data = {} #Empty data dictionary
+    def register_sensor(self,sensortype,sensorobject):
+        self.sensortypes[sensortype] = sensorobject
 
-        #Load each measurement
-        for measure in measurements:
-            mname = measure.pop('name') #Returns name and removes from list
-            self.add_measurement(mname,measure) #Remaining settings get sent to add measurement
-
-    def add_measurement(self,name,settings):
-        '''
-        Add a new measurement to the sensor
-        Inputs
-            - name of measurement
-            - mtype: type of measurement
-            - settings: dictionary of settings
-        '''
-        self.measurements[name] = measure.factory.get_measuremethod(settings['method'],name,settings)
-        self.data[name] = []
-
-    def change_settings(self,name,settings):
-        '''
-        Changes an existing measurement by deleting measurement object
-        and recreating with new settings
-        '''
-        del self.measurements[name]
-        self.measurements[name] = measure.factory.get_measuremethod(settings['method'],name,settings)
-
-    def measure(self,name):
-        '''
-        Perform a measurement and puts result in data dictionary
-        Input - name of measurement
+    def get_sensor(self,sensortype,name,settings):
+        #Note: .get method on dictionary will return none if not found
+        sensorobject = self.sensortypes.get(sensortype)
+        if not sensorobject:
+            #Evaluates true if sensorobject is none
+            raise ValueError(sensorobject)
         
-        '''
-        try:
-            mdata = self.measurements[name].measure()
-            self.data[name].append(mdata)
-            timestamp = mdata[0].strftime('%Y-%m-%d %H:%M:%S %f')
-            print('{}: {}={}'.format(timestamp,name,mdata[1]))
-        except:
-            print('Problem with {} {} measurement'.format(self.name,name))
+        return sensorobject(name,settings)
 
+#Create sensor factory and register Dyacon
+factory = sensorFactory()
+factory.register_sensor('dyaconTPH',databear.dyaconsensors.dyaconTPH)
 
-    def cleardata(self,name):
-        '''
-        Clear data values for a particular measurement
-        '''
-        self.data[name] = []
 
 
 

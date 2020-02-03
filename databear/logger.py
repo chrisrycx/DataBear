@@ -27,13 +27,39 @@ class DataLogger:
     def __init__(self,config):
         '''
         Initialize a new data logger
-        Input
-          - configuration: string or dictionary
-            If config is a string it should be
-            the path to the yaml configuration file.
-            If config is a dictionary, it should have
-            the same form as an imported yaml file.
+        Input (various options)
+        - string corresponding to name of logger (enables manual config for testing)
+        - path to yaml config file (must have .yaml)
+        - dictionary with configuration
+          
         '''
+        #Initialize properties
+        self.sensors = {}
+        self.loggersettings = [] #Form (<measurement>,<sensor>)
+        self.logschedule = schedule.Scheduler()
+
+        #Determine what input is
+        if (isinstance(config,dict)) or (config[-4:]=='yaml'):
+            #Pass dictionary to loadconfig
+            self.loadconfig(config)
+        else:
+            #Name assumed to be defined by input string
+            self.name = config
+
+            #Create output file
+            self.csvfile = open(config + '.csv','w',newline='')
+            self.csvwrite = csv.DictWriter(self.csvfile,['dt','measurement','value','sensor'])
+            self.csvwrite.writeheader()
+
+
+    def loadconfig(self,config):
+        '''
+        Load configuration file
+        Input options
+        - path to yaml
+        - dictionary with configuration
+        '''
+
         if isinstance(config,str):
             #Import configuration from yaml
             with open(config,'rt') as yin:
@@ -47,17 +73,12 @@ class DataLogger:
         
         self.name = datalogger['name']
         
-        #Initialize properties
-        self.sensors = {}
-        self.loggersettings = [] #Form (<measurement>,<sensor>)
-        self.logschedule = schedule.Scheduler()
-
         #Configure logger
         for sensor in sensors:
-            self.addSensor(sensor['name'],sensor['serialnumber'],sensor['measurements'])
+            self.addSensor(sensor['sensortype'],sensor['name'],sensor['settings'])
 
         for setting in loggersettings:
-            self.scheduleMeasurement(setting['measurement'],setting['sensor'],setting['sample'])
+            self.scheduleMeasurement(setting['sensor'],setting['sample'])
             self.scheduleStorage(setting['measurement'],setting['sensor'],setting['store'])
 
         #Create output file
@@ -65,19 +86,19 @@ class DataLogger:
         self.csvwrite = csv.DictWriter(self.csvfile,['dt','measurement','value','sensor'])
         self.csvwrite.writeheader()
 
-    def addSensor(self,name,sn,measurements):
+    def addSensor(self,sensortype,name,settings):
         '''
         Add a sensor to the logger
         '''
-        self.sensors[name] = sensor.Sensor(name,sn,measurements)
+        self.sensors[name] = sensor.factory.get_sensor(sensortype,name,settings)
 
-    def scheduleMeasurement(self,name,sensor,frequency):
+    def scheduleMeasurement(self,sensor,frequency):
         '''
         Schedule a measurement
         Frequency is seconds
         '''
         m = self.sensors[sensor].measure
-        self.logschedule.every(frequency).do(m,name)
+        self.logschedule.every(frequency).do(m)
         
     def scheduleStorage(self,name,sensor,frequency):
         '''
