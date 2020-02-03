@@ -14,7 +14,6 @@ Sensor objects must have the following interface:
     * cleardata - clear data for a particular measurement
 
 '''
-import databear.dyaconsensors
 
 class sensorFactory:
     '''
@@ -37,7 +36,6 @@ class sensorFactory:
 
 #Create sensor factory and register Dyacon
 factory = sensorFactory()
-factory.register_sensor('dyaconTPH',databear.dyaconsensors.dyaconTPH)
 
 
 
