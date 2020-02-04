@@ -18,10 +18,10 @@ class dyaconTPH:
             - settings['address'] = Sensor modbus address
         '''
         self.name = name
-        self.sn = settings['serialnum']
+        self.sn = settings['serialnumber']
         self.port = settings['port']
         self.address = settings['address']
-        self.frequency = settings['frequency']
+        self.frequency = settings['measurement']
 
         #Define characteristics of this sensor
         self.sensor_type = 'polled'

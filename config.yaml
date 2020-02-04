@@ -3,41 +3,30 @@
 #Must include datalogger and sensors keys 
 
 #Defines data logger settings
-#Settings key must have at least one set of measurement settings
+#Settings key must have at least one set of storage settings
 datalogger:
   name: <yourloggername>
   settings:
-    - measurement: 'mymeasurement'  #Must match name and sensor defined below
-      sensor: 'mysensor'    
-      sample: 10       #Sample frequency in seconds. Can be < 1
-      process: None    #Not yet implemented. Leave as None
-      store: 60        #Data storage frequency in seconds
-    - measurement: 'mymeasurement2'
+    - store: 'mymeasurement'  #Measurement to be stored
+      sensor: 'mysensor'      #Sensor that measurement is associated with
+      process: None           #Not yet implemented. Leave as None
+      frequency: 60           #Data STORAGE frequency in seconds
+    - store: 'mymeasurement2'
       sensor: 'mysensor'
-      sample: 15
       process: None
-      store: 30
+      frequency: 30
 
 #Must have at least one set of measurement settings per sensor.
-#Key value pairs in measurements vary by method
+#Key value pairs in settings vary by method but must include
+#serial number and measurement frequency.
 sensors: 
   - name: 'mysensor'
-    serialnumber: 'xxxx'
-    measurements:     #name and method are mandatory key value pairs
-    - name: 'airT'
-      method: modbus
-      address: 4      #other key value pairs are associated with measurement method
-      port: /dev/ttyMAX0
-      register: 210
-      regtype: float
-      timeout: 0.1
-    - name: 'humidity'
-      method: modbus
-      address: 4
-      port: /dev/ttyMAX0
-      register: 210
-      regtype: float
-      timeout: 0.1
+    sensortype: 'mymethod'
+    settings:     #Serial number and measurement are mandatory
+      serialnumber: 'xxxx'
+      measurement: 10   #MEASUREMENT frequency in seconds
+      port: COM10       #Next settings are specific to measurement method
+      address: 3
       
     
 

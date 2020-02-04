@@ -75,11 +75,13 @@ class DataLogger:
         
         #Configure logger
         for sensor in sensors:
+            sensorsettings = sensor['settings']
+            samplefreq = sensorsettings['measurement']
             self.addSensor(sensor['sensortype'],sensor['name'],sensor['settings'])
+            self.scheduleMeasurement(sensor['name'],samplefreq)
 
         for setting in loggersettings:
-            self.scheduleMeasurement(setting['sensor'],setting['sample'])
-            self.scheduleStorage(setting['measurement'],setting['sensor'],setting['store'])
+            self.scheduleStorage(setting['store'],setting['sensor'],setting['frequency'])
 
         #Create output file
         self.csvfile = open(datalogger['name']+'.csv','w',newline='')
