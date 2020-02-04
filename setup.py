@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="databear",
-    version="0.2.1",
+    version="1.0.0",
     author="Chris Cox",
     author_email="chrisrycx@gmail.com",
     description="A Python based data logger",
