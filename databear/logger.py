@@ -13,7 +13,7 @@ Data Logger
 '''
 
 import databear.schedule as schedule
-import databear.sensor as sensor
+from databear.sensors import sensorfactory
 import yaml
 import time #For sleeping during execution
 import csv
@@ -92,7 +92,7 @@ class DataLogger:
         '''
         Add a sensor to the logger
         '''
-        self.sensors[name] = sensor.factory.get_sensor(sensortype,name,settings)
+        self.sensors[name] = sensorfactory.factory.get_sensor(sensortype,name,settings)
 
     def scheduleMeasurement(self,sensor,frequency):
         '''

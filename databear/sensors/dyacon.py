@@ -1,8 +1,8 @@
 '''
 Dyacon sensor classes that conform to interface defined
-in sensor.py
+in ???
 '''
-import databear.sensor
+from databear.sensors import sensorfactory
 import datetime
 import minimalmodbus as mm
 
@@ -62,4 +62,4 @@ class dyaconTPH:
         self.data[name] = []
 
 #Register sensor with factory
-databear.sensor.factory.register_sensor('dyaconTPH',dyaconTPH)
+sensorfactory.factory.register_sensor('dyaconTPH',dyaconTPH)
