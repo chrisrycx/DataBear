@@ -8,6 +8,7 @@ General Sensor classes
 from databear.sensors import sensorfactory
 import datetime
 import serial
+import re
 
 class StreamSensor:
     def __init__(self,name,settings):
@@ -33,13 +34,13 @@ class StreamSensor:
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
 
         #Define measurements
-        x = {'name':'x','dataRE':'test'}
-        y = {'name':'y','dataRE':'test'}
-        z = {'name':'z','dataRE':'test'}
+        x = {'name':'x'}
+        y = {'name':'y'}
+        z = {'name':'z'}
         self.measurements = [x,y,z]
 
         #Initialize data structure
-        self.data = {} #Empty data dictionary
+        self.data = {'x':[],'y':[],'z':[]} #Empty data dictionary
 
     def measure(self):
         '''
@@ -51,10 +52,17 @@ class StreamSensor:
         rawdata = self.comm.read(dbytes).decode('utf-8')
         print(rawdata)
 
+        #Parse raw data
+        dataRE = r'(\d+\.\d+)'  #Pattern for decimal number (see https://docs.python.org/3/library/re.html#writing-a-tokenizer)
+        m = re.findall(dataRE,rawdata) #Search for matches in rawdata
+
+        counter=0
         for measure in self.measurements:
             #Parse measurement data from raw data
-            data = (dt,55)
-            self.data[measure['name']] = [data] #***Testing
+            val = float(m[counter])
+            data = (dt,val)
+            self.data[measure['name']].append(data)
+            counter=counter+1
 
 
     def cleardata(self,name):
