@@ -13,7 +13,7 @@ Data Logger
 '''
 
 import databear.schedule as schedule
-from databear.sensors import sensorfactory
+from databear import sensorfactory
 import yaml
 import time #For sleeping during execution
 import csv
