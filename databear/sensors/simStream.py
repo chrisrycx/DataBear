@@ -1,11 +1,10 @@
 '''
-
-General Sensor classes
-- ** use as base classes someday??
-
+Simulated streaming sensor
+- Platform: Windows
+- Connection: USB-RS485 (loopback)
+- Interface: DataBear Sensor Interface V0
 '''
 
-from databear.sensors import sensorfactory
 import datetime
 import serial
 import re
@@ -34,14 +33,8 @@ class StreamSensor:
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
 
         #Define measurements
-        x = {'name':'x'}
-        y = {'name':'y'}
-        z = {'name':'z'}
-        self.measurements = [x,y,z]
-
-        #Initialize data structure
-        self.data = {'x':[],'y':[],'z':[]} #Empty data dictionary
-
+        self.data = {'x':[],'y':[],'z':[]}
+        
     def measure(self):
         '''
         Read in data from port and parse to measurements
@@ -50,19 +43,20 @@ class StreamSensor:
 
         dbytes = self.comm.in_waiting
         rawdata = self.comm.read(dbytes).decode('utf-8')
-        print(rawdata)
+        timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
+        print('Measure: {}, data= {}'.format(timestamp,rawdata[:-2]))
 
         #Parse raw data
         dataRE = r'(\d+\.\d+)'  #Pattern for decimal number (see https://docs.python.org/3/library/re.html#writing-a-tokenizer)
-        m = re.findall(dataRE,rawdata) #Search for matches in rawdata
+        vals = re.findall(dataRE,rawdata) #Search for matches in rawdata
 
-        counter=0
-        for measure in self.measurements:
-            #Parse measurement data from raw data
-            val = float(m[counter])
-            data = (dt,val)
-            self.data[measure['name']].append(data)
-            counter=counter+1
+        x = float(vals[0])
+        y = float(vals[1])
+        z = float(vals[2])
+
+        self.data['x'].append((dt,x))
+        self.data['y'].append((dt,y))
+        self.data['z'].append((dt,z))
 
 
     def cleardata(self,name):
@@ -70,6 +64,3 @@ class StreamSensor:
         Clear data values for a particular measurement
         '''
         self.data[name] = []
-
-#Register sensor with factory
-sensorfactory.factory.register_sensor('streaming',StreamSensor)

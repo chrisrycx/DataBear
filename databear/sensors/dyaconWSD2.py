@@ -2,7 +2,7 @@
 Dyacon Sensor Classes
 - Platform: Windows
 - Connection: USB-RS485
-- Interface: Conform with current...???
+- Interface: DataBear Sensor Interface V0
 
 '''
 
@@ -12,65 +12,6 @@ import datetime
 import serial
 import time
 import re
-
-#Imports for modbus sensors
-import minimalmodbus as mm
-
-class dyaconTPH:
-    #Inherit from "modbus sensor class"?
-    def __init__(self,name,settings):
-        '''
-        Create a new Dyacon TPH sensor
-        Inputs
-            - Name for sensor
-            - settings['serialnum'] = Serial Number
-            - settings['port'] = Serial com port
-            - settings['address'] = Sensor modbus address
-        '''
-        self.name = name
-        self.sn = settings['serialnumber']
-        self.port = settings['port']
-        self.address = settings['address']
-        self.frequency = settings['measurement']
-
-        #Define characteristics of this sensor
-        self.sensor_type = 'polled'
-        self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
-
-        #Define measurements
-        airT = {'name':'airT','register':210,'regtype':'float'}
-        rh = {'name':'rh','register':212,'regtype':'float'}
-        bp = {'name':'bp','register':214,'regtype':'float'}
-        self.measurements = [airT,rh,bp]
-
-        #Setup measurement
-        self.comm = mm.Instrument(self.port,self.address)
-        self.comm.serial.timeout = 0.3
-
-        #Initialize data structure
-        self.data = {'airT':[],'rh':[],'bp':[]} #Empty data dictionary
-
-    def measure(self):
-        '''
-        Read in data using modbus
-        '''
-        for measure in self.measurements:
-            dt = datetime.datetime.now()
-            val = self.comm.read_float(measure['register'])
-
-            #Output results for testing
-            timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
-            print('Measure {}: {}, value= {}'.format(measure['name'],timestamp,val))
-
-            self.data[measure['name']].append((dt,val))
-
-
-    def cleardata(self,name):
-        '''
-        Clear data values for a particular measurement
-        '''
-        self.data[name] = []
-
 
 class dyaconWSD2:
     def __init__(self,name,settings):
@@ -96,7 +37,7 @@ class dyaconWSD2:
         self.maxfrequency = 5  #Maximum frequency in seconds the sensor can be polled
 
         #Define measurements
-        self.data={'speed':[]}
+        self.data={'speed':[],'direction':[]}
 
         #Setup measurement
         self.comm =  serial.Serial(settings['port'],1200,serial.SEVENBITS,serial.PARITY_EVEN,timeout=0)
@@ -142,15 +83,21 @@ class dyaconWSD2:
         #Read in raw data
         time.sleep(0.3)
         dbytes = self.comm.in_waiting
-        #print('Data bytes: {}'.format(dbytes))
         data = self.comm.read(dbytes).decode('utf-8')
 
         #Output results for testing
         timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
-        print('Measure SDI12: {}, value= {}'.format(timestamp,data))
+        print('Measure SDI12: {}, data= {}'.format(timestamp,data[:-2]))
 
-        #Store in RAM
-        self.data['speed'].append((dt,data))   
+        #Parse incoming data - pattern: 0+4.5+284.5\r\n
+        dataRE = r'\d+\.\d+'  #Find all decimals
+        dvals = re.findall(dataRE,data)
+
+        # Store in RAM
+        speed = float(dvals[0])
+        direction = float(dvals[1])
+        self.data['speed'].append((dt,speed))
+        self.data['direction'].append((dt,direction))   
 
 
     def cleardata(self,name):
