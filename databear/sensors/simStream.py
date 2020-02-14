@@ -29,6 +29,12 @@ class StreamSensor:
         self.baud = settings['baud']
         self.timeout = 0
 
+        #Serial settings
+        self.rs = 'RS485'
+        self.duplex = 'half'
+        self.resistors = 1
+        self.bias = 1
+
         #Set up connection
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
 

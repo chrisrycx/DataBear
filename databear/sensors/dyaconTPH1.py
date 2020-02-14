@@ -26,6 +26,12 @@ class dyaconTPH:
         self.address = settings['address']
         self.frequency = settings['measurement']
 
+        #Serial settings
+        self.rs = 'RS485'
+        self.duplex = 'half'
+        self.resistors = 1
+        self.bias = 1
+
         #Define characteristics of this sensor
         self.sensor_type = 'polled'
         self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
