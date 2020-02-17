@@ -35,8 +35,8 @@ class dyaconWSD2:
         #Serial settings
         self.rs = 'RS485'
         self.duplex = 'half'
-        self.resistors = 1
-        self.bias = 1
+        self.resistors = 0
+        self.bias = 0
 
         #Define characteristics of this sensor
         self.sensor_type = 'polled'
@@ -56,31 +56,31 @@ class dyaconWSD2:
         Reading buffer too early will result in missed data.
         '''
         #Wake the sensor with a custom break
-        '''
         self.comm.baudrate = 600
         bc = '\0'
         self.comm.write(bc.encode('utf-8'))
         time.sleep(0.04)
         self.comm.baudrate = 1200
-        '''
-        #print('Measuring')
+        
+        print('Measuring')
         dt = datetime.datetime.now()
 
         #Windows
-        self.comm.send_break(0.02)
-        time.sleep(0.016)
-        self.comm.send_break(0.016)
-        time.sleep(0.016)
+        #self.comm.send_break(0.02)
+        #time.sleep(0.016)
+        #self.comm.send_break(0.016)
+        #time.sleep(0.016)
 
         #Send measure command
         mcmd = self.address + 'M!'
         self.comm.write(mcmd.encode('utf-8'))  #Also tried UTF-8
 
-        #Read in sensor response. WSD-2 will return zero, but read in to clear buffer
+        #Read in sensor response. 
+        #WSD-2 will return zero, but read in to clear buffer
         time.sleep(0.1)
         dbytes = self.comm.in_waiting
         mtime = self.comm.read(dbytes).decode('utf-8')
-        #print(mtime)
+        print('Measure time: {}'.format(mtime))
 
         #Send D command
         dcmd = self.address+'D0!'
@@ -89,6 +89,7 @@ class dyaconWSD2:
         #Read in raw data
         time.sleep(0.3)
         dbytes = self.comm.in_waiting
+        print('Raw data bytes: {}'.format(dbytes))
         data = self.comm.read(dbytes).decode('utf-8')
 
         #Output results for testing

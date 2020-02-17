@@ -52,8 +52,11 @@ class StreamSensor:
         timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
         print('Measure: {}, data= {}'.format(timestamp,rawdata[:-2]))
 
+        '''
         #Parse raw data
-        dataRE = r'(\d+\.\d+)'  #Pattern for decimal number (see https://docs.python.org/3/library/re.html#writing-a-tokenizer)
+        #Pattern for decimal number
+        #(see https://docs.python.org/3/library/re.html#writing-a-tokenizer)
+        dataRE = r'(\d+\.\d+)'
         vals = re.findall(dataRE,rawdata) #Search for matches in rawdata
 
         x = float(vals[0])
@@ -63,7 +66,7 @@ class StreamSensor:
         self.data['x'].append((dt,x))
         self.data['y'].append((dt,y))
         self.data['z'].append((dt,z))
-
+        '''
 
     def cleardata(self,name):
         '''
