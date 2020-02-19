@@ -1,7 +1,11 @@
 '''
-Dyacon Sensor Classes
-- Platform: Windows
-- Connection: USB-RS485
+Dyacon Sensor WSD-2
+Wind speed and direction sensor with SDI12 interface.
+
+Classes:
+dyaconWSD2
+- Platforms: Windows, Linux
+- Tested hardware: USB-RS485, Dyacon MDL serial module
 - Interface: DataBear Sensor Interface V0
 
 '''
@@ -68,10 +72,9 @@ class dyaconWSD2:
         time.sleep(0.04)
         self.comm.baudrate = 1200
         
-        print('Measuring')
         dt = datetime.datetime.now()
 
-        #Windows
+        #Windows only
         #self.comm.send_break(0.02)
         #time.sleep(0.016)
         #self.comm.send_break(0.016)
@@ -86,7 +89,7 @@ class dyaconWSD2:
         time.sleep(0.1)
         dbytes = self.comm.in_waiting
         mtime = self.comm.read(dbytes).decode('utf-8')
-        print('Measure time: {}'.format(mtime))
+        #print('Measure time: {}'.format(mtime))
 
         #Send D command
         dcmd = self.address+'D0!'
