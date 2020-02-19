@@ -1,7 +1,8 @@
 '''
-Simulated streaming sensor
-- Platform: Windows
-- Connection: USB-RS485 (loopback)
+Simulated Streaming Sensor
+A test module for a generic streaming sensor. 
+- Platform: Windows, Linux
+- Tested hardware: USB-RS485 (loopback), Dyacon MDL serial module
 - Interface: DataBear Sensor Interface V0
 '''
 
@@ -9,7 +10,7 @@ import datetime
 import serial
 import re
 
-class StreamSensor:
+class SimStream:
     def __init__(self,name,settings):
         '''
         Abstract class for a streaming sensor
