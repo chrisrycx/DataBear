@@ -39,14 +39,20 @@ class dyaconWSD2:
         self.bias = 0
 
         #Define characteristics of this sensor
+        #maxfrequency: Maximum frequency in seconds the sensor can be polled
         self.sensor_type = 'polled'
-        self.maxfrequency = 5  #Maximum frequency in seconds the sensor can be polled
+        self.maxfrequency = 5  
 
         #Define measurements
         self.data={'speed':[],'direction':[]}
 
         #Setup measurement
-        self.comm =  serial.Serial(settings['port'],1200,serial.SEVENBITS,serial.PARITY_EVEN,timeout=0)
+        self.comm =  serial.Serial(
+                settings['port'],
+                1200,
+                serial.SEVENBITS,
+                serial.PARITY_EVEN,
+                timeout=0)
 
 
     def measure(self):

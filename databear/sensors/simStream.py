@@ -52,7 +52,6 @@ class StreamSensor:
         timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
         print('Measure: {}, data= {}'.format(timestamp,rawdata[:-2]))
 
-        '''
         #Parse raw data
         #Pattern for decimal number
         #(see https://docs.python.org/3/library/re.html#writing-a-tokenizer)
@@ -66,7 +65,6 @@ class StreamSensor:
         self.data['x'].append((dt,x))
         self.data['y'].append((dt,y))
         self.data['z'].append((dt,z))
-        '''
 
     def cleardata(self,name):
         '''
