@@ -86,10 +86,10 @@ class dyaconWSD2:
 
         #Read in sensor response. 
         #WSD-2 will return zero, but read in to clear buffer
-        time.sleep(0.1)
+        time.sleep(0.15)
         dbytes = self.comm.in_waiting
         mtime = self.comm.read(dbytes).decode('utf-8')
-        #print('Measure time: {}'.format(mtime))
+        print('Measure time: {}'.format(mtime))
 
         #Send D command
         dcmd = self.address+'D0!'

@@ -11,7 +11,7 @@ from databear import logger
 #Sensor settings
 wsdsettings = {
     'serialnumber':555,
-    'port':'COM7',
+    'port':'/dev/ttyMAX3',
     'address':'0',
     'measurement':10
 }
@@ -29,4 +29,4 @@ datalogger.scheduleMeasurement('wsd',1)
 datalogger.scheduleStorage('speed','wsd',30)
 datalogger.scheduleStorage('direction','wsd',30)
 
-datalogger.run()
+#datalogger.run()
