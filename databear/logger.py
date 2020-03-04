@@ -13,6 +13,7 @@ Data Logger
 '''
 
 import databear.schedule as schedule
+import databear.process as process
 from databear import sensorfactory
 import yaml
 import time #For sleeping during execution
@@ -119,20 +120,24 @@ class DataLogger:
             #No data stored
             return
 
-        if process=='sample':
-            for value in self.sensors[sensor].data[name]:
-                dt = value[0].strftime('%Y-%m-%d %H:%M:%S:%f')
-                val = value[1]
-                datadict = {
-                    'dt':dt,
+        #Extract data to be stored
+        #TODO
+        #self.sensors[sensor].cleardata(name)
+        
+        #Process data
+        storedata = process.calculate(process,data,storetime)
+
+        #Write to CSV
+        for row in storedata:
+            datadict = {
+                    'dt': row[0],
                     'measurement':name,
-                    'value':val,
+                    'value': row[1],
                     'sensor':sensor}
-            
-                #Output row to CSV
-                self.csvwrite.writerow(datadict)
-            
-        self.sensors[sensor].cleardata(name)
+
+            #Output row to CSV
+            self.csvwrite.writerow(datadict)
+
 
     def run(self):
         '''
