@@ -86,7 +86,7 @@ class dyaconTPH:
         savedata = []
         data = self.data[name]
         for val in data:
-            if (val[0]<startdt) and (val[0]>=enddt):
+            if (val[0]<startdt) or (val[0]>=enddt):
                 savedata.append(val)
 
         self.data[name] = savedata
