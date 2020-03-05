@@ -2,7 +2,7 @@
 Dyacon TPH-1 Sensor
 - Platform: Windows
 - Connection: USB-RS485
-- Interface: DataBear Sensor Interface V0
+- Interface: DataBear Sensor Interface V0.1(?)
 
 '''
 
@@ -63,9 +63,30 @@ class dyaconTPH:
 
             self.data[measure['name']].append((dt,val))
 
+    def getdata(self,name,startdt,enddt):
+        '''
+        Return a list of values such that
+        startdt <= timestamps < enddt
+        - Inputs: datetime objects
+        '''
+        output = []
+        data = self.data[name]
+        for val in data:
+            if (val[0]>=startdt) and (val[0]<enddt):
+                output.append(val)
+        return output
 
-    def cleardata(self,name):
+
+    def cleardata(self,name,startdt,enddt):
         '''
         Clear data values for a particular measurement
+        Loop through values and remove. Note: This is probably
+        inefficient if the data structure is large.
         '''
-        self.data[name] = []
+        savedata = []
+        data = self.data[name]
+        for val in data:
+            if (val[0]<startdt) and (val[0]>=enddt):
+                savedata.append(val)
+
+        self.data[name] = savedata
