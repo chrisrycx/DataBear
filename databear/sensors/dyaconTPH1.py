@@ -55,13 +55,17 @@ class dyaconTPH:
         '''
         for measure in self.measurements:
             dt = datetime.datetime.now()
-            val = self.comm.read_float(measure['register'])
-
-            #Output results for testing
             timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
-            print('Measure {}: {}, value= {}'.format(measure['name'],timestamp,val))
 
-            self.data[measure['name']].append((dt,val))
+            try:
+                val = self.comm.read_float(measure['register'])
+                
+                #Output results for testing
+                print('Measure {}: {}, value= {}'.format(measure['name'],timestamp,val))
+
+                self.data[measure['name']].append((dt,val))
+            except mm.NoResponseError as norsp:
+                print('Error: no response {}'.format(self.name))
 
     def getdata(self,name,startdt,enddt):
         '''

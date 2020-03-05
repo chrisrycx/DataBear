@@ -113,8 +113,8 @@ class DataLogger:
     def storeMeasurement(self,name,sensor,process):
         '''
         Store measurement data according to process.
-        - process is fixed at 'sample' for now.
-        Deletes any unstored data.
+        - Process = 'average','min','max','dump','sample'
+        - Deletes any data associated with storage after saving
         '''
         if not self.sensors[sensor].data[name]:
             #No data stored

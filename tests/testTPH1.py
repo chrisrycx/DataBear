@@ -9,7 +9,7 @@ name = 'test'
 settings = {
     'serialnumber':555,
     'port':'COM3',
-    'address': 4,
+    'address': 5,
     'measurement': 10
 }
 
@@ -27,7 +27,7 @@ dt1 = datetime.datetime(2020,3,4,12,30)
 dt2 = datetime.datetime(2020,3,4,12,35)
 
 tph = dyaconTPH1.dyaconTPH(name,settings)
-tph.data['airT'] = fdata
-tph.measure()
+#tph.data['airT'] = fdata
+#tph.measure()
 
 #tph.cleardata('airT',dt1,dt2)
