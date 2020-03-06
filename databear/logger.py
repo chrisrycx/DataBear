@@ -123,6 +123,8 @@ class DataLogger:
         - process: A valid process type
         - storetime: datetime of the scheduled storage
         - lasttime: datetime of last storage event
+        - Process = 'average','min','max','dump','sample'
+        - Deletes any data associated with storage after saving
         '''
         if not self.sensors[sensor].data[name]:
             #No data stored
