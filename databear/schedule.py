@@ -132,8 +132,8 @@ class Job:
         Run the job and immediately reschedule it.
         :return: The return value returned by the `job_func`
         """
+        ret = self.job_func(self.next_run,self.last_run)
         self.last_run = self.next_run
-        ret = self.job_func()
         self.next_run = self.last_run + datetime.timedelta(seconds=self.interval)
         return ret
 

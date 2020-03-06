@@ -120,39 +120,40 @@ def datamin(data,storetime):
 
 
 #------------- Testing -------------
-#Test parameters
-simtime = datetime(2020,2,27,12,20)
+if __name__ == "__main__":
+    #Test parameters
+    simtime = datetime(2020,2,27,12,20)
 
-testdata = [
-    ('2020-02-27 11:00',1),
-    ('2020-02-27 11:10',2),
-    ('2020-02-27 11:20',3),
-    ('2020-02-27 11:30',4),
-    ('2020-02-27 11:40',5),
-    ('2020-02-27 11:50',6),
-    ('2020-02-27 12:00',7),
-    ('2020-02-27 12:10',8)
-]
+    testdata = [
+        ('2020-02-27 11:00',1),
+        ('2020-02-27 11:10',2),
+        ('2020-02-27 11:20',3),
+        ('2020-02-27 11:30',4),
+        ('2020-02-27 11:40',5),
+        ('2020-02-27 11:50',6),
+        ('2020-02-27 12:00',7),
+        ('2020-02-27 12:10',8)
+    ]
 
-#Convert testdata to form (<datetime>,val)
-data = []
-for row in testdata:
-    timestr = row[0]
-    dt = datetime.strptime(timestr,'%Y-%m-%d %H:%M')
-    data.append((dt,row[1]))
+    #Convert testdata to form (<datetime>,val)
+    data = []
+    for row in testdata:
+        timestr = row[0]
+        dt = datetime.strptime(timestr,'%Y-%m-%d %H:%M')
+        data.append((dt,row[1]))
 
-#Test functions
-test1 = calculate('dump',data,simtime)
-test2 = calculate('sample',data,simtime)
-test3 = calculate('average',data,simtime)
-test4 = calculate('max',data,simtime)
-test5 = calculate('min',data,simtime)
+    #Test functions
+    test1 = calculate('dump',data,simtime)
+    test2 = calculate('sample',data,simtime)
+    test3 = calculate('average',data,simtime)
+    test4 = calculate('max',data,simtime)
+    test5 = calculate('min',data,simtime)
 
-print(test1)
-print(test2)
-print(test3)
-print(test4)
-print(test5)
+    print(test1)
+    print(test2)
+    print(test3)
+    print(test4)
+    print(test5)
 
 
 

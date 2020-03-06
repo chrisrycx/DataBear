@@ -49,7 +49,7 @@ class dyaconTPH:
         #Initialize data structure
         self.data = {'airT':[],'rh':[],'bp':[]} #Empty data dictionary
 
-    def measure(self):
+    def measure(self,measuretime,lastmeasure):
         '''
         Read in data using modbus
         '''

@@ -13,8 +13,9 @@ Data Logger
 '''
 
 import databear.schedule as schedule
-import databear.process as process
+import databear.process as processdata
 from databear import sensorfactory
+from datetime import timedelta
 import yaml
 import time #For sleeping during execution
 import csv
@@ -52,7 +53,6 @@ class DataLogger:
             self.csvwrite = csv.DictWriter(self.csvfile,['dt','measurement','value','sensor'])
             self.csvwrite.writeheader()
 
-
     def loadconfig(self,config):
         '''
         Load configuration file
@@ -82,7 +82,11 @@ class DataLogger:
             self.scheduleMeasurement(sensor['name'],samplefreq)
 
         for setting in loggersettings:
-            self.scheduleStorage(setting['store'],setting['sensor'],setting['frequency'])
+            self.scheduleStorage(
+                setting['store'],
+                setting['sensor'],
+                setting['frequency'],
+                setting['process'])
 
         #Create output file
         self.csvfile = open(datalogger['name']+'.csv','w',newline='')
@@ -103,29 +107,37 @@ class DataLogger:
         m = self.sensors[sensor].measure
         self.logschedule.every(frequency).do(m)
         
-    def scheduleStorage(self,name,sensor,frequency):
+    def scheduleStorage(self,name,sensor,frequency,process):
         '''
         Schedule when storage takes place
         '''
         s = self.storeMeasurement
-        self.logschedule.every(frequency).do(s,name,sensor,'sample')
+        #Note: Some parameters for function supplied by Job class in Schedule
+        self.logschedule.every(frequency).do(s,name,sensor,process)
 
-    def storeMeasurement(self,name,sensor,process):
+    def storeMeasurement(self,name,sensor,process,storetime,lasttime):
         '''
         Store measurement data according to process.
-        - process is fixed at 'sample' for now.
-        Deletes any unstored data.
+        Inputs
+        - name, sensor
+        - process: A valid process type
+        - storetime: datetime of the scheduled storage
+        - lasttime: datetime of last storage event
         '''
         if not self.sensors[sensor].data[name]:
             #No data stored
             return
 
-        #Extract data to be stored
-        #TODO
-        #self.sensors[sensor].cleardata(name)
+        #Deal with missing last time on start-up
+        #Set to storetime - 1 day to ensure all data is included
+        if not lasttime:
+            lasttime = storetime - timedelta(1)
+
+        #Get datetimes associated with current storage and prior
+        data = self.sensors[sensor].getdata(name,lasttime,storetime)
         
         #Process data
-        storedata = process.calculate(process,data,storetime)
+        storedata = processdata.calculate(process,data,storetime)
 
         #Write to CSV
         for row in storedata:
@@ -137,7 +149,7 @@ class DataLogger:
 
             #Output row to CSV
             self.csvwrite.writerow(datadict)
-
+            
 
     def run(self):
         '''
