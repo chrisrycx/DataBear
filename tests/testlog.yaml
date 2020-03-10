@@ -9,7 +9,7 @@ datalogger:
   settings:
     - store: airT  #Measurement to be stored
       sensor: tph      #Sensor that measurement is associated with
-      process: average           #Not yet implemented. Leave as None
+      process: average           #process: dump, sample, average, max, min
       frequency: 20           #Data STORAGE frequency in seconds
 
 

@@ -8,6 +8,7 @@ Dyacon TPH-1 Sensor
 
 import datetime
 import minimalmodbus as mm
+from databear.errors import MeasureError
 
 class dyaconTPH:
     #Inherit from "modbus sensor class"?
@@ -49,14 +50,15 @@ class dyaconTPH:
         #Initialize data structure
         self.data = {'airT':[],'rh':[],'bp':[]} #Empty data dictionary
 
-    def measure(self,measuretime,lastmeasure):
+    def measure(self):
         '''
         Read in data using modbus
         '''
+        fails = [] #keep track of measurement failures
         for measure in self.measurements:
             dt = datetime.datetime.now()
             timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
-
+            
             try:
                 val = self.comm.read_float(measure['register'])
                 
@@ -65,7 +67,10 @@ class dyaconTPH:
 
                 self.data[measure['name']].append((dt,val))
             except mm.NoResponseError as norsp:
-                print('Error: no response {}'.format(self.name))
+                fails.append(measure['name'])
+        #Raise a measurement error if a fail is detected
+        if len(fails)>0:
+            raise MeasureError('TPH Measurement Failure')
 
     def getdata(self,name,startdt,enddt):
         '''

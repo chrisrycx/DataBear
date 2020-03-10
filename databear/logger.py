@@ -15,6 +15,7 @@ Data Logger
 import databear.schedule as schedule
 import databear.process as processdata
 from databear import sensorfactory
+from databear.errors import DataLogConfigError, MeasureError
 from datetime import timedelta
 import yaml
 import time #For sleeping during execution
@@ -104,8 +105,27 @@ class DataLogger:
         Schedule a measurement
         Frequency is seconds
         '''
-        m = self.sensors[sensor].measure
-        self.logschedule.every(frequency).do(m)
+        #Check frequency against max
+        if frequency < self.sensors[sensor].maxfrequency:
+            raise DataLogConfigError('Logger frequency exceeds sensor max')
+        
+        #Schedule measurement
+        m = self.doMeasurement
+        self.logschedule.every(frequency).do(m,sensor)
+    
+    def doMeasurement(self,sensor,storetime,lasttime):
+        '''
+        Perform a measurement on a sensor
+        Inputs
+        - Sensor name
+        - storetime and lasttime are not currently used here
+          but are passed by Schedule when this function is called.
+        '''
+        try:
+            self.sensors[sensor].measure()
+        except MeasureError as measureE:
+            #Print out exception message
+            print(measureE)
         
     def scheduleStorage(self,name,sensor,frequency,process):
         '''
@@ -152,7 +172,6 @@ class DataLogger:
             #Output row to CSV
             self.csvwrite.writerow(datadict)
             
-
     def run(self):
         '''
         Run the logger
