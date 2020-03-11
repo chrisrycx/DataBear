@@ -21,17 +21,24 @@ import yaml
 import time #For sleeping during execution
 import csv
 import sys #For command line args
+import logging
+
+
 
 #-------- Logger Initialization and Setup ------
 class DataLogger:
     '''
     A data logger
     '''
+    #Error logging format
+    errorfmt = '%(asctime)s %(levelname)s %(lineno)s %(message)s'
+
     def __init__(self,config):
         '''
         Initialize a new data logger
         Input (various options)
-        - string corresponding to name of logger (enables manual config for testing)
+        - string corresponding to name of logger 
+          (enables manual config for testing)
         - path to yaml config file (must have .yaml)
         - dictionary with configuration
           
@@ -48,7 +55,10 @@ class DataLogger:
         else:
             #Name assumed to be defined by input string
             self.name = config
-
+            logging.basicConfig(
+                format=DataLogger.errorfmt,
+                filename=self.name+'_error.log')
+            
             #Create output file
             self.csvfile = open(config + '.csv','w',newline='')
             self.csvwrite = csv.DictWriter(self.csvfile,['dt','measurement','value','sensor'])
@@ -74,6 +84,11 @@ class DataLogger:
         sensors = config['sensors']
         
         self.name = datalogger['name']
+
+        #Set up error logging
+        logging.basicConfig(
+                format=DataLogger.errorfmt,
+                filename=self.name+'_error.log')
         
         #Configure logger
         for sensor in sensors:
@@ -121,6 +136,9 @@ class DataLogger:
         - storetime and lasttime are not currently used here
           but are passed by Schedule when this function is called.
         '''
+        #Test error logging
+        logging.warning('Testing the error log - Measure')
+
         try:
             self.sensors[sensor].measure()
         except MeasureError as measureE:
@@ -146,6 +164,9 @@ class DataLogger:
         - Process = 'average','min','max','dump','sample'
         - Deletes any data associated with storage after saving
         '''
+        #Test error logging
+        logging.warning('Testing the error log - Storage')
+        
         if not self.sensors[sensor].data[name]:
             #No data stored
             return
