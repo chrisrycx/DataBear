@@ -136,14 +136,10 @@ class DataLogger:
         - storetime and lasttime are not currently used here
           but are passed by Schedule when this function is called.
         '''
-        #Test error logging
-        logging.warning('Testing the error log - Measure')
-
         try:
             self.sensors[sensor].measure()
         except MeasureError as measureE:
-            #Print out exception message
-            print(measureE)
+            logging.exception(measureE)
         
     def scheduleStorage(self,name,sensor,frequency,process):
         '''

@@ -11,6 +11,10 @@ datalogger:
       sensor: tph      #Sensor that measurement is associated with
       process: average           #process: dump, sample, average, max, min
       frequency: 20           #Data STORAGE frequency in seconds
+    - store: bp
+      sensor: tph
+      process: average
+      frequency: 10
 
 
 #Must have at least one set of measurement settings per sensor.
@@ -23,7 +27,7 @@ sensors:
       serialnumber: '555'
       measurement: 5   #MEASUREMENT frequency in seconds
       port: COM7       #Next settings are specific to measurement method
-      address: 4
+      #address: 4
       
     
 
