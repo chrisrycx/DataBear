@@ -54,7 +54,7 @@ class dyaconTPH:
         '''
         Read in data using modbus
         '''
-        fails = [] #keep track of measurement failures
+        fails = {} #keep track of measurement failures
         for measure in self.measurements:
             dt = datetime.datetime.now()
             timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
@@ -67,10 +67,11 @@ class dyaconTPH:
 
                 self.data[measure['name']].append((dt,val))
             except mm.NoResponseError as norsp:
-                fails.append(measure['name'])
+                fails[measure['name']] = norsp.strerror
         #Raise a measurement error if a fail is detected
         if len(fails)>0:
-            raise MeasureError('TPH Measurement Failure')
+            failnames = list(fails.keys())
+            raise MeasureError(failnames,fails)
 
     def getdata(self,name,startdt,enddt):
         '''

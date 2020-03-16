@@ -19,6 +19,7 @@ measurements rather than time.
 import datetime
 import time
 import functools
+from math import ceil
 
 class Scheduler:
     """
@@ -93,14 +94,45 @@ class Job:
 
     def _schedule_first_run(self):
         """
-        Determine when first run should be.
-        Start logger at top of the minute XX:00
+        Schedule first run of job.
+        Assumes preferred start time at
+        the start of the next sec, min, or hr
+        or some multiple of the interval.
         """
         currenttime = datetime.datetime.now()
-        smin = currenttime.minute + 1
-        if smin > 59:
-            smin=0
-        self.next_run = currenttime.replace(minute=smin,second=0,microsecond=0)
+        
+        #Round everything to nearest sec
+        intervalsec = ceil(self.interval)
+    
+        if intervalsec <= 60:
+            zerotime = currenttime.replace(
+                second=0,
+                microsecond=0)
+            startsec = ceil(currenttime.second/intervalsec)*intervalsec
+
+        elif intervalsec <= 3600 and intervalsec > 60:
+            zerotime = currenttime.replace(
+                minute=0,
+                second=0,
+                microsecond=0)
+            secsin = currenttime.minute*60 + currenttime.second
+            startsec = ceil(secsin/intervalsec)*intervalsec
+
+        elif intervalsec <= 86400 and intervalsec > 3600:
+            zerotime = currenttime.replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0)
+            secsin = currenttime.hour*3600 + currenttime.minute*60 + currenttime.second
+            startsec = ceil(secsin/intervalsec)*intervalsec
+        
+        else:
+            #Start immediately
+            zerotime = currenttime
+            startsec = 0
+
+        self.next_run = zerotime + datetime.timedelta(seconds=startsec)
 
     def do(self, job_func, *args):
         """
