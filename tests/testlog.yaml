@@ -10,11 +10,11 @@ datalogger:
     - store: airT  #Measurement to be stored
       sensor: tph      #Sensor that measurement is associated with
       process: average           #process: dump, sample, average, max, min
-      frequency: 60           #Data STORAGE frequency in seconds
+      frequency: 30           #Data STORAGE frequency in seconds
     - store: bp
       sensor: tph
       process: average
-      frequency: 60
+      frequency: 30
 
 
 #Must have at least one set of measurement settings per sensor.
@@ -25,7 +25,7 @@ sensors:
     sensortype: dyaconTPH1
     settings:     #Serial number and measurement are mandatory
       serialnumber: '555'
-      measurement: 30   #MEASUREMENT frequency in seconds
+      measurement: 5   #MEASUREMENT frequency in seconds
       port: COM12       #Next settings are specific to measurement method
       address: 2
       

@@ -140,7 +140,10 @@ class DataLogger:
             self.sensors[sensor].measure()
         except MeasureError as measureE:
             for m in measureE.measurements:
-                logging.exception(measureE.messages[m])
+                logging.error('{}:{} - {}'.format(
+                        sensor,
+                        m,
+                        measureE.messages[m]))
         
     def scheduleStorage(self,name,sensor,frequency,process):
         '''

@@ -67,7 +67,7 @@ class dyaconTPH:
 
                 self.data[measure['name']].append((dt,val))
             except mm.NoResponseError as norsp:
-                fails[measure['name']] = norsp.strerror
+                fails[measure['name']] = 'No response from sensor'
         #Raise a measurement error if a fail is detected
         if len(fails)>0:
             failnames = list(fails.keys())
