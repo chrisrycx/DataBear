@@ -92,17 +92,27 @@ class DataLogger:
         
         #Configure logger
         for sensor in sensors:
-            sensorsettings = sensor['settings']
+            try:
+                sensorsettings = sensor['settings']
+            except TypeError as tp:
+                raise DataLogConfigError(
+                'YAML configured wrong. Sensor block missing dash (-)')
+            
             samplefreq = sensorsettings['measurement']
             self.addSensor(sensor['sensortype'],sensor['name'],sensor['settings'])
             self.scheduleMeasurement(sensor['name'],samplefreq)
 
         for setting in loggersettings:
-            self.scheduleStorage(
-                setting['store'],
-                setting['sensor'],
-                setting['frequency'],
-                setting['process'])
+            try:
+                self.scheduleStorage(
+                    setting['store'],
+                    setting['sensor'],
+                    setting['frequency'],
+                    setting['process'])
+            except TypeError as tp:
+                raise DataLogConfigError(
+                'YAML configured wrong. Logger setting missing dash (-)')
+            
 
         #Create output file
         self.csvfile = open(datalogger['name']+'.csv','w',newline='')

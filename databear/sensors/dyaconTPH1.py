@@ -8,7 +8,7 @@ Dyacon TPH-1 Sensor
 
 import datetime
 import minimalmodbus as mm
-from databear.errors import MeasureError
+from databear.errors import MeasureError, SensorConfigError
 
 class dyaconTPH:
     #Inherit from "modbus sensor class"?
@@ -21,11 +21,14 @@ class dyaconTPH:
             - settings['port'] = Serial com port
             - settings['address'] = Sensor modbus address
         '''
-        self.name = name
-        self.sn = settings['serialnumber']
-        self.port = settings['port']
-        self.address = settings['address']
-        self.frequency = settings['measurement']
+        try:
+            self.name = name
+            self.sn = settings['serialnumber']
+            self.port = settings['port']
+            self.address = settings['address']
+            self.frequency = settings['measurement']
+        except KeyError as ke:
+            raise SensorConfigError('YAML missing required sensor setting')
 
         #Serial settings
         self.rs = 'RS485'
