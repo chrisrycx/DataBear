@@ -77,7 +77,7 @@ class DataLogger:
             with open(config,'rt') as yin:
                 configyaml = yin.read()
 
-            config = yaml.load(configyaml)
+            config = yaml.safe_load(configyaml)
 
         datalogger = config['datalogger']
         loggersettings = datalogger['settings']
@@ -174,12 +174,6 @@ class DataLogger:
         - Process = 'average','min','max','dump','sample'
         - Deletes any data associated with storage after saving
         '''
-        #Test error logging
-        logging.warning('Testing the error log - Storage')
-        
-        if not self.sensors[sensor].data[name]:
-            #No data stored
-            return
 
         #Deal with missing last time on start-up
         #Set to storetime - 1 day to ensure all data is included
@@ -188,6 +182,12 @@ class DataLogger:
 
         #Get datetimes associated with current storage and prior
         data = self.sensors[sensor].getdata(name,lasttime,storetime)
+
+        if not data:
+            #No data found to be stored
+            logging.warning(
+                '{}:{} - No data available for storage'.format(sensor,name))
+            return
         
         #Process data
         storedata = processdata.calculate(process,data,storetime)
@@ -208,6 +208,7 @@ class DataLogger:
         Run the logger
         ctrl-C to stop
         '''
+        print('DataBear: Logger starting - ctrl-C to stop')
         while True:
             try:
                 self.logschedule.run_pending()

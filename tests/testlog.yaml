@@ -9,12 +9,16 @@ datalogger:
   settings:
     - store: airT  #Measurement to be stored
       sensor: tph      #Sensor that measurement is associated with
-      process: average           #process: dump, sample, average, max, min
-      frequency: 30           #Data STORAGE frequency in seconds
+      process: sample           #process: dump, sample, average, max, min
+      frequency: 10           #Data STORAGE frequency in seconds
     - store: rh                 #Measurement to be stored
       sensor: tph                 #Sensor that measurement is associated with
       process: average           #process: dump, sample, average, max, min
-      frequency: 30  
+      frequency: 30
+    - store: bp
+      sensor: tph
+      process: dump
+      frequency: 15  
 
 
 #Must have at least one set of measurement settings per sensor.
