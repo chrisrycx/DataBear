@@ -1,0 +1,39 @@
+#An example configuration file for the MDL-700
+
+#Change key values to change settings. Also add or remove groups of key/value pairs as needed.
+
+#Define datalogger settings - Controls how measurements are stored
+#Settings key must have at least one set of storage settings
+datalogger:
+  name: mylogger           #Logger name will be associated with output csv
+  settings:
+    - sensor: WSD1
+      store: WindSpeed   
+      frequency: 1        #Sample frequency in seconds. Can be < 1
+      process: None        #Not yet implemented. Leave as None
+    - sensor: WSD1
+      store: WindDir  
+      frequency: 1        #Sample frequency in seconds. Can be < 1
+      process: None        #Not yet implemented. Leave as None
+
+
+#Define sensors
+#Must have at least one set of settings per sensor.
+#Key value pairs in measurements vary by method
+sensors: 
+  - name: WSD1
+    sensortype: modbus
+    settings:
+      serialnumber: '1121'
+      measurement: 1  #Measurement frequency of the sensor
+      address: 1      
+      port: SM1       #pyMDL specific - "serial module" port number (1-8)
+ # - name: RMY
+  #  sensortype: streaming
+   # settings:
+    #  serialnumber: 9999
+     # measurement: 5
+      #port: SM4
+      
+    
+
