@@ -5,15 +5,11 @@
 #Define datalogger settings - Controls how measurements are stored
 #Settings key must have at least one set of storage settings
 datalogger:
-  name: FRFwind1           #Logger name will be associated with output csv
+  name: MBRange           #Logger name will be associated with output csv
   settings:
-    - sensor: dyaconWSD1
-      store: WindSpeed   
-      frequency: 1        #Sample frequency in seconds. Can be < 1
-      process: dump        #Not yet implemented. Leave as None
-    - sensor: dyaconWSD1
-      store: WindDir  
-      frequency: 1        #Sample frequency in seconds. Can be < 1
+    - sensor: maxBotixAlt
+      store: range   
+      frequency: .1        #Sample frequency in seconds. Can be < 1
       process: dump        #Not yet implemented. Leave as None
 
 
@@ -21,14 +17,14 @@ datalogger:
 #Must have at least one set of settings per sensor.
 #Key value pairs in measurements vary by method
 sensors: 
-  - name: dyaconWSD1
-    sensortype: dyaconWSD1
+  - name: maxBotixAlt
+    sensortype: maxBotixAlt
     settings:
-      serialnumber: '1121'
-      measurement: 1  #Measurement frequency of the sensor
-      address: 1      
-      port: SM1       #pyMDL specific - "serial module" port number (1-8)
-      scalefactor: 0.1
+      serialnumber: '7360'
+      measurement: .1  #Measurement frequency of the sensor
+      baud: 9600
+      #address: 1      
+      port: SM3       #pyMDL specific - "serial module" port number (1-8)
  # - name: RMY
   #  sensortype: streaming
    # settings:
