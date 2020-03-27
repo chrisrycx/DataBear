@@ -1,25 +1,24 @@
 '''
-Simulated Streaming Sensor
-A test module for a generic streaming sensor. 
-- Platform: Windows, Linux
-- Tested hardware: USB-RS485 (loopback), Dyacon MDL serial module
-- Interface: DataBear Sensor Interface V0
+Maxbotix Altimeter
+Initial sensor interface for Maxbotix Altimeter (model?)
+- Tested platform(s): Dyacon MDL
+- Interface Version: 0.1
+
 '''
 
 import datetime
 import serial
 import re
-from databear import ReadLine
 
-class maxBotixAlt:
+class maxbotixAlt:
     def __init__(self,name,settings):
         '''
-        Abstract class for a streaming sensor
         Inputs
-            - settings['serialnumber']
-            - settings['port']
-            - settings['baud']
-            - settings['hz'] - Data stream frequency from sensor
+            Inputs
+            - Name for sensor
+            - settings['serialnum'] = Serial Number
+            - settings['port'] = Serial com port
+            - settings['baud'] = Baud rate for sensor
         '''
         #Define characteristics of this sensor
         self.sensor_type = 'continuous'
@@ -92,9 +91,17 @@ class maxBotixAlt:
                     output.append(val)
             return output
         
-    def cleardata(self,name):
+    def cleardata(self,name,startdt,enddt):
         '''
         Clear data values for a particular measurement
+        Loop through values and remove. Note: This is probably
+        inefficient if the data structure is large.
         '''
-        self.data[name] = []
+        savedata = []
+        data = self.data[name]
+        for val in data:
+            if (val[0]<startdt) or (val[0]>=enddt):
+                savedata.append(val)
+
+        self.data[name] = savedata
 

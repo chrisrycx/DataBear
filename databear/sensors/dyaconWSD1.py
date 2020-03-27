@@ -1,8 +1,8 @@
 '''
-Dyacon TPH-1 Sensor
-- Platform: Windows
-- Connection: USB-RS485
-- Interface: DataBear Sensor Interface V0.1(?)
+Dyacon WSD-1 Sensor
+Initial sensor interface for Dyacon WSD-1 sensor
+- Tested platform(s): Dyacon MDL
+- Interface Version: 0.1
 
 '''
 
