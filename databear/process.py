@@ -86,8 +86,7 @@ def average(data,storetime):
 
 def datamax(data,storetime):
     '''
-    Average input data
-    Assumes data is evenly spaced
+    Output max
     '''
     #Extract values to list
     vals = [x[1] for x in data]
@@ -103,8 +102,7 @@ def datamax(data,storetime):
 
 def datamin(data,storetime):
     '''
-    Average input data
-    Assumes data is evenly spaced
+    Output min
     '''
     #Extract values to list
     vals = [x[1] for x in data]
