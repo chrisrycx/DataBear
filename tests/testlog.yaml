@@ -7,18 +7,15 @@
 datalogger:
   name: simpletest
   settings:
-    - store: airT  #Measurement to be stored
-      sensor: tph      #Sensor that measurement is associated with
-      process: max          #process: dump, sample, average, max, min
-      frequency: 5           #Data STORAGE frequency in seconds
-    - store: rh                 #Measurement to be stored
-      sensor: tph                 #Sensor that measurement is associated with
-      process: min           #process: dump, sample, average, max, min
-      frequency: 60
-    - store: bp
-      sensor: tph
-      process: average
-      frequency: 30  
+  - store: airT  #Measurement to be stored
+    sensor: tph      #Sensor that measurement is associated with
+    process: max          #process: dump, sample, average, max, min
+    frequency: 10           #Data STORAGE frequency in seconds
+  - store: rh                 #Measurement to be stored
+    sensor: tph                 #Sensor that measurement is associated with
+    process: min           #process: dump, sample, average, max, min
+    frequency: 60
+  
 
 
 #Must have at least one set of measurement settings per sensor.
@@ -32,6 +29,7 @@ sensors:
       measurement: 2   #MEASUREMENT frequency in seconds
       port: COM12       #Next settings are specific to measurement method
       address: 2
+
       
     
 

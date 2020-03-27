@@ -159,6 +159,10 @@ class DataLogger:
         '''
         Schedule when storage takes place
         '''
+        #Check storage frequency doesn't exceed measurement frequency
+        if frequency < self.sensors[sensor].frequency:
+            raise DataLogConfigError('Storage frequency exceeds sensor measurement frequency')
+
         s = self.storeMeasurement
         #Note: Some parameters for function supplied by Job class in Schedule
         self.logschedule.every(frequency).do(s,name,sensor,process)
