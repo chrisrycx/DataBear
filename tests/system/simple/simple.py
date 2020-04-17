@@ -1,7 +1,7 @@
 '''
 
-This is an example script for using DataBear.
-Use this script as a template for your particular implementation.
+This is a simple test of the databear system on Windows
+using DyaconTPH sensor
 
 '''
 
@@ -18,7 +18,7 @@ sensorfactory.factory.register_sensor('dyaconTPH1',dyaconTPH1.dyaconTPH)
 #sensorfactory.factory.register_sensor('newSensor',mysensor.newSensor)
 
 #------ Create a logger ------
-config = 'testlog.yaml'
+config = 'simple.yaml'
 datalogger = logger.DataLogger(config)
 
 #------- Run databear ------

@@ -4,15 +4,12 @@ library: https://github.com/dbader/schedule
 Copyright (c) 2013 Daniel Bader (http://dbader.org)
 
 In addition to removing portions of the code,
-a "first run" method is added to schedule the 
-first run at the top of the next minute.
+a "first run" method is added to schedule that
+starts logging at an even multiple of the job interval. 
 
 Also, the next run is based on the last
-scheduled run, not the last actual run.
-
-Idea...
-Create a .when method for scheduling a job based on
-measurements rather than time.
+scheduled run, not the last actual run in order
+to keep jobs from drifting.
 
 '''
 
@@ -71,6 +68,14 @@ class Scheduler:
 
     def _run_job(self, job):
         ret = job.run()
+
+    def reset(self):
+        '''
+        Reset schedule for all jobs
+        Can be used to handle errors like clock changes
+        '''
+        for job in self.jobs:
+            job._schedule_first_run()
 
 class Job:
     """
@@ -164,7 +169,15 @@ class Job:
         Run the job and immediately reschedule it.
         :return: The return value returned by the `job_func`
         """
+        #Check to see if job is on time raise error if
+        #time is off
+        dtdiff = datetime.datetime.now() - self.next_run
+        assert abs(dtdiff.total_seconds()) < 2*self.interval
+        
+        #Execute job passing along current and prior runs
+        #which are used by processing jobs
         ret = self.job_func(self.next_run,self.last_run)
+
         self.last_run = self.next_run
         self.next_run = self.last_run + datetime.timedelta(seconds=self.interval)
         return ret

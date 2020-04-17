@@ -219,6 +219,9 @@ class DataLogger:
                 sleeptime = self.logschedule.idle_seconds
                 if sleeptime > 0:
                     time.sleep(sleeptime)
+            except AssertionError:
+                logging.error('Measurement too late, logger resetting')
+                self.logschedule.reset()
             except KeyboardInterrupt:
                 break
 

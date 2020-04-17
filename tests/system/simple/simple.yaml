@@ -26,7 +26,7 @@ sensors:
     sensortype: dyaconTPH1
     settings:     #Serial number and measurement are mandatory
       serialnumber: '555'
-      measurement: 2   #MEASUREMENT frequency in seconds
+      measurement: 5   #MEASUREMENT frequency in seconds
       port: COM12       #Next settings are specific to measurement method
       address: 2
 
