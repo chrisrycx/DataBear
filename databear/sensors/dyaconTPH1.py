@@ -66,7 +66,11 @@ class dyaconTPH:
                 val = self.comm.read_float(measure['register'])
                 
                 #Output results for testing
-                print('Measure {}: {}, value= {}'.format(measure['name'],timestamp,val))
+                print('{} - Measure {}: {}, value= {}'.format(
+                    self.name,
+                    measure['name'],
+                    timestamp,
+                    val))
 
                 self.data[measure['name']].append((dt,val))
             except mm.NoResponseError as norsp:
