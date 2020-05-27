@@ -1,74 +1,67 @@
 '''
-Simulated Streaming Sensor
-A test module for a generic streaming sensor. 
-- Platform: Windows, Linux
-- Tested hardware: USB-RS485 (loopback), Dyacon MDL serial module
-- Interface: DataBear Sensor Interface V0
+A streaming sensor simulator
+Outputs data to a text file at a given rate
+
+Output dataframe:
+<min>:<sec>:<ms>::<count per sec>
 '''
 
+#import serial
+import time
 import datetime
-import serial
-import re
 
-class SimStream:
-    def __init__(self,name,settings):
-        '''
-        Abstract class for a streaming sensor
-        Inputs
-            - settings['serialnumber']
-            - settings['port']
-            - settings['baud']
-            - settings['hz'] - Data stream frequency from sensor
-        '''
-        #Define characteristics of this sensor
-        self.sensor_type = 'continuous'
+#Run Settings
+mode = 'clock' #Clock or sleep algorithms
+hz = 500  #Output frequency in hz
+outfile = 'simdata.txt'
 
-        #Load sensor settings
-        self.name = name
-        self.sn = settings['serialnumber']
-        self.port = settings['port']
-        self.baud = settings['baud']
-        self.timeout = 0
+#Set up comm... wait for later
+#comm = serial.Serial('COM10',19200,timeout=0)
 
-        #Serial settings
-        self.rs = 'RS485'
-        self.duplex = 'half'
-        self.resistors = 1
-        self.bias = 1
+#Open output file
+f = open(outfile,'w')
 
-        #Set up connection
-        self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
+#Algorithm "clock"
+if mode=='clock':
+    #Set up clock check
+    startdt = datetime.datetime.now()
+    interval = datetime.timedelta(seconds=1/hz) #Seconds between running
+    
+    loops = 0
+    dataframes = 0
+    lastsec = 0
+    #Output loop
+    while True:
+        try:
+            #Get datetime
+            dt = datetime.datetime.now()
 
-        #Define measurements
-        self.data = {'x':[],'y':[],'z':[]}
-        
-    def measure(self):
-        '''
-        Read in data from port and parse to measurements
-        '''
-        dt = datetime.datetime.now()
+            if dt >= (startdt + interval):
+                #Extract datetime information
+                minute = dt.minute
+                second = dt.second
+                ms = dt.microsecond
 
-        dbytes = self.comm.in_waiting
-        rawdata = self.comm.read(dbytes).decode('utf-8')
-        timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
-        print('Measure: {}, data= {}'.format(timestamp,rawdata[:-2]))
+                if second != lastsec:
+                    print('Loops = {}'.format(loops))
+                    loops = 0
+                    dataframes = 0
 
-        #Parse raw data
-        #Pattern for decimal number
-        #(see https://docs.python.org/3/library/re.html#writing-a-tokenizer)
-        dataRE = r'(\d+\.\d+)'
-        vals = re.findall(dataRE,rawdata) #Search for matches in rawdata
+                dataframes = dataframes + 1
 
-        x = float(vals[0])
-        y = float(vals[1])
-        z = float(vals[2])
+                print('{}:{}:{}::{}'.format(minute,second,ms,dataframes),file=f)
+                
+                startdt = dt
+                lastsec = second
 
-        self.data['x'].append((dt,x))
-        self.data['y'].append((dt,y))
-        self.data['z'].append((dt,z))
+            loops = loops + 1
 
-    def cleardata(self,name):
-        '''
-        Clear data values for a particular measurement
-        '''
-        self.data[name] = []
+        except KeyboardInterrupt:
+            break
+
+f.close()
+
+    
+
+
+
