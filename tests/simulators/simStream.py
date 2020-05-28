@@ -11,8 +11,8 @@ import time
 import datetime
 
 #Run Settings
-mode = 'clock' #Clock or sleep algorithms
-hz = 500  #Output frequency in hz
+mode = 'sleep' #Clock or sleep algorithms
+hz = 2  #Output frequency in hz
 outfile = 'simdata.txt'
 
 #Set up comm... wait for later
@@ -35,12 +35,14 @@ if mode=='clock':
         try:
             #Get datetime
             dt = datetime.datetime.now()
+            delta = dt - startdt
 
-            if dt >= (startdt + interval):
+            if delta >= interval:
                 #Extract datetime information
                 minute = dt.minute
                 second = dt.second
                 ms = dt.microsecond
+                deltams = delta/datetime.timedelta(microseconds=1)
 
                 if second != lastsec:
                     print('Loops = {}'.format(loops))
@@ -49,12 +51,56 @@ if mode=='clock':
 
                 dataframes = dataframes + 1
 
-                print('{}:{}:{}::{}'.format(minute,second,ms,dataframes),file=f)
+                print('{}:{}:{},delta={},frames={}'.format(
+                    minute,second,ms,deltams,dataframes),file=f)
                 
                 startdt = dt
                 lastsec = second
 
             loops = loops + 1
+
+        except KeyboardInterrupt:
+            break
+
+#Algorithm "clock"
+if mode=='sleep':
+    #Set up sleep time
+    sleeptime = 1/hz
+    
+    loops = 0
+    dataframes = 0
+    lastdt = datetime.datetime.now()
+    lastsec = 0
+
+    #Output loop
+    while True:
+        try:
+            #Get datetime
+            dt = datetime.datetime.now()
+            delta = dt - lastdt
+            
+            #Extract datetime information
+            minute = dt.minute
+            second = dt.second
+            ms = dt.microsecond
+            deltams = delta/datetime.timedelta(microseconds=1)
+
+            if second != lastsec:
+                print('Loops = {}'.format(loops))
+                loops = 0
+                dataframes = 0
+
+            dataframes = dataframes + 1
+
+            print('{}:{}:{},delta={},frames={}'.format(
+                minute,second,ms,deltams,dataframes),file=f)
+                
+            lastdt = dt
+            lastsec = second
+
+            loops = loops + 1
+
+            time.sleep(sleeptime)
 
         except KeyboardInterrupt:
             break
