@@ -5,6 +5,7 @@ Creates simple data values when measure method is called
 Sensor Interface: V0.1
 '''
 import datetime
+import time
 from databear.errors import MeasureError, SensorConfigError
 
 class sensorSim:
@@ -65,6 +66,9 @@ class sensorSim:
         print('Sensor: {}  Time: {}  measure2: {}  measure3: {}'.format(
             self.name,dt.strftime('%H:%M'),dt.second,dt.microsecond
         ))
+
+        #Pause to simulate a measurement time
+        time.sleep(0.5)
 
     def getdata(self,name,startdt,enddt):
         '''
