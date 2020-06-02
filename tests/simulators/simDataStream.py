@@ -1,5 +1,5 @@
 '''
-A streaming sensor simulator
+Simulates a generic data streaming sensor
 Outputs data to a text file at a given rate
 This version is simplified for testing on MDL
 

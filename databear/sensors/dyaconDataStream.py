@@ -1,9 +1,9 @@
 '''
-Simulated Streaming Sensor
-A test module for a generic streaming sensor. 
+Dyacon DataStream
+A testing module for reading streaming data from simDataStream.py 
 - Platform: Windows, Linux
-- Tested hardware: USB-RS485 (loopback), Dyacon MDL serial module
-- Interface: DataBear Sensor Interface V0
+- Tested hardware: USB-RS485 (loopback)
+- Interface: DataBear Sensor Interface V0.1
 '''
 
 import datetime
