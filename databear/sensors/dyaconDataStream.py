@@ -5,42 +5,48 @@ A testing module for reading streaming data from simDataStream.py
 - Tested hardware: USB-RS485 (loopback)
 - Interface: DataBear Sensor Interface V0.1
 '''
-
+#Import any libraries needed for sensor operation. Also
+#import error classes to alert users to problems.
 import datetime
+from databear.errors import MeasureError, SensorConfigError
 import serial
-import re
 
-class SimStream:
+class dyaconDataStream:
     def __init__(self,name,settings):
         '''
-        Abstract class for a streaming sensor
+        Create a new sensor
         Inputs
-            - settings['serialnumber']
-            - settings['port']
-            - settings['baud']
-            - settings['hz'] - Data stream frequency from sensor
+        - name: string - name for sensor
+        - settings: dictionary
+            settings['serialnum'] = Serial Number 
+            settings['interval'] = Sensor measurement interval sec 
+            settings['port'] = Serial port
+            settings['baud'] = Baud rate
         '''
-        #Define characteristics of this sensor
-        self.sensor_type = 'continuous'
-
-        #Load sensor settings
-        self.name = name
-        self.sn = settings['serialnumber']
-        self.port = settings['port']
-        self.baud = settings['baud']
+        #Load settings to instance attributes
+        try:
+            self.name = name
+            self.sn = settings['serialnumber']
+            self.interval = settings['interval']
+            self.port = settings['port']
+            self.baud = settings['baud']
+            
+        except KeyError as ke:
+            raise SensorConfigError('YAML missing required sensor setting')
+        
+        #Other settings
+        self.maxfrequency = 0  #Maximum sample rate
         self.timeout = 0
-
-        #Serial settings
-        self.rs = 'RS485'
-        self.duplex = 'half'
-        self.resistors = 1
-        self.bias = 1
 
         #Set up connection
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
 
-        #Define measurements
-        self.data = {'x':[],'y':[],'z':[]}
+        #Initialize data structure
+        #See simDataStream.py
+        #Microsec is the timestamp associated with sending data
+        #Target is the target microsec prior to sending data
+        #Frame is the number of frames sent in a particular second
+        self.data = {'microsec':[],'target':[],'frames':[]}
         
     def measure(self):
         '''
@@ -48,27 +54,34 @@ class SimStream:
         '''
         dt = datetime.datetime.now()
 
+        #Read in bytes from port
         dbytes = self.comm.in_waiting
         rawdata = self.comm.read(dbytes).decode('utf-8')
-        timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
-        print('Measure: {}, data= {}'.format(timestamp,rawdata[:-2]))
+        print(rawdata)
 
-        #Parse raw data
-        #Pattern for decimal number
-        #(see https://docs.python.org/3/library/re.html#writing-a-tokenizer)
-        dataRE = r'(\d+\.\d+)'
-        vals = re.findall(dataRE,rawdata) #Search for matches in rawdata
-
-        x = float(vals[0])
-        y = float(vals[1])
-        z = float(vals[2])
-
-        self.data['x'].append((dt,x))
-        self.data['y'].append((dt,y))
-        self.data['z'].append((dt,z))
-
-    def cleardata(self,name):
+    def getdata(self,name,startdt,enddt):
+            '''
+            Return a list of values such that
+            startdt <= timestamps < enddt
+            - Inputs: datetime objects
+            '''
+            output = []
+            data = self.data[name]
+            for val in data:
+                if (val[0]>=startdt) and (val[0]<enddt):
+                    output.append(val)
+            return output
+        
+    def cleardata(self,name,startdt,enddt):
         '''
         Clear data values for a particular measurement
+        Loop through values and remove. Note: This is probably
+        inefficient if the data structure is large.
         '''
-        self.data[name] = []
+        savedata = []
+        data = self.data[name]
+        for val in data:
+            if (val[0]<startdt) or (val[0]>=enddt):
+                savedata.append(val)
+
+        self.data[name] = savedata
