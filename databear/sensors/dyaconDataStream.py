@@ -19,7 +19,7 @@ class dyaconDataStream:
         - name: string - name for sensor
         - settings: dictionary
             settings['serialnum'] = Serial Number 
-            settings['interval'] = Sensor measurement interval sec 
+            settings['measurement'] = Sensor measurement interval sec 
             settings['port'] = Serial port
             settings['baud'] = Baud rate
         '''
@@ -27,7 +27,7 @@ class dyaconDataStream:
         try:
             self.name = name
             self.sn = settings['serialnumber']
-            self.interval = settings['interval']
+            self.frequency = settings['measurement']
             self.port = settings['port']
             self.baud = settings['baud']
             

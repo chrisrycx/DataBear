@@ -8,7 +8,7 @@ datalogger:
   name: simtest
   settings:
   - store: target  #Measurement to be stored
-    sensor: stream1      #Sensor that measurement is associated with
+    sensor: sim1      #Sensor that measurement is associated with
     process: dump          #process: dump, sample, average, max, min
     frequency: 100           #Data STORAGE frequency in seconds
   
@@ -23,9 +23,9 @@ sensors:
     sensortype: datastream
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
-      interval: 1   #MEASUREMENT frequency in seconds
-      port: 'COM1'
-      baude: 19200
+      measurement: 1   #MEASUREMENT interval
+      port: 'COM7'
+      baud: 19200
    
    
 

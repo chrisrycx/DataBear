@@ -18,17 +18,17 @@ import time
 import datetime
 
 #Run Settings
-hz = 100  #Output frequency in hz
+hz = 2  #Output frequency in hz
 #outfile = 'simdata.txt'
 
 #Set up comm
-comm = serial.Serial('COM12',115200,timeout=0)
+comm = serial.Serial('COM12',19200,timeout=0)
 
 #Open output file
 #f = open(outfile,'w')
 
 #Set up sleep time to be a fraction of interval
-#leeptime = (1/hz)*0.9
+sleeptime = (1/hz)*0.9
 
 #Set up clock check. Start at zero ms into second.
 startdt = datetime.datetime.now()
@@ -63,14 +63,13 @@ while True:
             dataframes = dataframes + 1
 
             #Send data
-            #data = '{}:{}:{},target={},frames={}\r\n'.format(
-                                #minute,second,ms,targetms,dataframes)
-            test = b'\x35'
-            nbytes = comm.write(test)
+            data = '{}:{}:{},target={},frames={}\r\n'.format(
+                                minute,second,ms,targetms,dataframes)
+            nbytes = comm.write(data.encode('utf-8'))
             
             nextdt = nextdt + interval
             lastsec = second
-            #time.sleep(sleeptime)
+            time.sleep(sleeptime)
             
         loops = loops + 1
 
