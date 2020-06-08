@@ -18,7 +18,7 @@ import time
 import datetime
 
 #Run Settings
-hz = 2  #Output frequency in hz
+hz = 40  #Output frequency in hz
 #outfile = 'simdata.txt'
 
 #Set up comm
@@ -28,14 +28,13 @@ comm = serial.Serial('COM12',19200,timeout=0)
 #f = open(outfile,'w')
 
 #Set up sleep time to be a fraction of interval
-sleeptime = (1/hz)*0.9
+#sleeptime = (1/hz)*0.9
 
 #Set up clock check. Start at zero ms into second.
 startdt = datetime.datetime.now()
-startdt = startdt.replace(microsecond=0) + datetime.timedelta(seconds=1)
-print('start time: {}'.format(startdt))
+nextdt = startdt.replace(microsecond=0) + datetime.timedelta(seconds=1)
+print('start time: {}'.format(nextdt))
 interval = datetime.timedelta(seconds=1/hz) #Seconds between running
-nextdt = startdt + interval
 
 loops = 0
 dataframes = 0
@@ -55,21 +54,23 @@ while True:
             targetms = nextdt.microsecond
 
             if second != lastsec:
-                print('Loops = {}'.format(loops))
                 print('Bytes sent = {}'.format(nbytes))
-                loops = 0
                 dataframes = 0
 
             dataframes = dataframes + 1
 
             #Send data
-            data = '{}:{}:{},target={},frames={}\r\n'.format(
-                                minute,second,ms,targetms,dataframes)
+            data = '{}:{}:{},target={},frames={},currentloops={}\r\n'.format(
+                                minute,second,ms,targetms,dataframes,
+                                loops)
             nbytes = comm.write(data.encode('utf-8'))
+
+            #Reset counters
+            loops = 0
             
             nextdt = nextdt + interval
             lastsec = second
-            time.sleep(sleeptime)
+            #time.sleep(sleeptime)
             
         loops = loops + 1
 
