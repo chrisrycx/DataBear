@@ -10,6 +10,7 @@ A testing module for reading streaming data from simDataStream.py
 import datetime
 from databear.errors import MeasureError, SensorConfigError
 import serial
+import re
 
 class dyaconDataStream:
     def __init__(self,name,settings):
@@ -43,10 +44,10 @@ class dyaconDataStream:
 
         #Initialize data structure
         #See simDataStream.py
-        #Microsec is the timestamp associated with sending data
-        #Target is the target microsec prior to sending data
+        #micsecdiff = send microseconds - target microseconds
         #Frame is the number of frames sent in a particular second
-        self.data = {'microsec':[],'target':[],'frames':[]}
+        #Loops is the number of loops between frames on simDataStream
+        self.data = {'micsecdiff':[],'frames':[],'loops':[]}
         
     def measure(self):
         '''
@@ -57,7 +58,17 @@ class dyaconDataStream:
         #Read in bytes from port
         dbytes = self.comm.in_waiting
         rawdata = self.comm.read(dbytes).decode('utf-8')
-        print(rawdata)
+
+        if dbytes > 0:
+            #Parse data
+            #Expects: 'X{}:{}:{},target={},frames={},currentloops={}\r\n'
+            framere = r'X\d+:\d+:(\d+),target=(\d+),frames=(\d+),currentloops=(\d+)\r\n'
+            frameparse = re.findall(framere,rawdata)
+            framematch = frameparse[0] #Assumes only one match in raw data
+            mcdiff = int(framematch[0]) - int(framematch[1])
+            self.data['micsecdiff'].append((dt,mcdiff))
+            self.data['frames'].append((dt,framematch[2]))
+            self.data['loops'].append((dt,framematch[3]))
 
     def getdata(self,name,startdt,enddt):
             '''
