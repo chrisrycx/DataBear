@@ -17,6 +17,7 @@ import databear.process as processdata
 from databear import sensorfactory
 from databear.errors import DataLogConfigError, MeasureError
 from datetime import timedelta
+import concurrent.futures
 import yaml
 import time #For sleeping during execution
 import csv
@@ -63,6 +64,9 @@ class DataLogger:
             self.csvfile = open(config + '.csv','w',newline='')
             self.csvwrite = csv.DictWriter(self.csvfile,['dt','measurement','value','sensor'])
             self.csvwrite.writeheader()
+
+            #Create threadpool with default workers
+            self.workerpool = concurrent.futures.ThreadPoolExecutor()
 
     def loadconfig(self,config):
         '''
@@ -119,6 +123,9 @@ class DataLogger:
         self.csvwrite = csv.DictWriter(self.csvfile,['dt','measurement','value','sensor'])
         self.csvwrite.writeheader()
 
+        #Create threadpool
+        self.workerpool = concurrent.futures.ThreadPoolExecutor(max_workers=len(sensors))
+
     def addSensor(self,sensortype,name,settings):
         '''
         Add a sensor to the logger
@@ -146,15 +153,27 @@ class DataLogger:
         - storetime and lasttime are not currently used here
           but are passed by Schedule when this function is called.
         '''
-        try:
-            self.sensors[sensor].measure()
-        except MeasureError as measureE:
-            for m in measureE.measurements:
-                logging.error('{}:{} - {}'.format(
-                        sensor,
-                        m,
-                        measureE.messages[m]))
+        mfuture = self.workerpool.submit(self.sensors[sensor].measure)
+        mfuture.add_done_callback(self.endMeasurement)
         
+    def endMeasurement(self,mfuture):
+        '''
+        A callback after measurement is complete
+        Use to log any exceptions that occurred
+        input: mfuture - a futures object that gets passed when complete
+        '''
+        #Retrieve exception. Returns none is no exceptions
+        merrors = mfuture.exception()
+
+        #Log exceptions
+        if merrors:
+            for m in merrors.measurements:
+                logging.error('{}:{} - {}'.format(
+                        merrors.sensor,
+                        m,
+                        merrors.messages[m]))
+
+
     def scheduleStorage(self,name,sensor,frequency,process):
         '''
         Schedule when storage takes place
@@ -223,6 +242,7 @@ class DataLogger:
                 logging.error('Measurement too late, logger resetting')
                 self.logschedule.reset()
             except KeyboardInterrupt:
+                self.workerpool.shutdown()
                 break
 
         #Close CSV after stopping
