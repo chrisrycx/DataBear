@@ -7,6 +7,7 @@ Sensor Interface: V0.1
 import datetime
 import time
 from databear.errors import MeasureError, SensorConfigError
+import random
 
 class sensorSim:
     '''
@@ -56,6 +57,10 @@ class sensorSim:
         '''
         #Create a timestamp
         dt = datetime.datetime.now()
+
+        #Randomly raise measurement error for testing
+        if random.randint(0,5) == 3:
+            raise MeasureError(self.name,['Test'],{'Test':'Measure fail'})
 
         #Measurements are simply integers from the dt
         self.data['measure1'].append((dt,dt.minute))
