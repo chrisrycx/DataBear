@@ -52,7 +52,7 @@ def dump(data):
     '''
     outdata = []
     for value in data:
-        dt = value[0].strftime('%Y-%m-%d %H:%M:%S')
+        dt = value[0].strftime('%Y-%m-%d %H:%M:%S:%f')
         outdata.append((dt,value[1]))
 
     return outdata
@@ -62,7 +62,7 @@ def sample(data):
     Retrieve the first value from current data
     Change datetime to string
     '''
-    dt = data[0][0].strftime('%Y-%m-%d %H:%M:%S')
+    dt = data[0][0].strftime('%Y-%m-%d %H:%M:%S:%f')
     outdata = [(dt,data[0][1])]
 
     return outdata

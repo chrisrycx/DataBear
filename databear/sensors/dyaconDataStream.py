@@ -47,7 +47,7 @@ class dyaconDataStream:
         #micsecdiff = send microseconds - target microseconds
         #Frame is the number of frames sent in a particular second
         #Loops is the number of loops between frames on simDataStream
-        self.data = {'micsecdiff':[],'frames':[],'loops':[]}
+        self.data = {'time':[],'frames':[],'loops':[]}
         
     def measure(self):
         '''
@@ -62,13 +62,13 @@ class dyaconDataStream:
         if dbytes > 0:
             #Parse data
             #Expects: 'X{}:{}:{},target={},frames={},currentloops={}\r\n'
-            framere = r'X\d+:\d+:(\d+),target=(\d+),frames=(\d+),currentloops=(\d+)\r\n'
+            framere = r'X(\d+:\d+:\d+),target=(\d+),frames=(\d+),currentloops=(\d+)\r\n'
             frameparse = re.findall(framere,rawdata)
             framematch = frameparse[0] #Assumes only one match in raw data
-            mcdiff = int(framematch[0]) - int(framematch[1])
-            self.data['micsecdiff'].append((dt,mcdiff))
-            self.data['frames'].append((dt,framematch[2]))
-            self.data['loops'].append((dt,framematch[3]))
+
+            self.data['time'].append((dt,framematch[0]))
+            self.data['frames'].append((dt,framematch[1]))
+            self.data['loops'].append((dt,framematch[2]))
 
     def getdata(self,name,startdt,enddt):
             '''

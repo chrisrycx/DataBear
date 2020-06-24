@@ -7,18 +7,11 @@
 datalogger:
   name: simtest
   settings:
-  - store: micsecdiff  #Measurement to be stored
+  - store: time  #Measurement to be stored
     sensor: sim1      #Sensor that measurement is associated with
     process: dump          #process: dump, sample, average, max, min
     frequency: 1           #Data STORAGE frequency in seconds
-  - store: frames  #Measurement to be stored
-    sensor: sim1      #Sensor that measurement is associated with
-    process: dump          #process: dump, sample, average, max, min
-    frequency: 1           #Data STORAGE frequency in seconds
-  - store: loops  #Measurement to be stored
-    sensor: sim1      #Sensor that measurement is associated with
-    process: dump          #process: dump, sample, average, max, min
-    frequency: 1           #Data STORAGE frequency in seconds
+          
   
   
 
@@ -31,7 +24,7 @@ sensors:
     sensortype: datastream
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
-      measurement: .025   #MEASUREMENT interval
+      measurement: .05   #MEASUREMENT interval
       port: 'COM7'
       baud: 19200
    

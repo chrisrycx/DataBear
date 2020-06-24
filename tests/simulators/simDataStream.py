@@ -18,11 +18,11 @@ import time
 import datetime
 
 #Run Settings
-hz = 200  #Output frequency in hz
+hz = 20  #Output frequency in hz
 #outfile = 'simdata.txt'
 
 #Set up comm
-comm = serial.Serial('COM12',115200,timeout=0)
+comm = serial.Serial('COM12',19200,timeout=0)
 
 #Open output file
 #f = open(outfile,'w')
