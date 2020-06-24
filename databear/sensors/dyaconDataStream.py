@@ -63,18 +63,23 @@ class dyaconDataStream:
 
         #Read in bytes from port
         dbytes = self.comm.in_waiting
-        rawdata = self.comm.read(dbytes).decode('utf-8')
 
         if dbytes > 0:
-            #Parse data
-            #Expects: 'X{}:{}:{},target={},frames={},currentloops={}\r\n'
-            framere = r'X(\d+:\d+:\d+),target=(\d+),frames=(\d+),currentloops=(\d+)\r\n'
-            frameparse = re.findall(framere,rawdata)
-            framematch = frameparse[0] #Assumes only one match in raw data
+            try:
+                rawdata = self.comm.read(dbytes).decode('utf-8')
+                
+                #Parse data
+                #Expects: 'X{}:{}:{},target={},frames={},currentloops={}\r\n'
+                framere = r'X(\d+:\d+:\d+),target=(\d+),frames=(\d+),currentloops=(\d+)\r\n'
+                frameparse = re.findall(framere,rawdata)
+                framematch = frameparse[0] #Assumes only one match in raw data
 
-            self.data['time'].append((dt,framematch[0]))
-            self.data['frames'].append((dt,framematch[1]))
-            self.data['loops'].append((dt,framematch[2]))
+                self.data['time'].append((dt,framematch[0]))
+                self.data['frames'].append((dt,framematch[1]))
+                self.data['loops'].append((dt,framematch[2]))
+            except IndexError as indxer:
+                errmsg = {'time':'RE parse error likely','frames':'RE parse error likely','loops':'RE parse error likely'}
+                raise MeasureError(self.name,['time','frames','loops'],errmsg)
 
     def getdata(self,name,startdt,enddt):
             '''
