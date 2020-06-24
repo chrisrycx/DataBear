@@ -13,9 +13,6 @@ datalogger:
     frequency: 1           #Data STORAGE frequency in seconds
           
   
-  
-
-
 #Must have at least one set of measurement settings per sensor.
 #Key value pairs in settings vary by method but must include
 #serial number and measurement frequency.
