@@ -60,7 +60,7 @@ while True:
             dataframes = dataframes + 1
 
             #Send data
-            data = 'X{}:{}:{},target={},frames={},currentloops={}\r\n'.format(
+            data = 'X{}:{}:{},target={},frames={},currentloops={}Z'.format(
                                 minute,second,ms,targetms,dataframes,
                                 loops)
             nbytes = comm.write(data.encode('utf-8'))
