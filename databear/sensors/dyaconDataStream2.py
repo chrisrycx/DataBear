@@ -49,6 +49,7 @@ class dyaconDataStream:
 
         #Set up connection
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
+        self.comm.reset_input_buffer()
 
         #Initialize data structure
         self.data = {'raw':[]}

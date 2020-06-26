@@ -108,8 +108,14 @@ class Job:
         
         #Round everything to nearest sec
         intervalsec = ceil(self.interval)
+
+        if intervalsec == 1:
+            #If 1 or less wait til next second to start
+            zerotime = currenttime.replace(
+                microsecond=0)
+            startsec = 1
     
-        if intervalsec <= 60:
+        elif intervalsec <= 60:
             zerotime = currenttime.replace(
                 second=0,
                 microsecond=0)
