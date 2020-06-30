@@ -21,9 +21,9 @@ sensors:
     sensortype: datastream2
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
-      measurement: .02   #MEASUREMENT interval
+      measurement: .05   #MEASUREMENT interval
       port: 'COM7'
-      baud: 38400
+      baud: 19200
    
    
 
