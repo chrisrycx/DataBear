@@ -1,0 +1,32 @@
+#Example configuration file for DataBear
+#Create a new file with specific settings
+#Must include datalogger and sensors keys 
+
+#Defines data logger settings
+#Settings key must have at least one set of storage settings
+datalogger:
+  name: BPtest
+  settings:
+  - store: raw  #Measurement to be stored
+    sensor: rmyBP     #Sensor that measurement is associated with
+    process: dump          #process: dump, sample, average, max, min
+    frequency: 60           #Data STORAGE frequency in seconds
+          
+  
+#Must have at least one set of measurement settings per sensor.
+#Key value pairs in settings vary by method but must include
+#serial number and measurement frequency.
+sensors: 
+  - name: rmyBP
+    sensortype: rmyBP
+    settings:     #Serial number and measurement are mandatory
+      serialnumber: '1'
+      measurement: 60   #MEASUREMENT interval
+      port: 'COM20'
+      baud: 9600
+   
+   
+
+      
+    
+

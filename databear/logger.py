@@ -116,6 +116,11 @@ class DataLogger:
             except TypeError as tp:
                 raise DataLogConfigError(
                 'YAML configured wrong. Logger setting missing dash (-)')
+            except DataLogConfigError:
+                print('in config error?')
+                raise
+
+
             
 
         #Create output file
