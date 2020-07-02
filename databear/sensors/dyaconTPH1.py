@@ -78,7 +78,7 @@ class dyaconTPH:
         #Raise a measurement error if a fail is detected
         if len(fails)>0:
             failnames = list(fails.keys())
-            raise MeasureError(failnames,fails)
+            raise MeasureError(self.name,failnames,fails)
 
     def getdata(self,name,startdt,enddt):
         '''

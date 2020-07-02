@@ -1,0 +1,72 @@
+#Example configuration file for DataBear
+#Create a new file with specific settings
+#Must include datalogger and sensors keys 
+
+#Defines data logger settings
+#Settings key must have at least one set of storage settings
+datalogger:
+  name: test3PC
+  settings:
+  - store: raw  #Measurement to be stored
+    sensor: rmyBP     #Sensor that measurement is associated with
+    process: dump          #process: dump, sample, average, max, min
+    frequency: 60           #Data STORAGE frequency in seconds
+  - store: airT  
+    sensor: tph1     
+    process: dump          
+    frequency: 60          
+  - store: rh 
+    sensor: tph1     
+    process: dump         
+    frequency: 60          
+  - store: bp  
+    sensor: tph1    
+    process: dump          
+    frequency: 60
+  - store: airT  
+    sensor: tph2     
+    process: average          
+    frequency: 60          
+  - store: rh 
+    sensor: tph2     
+    process: average         
+    frequency: 60          
+  - store: bp  
+    sensor: tph2    
+    process: average          
+    frequency: 60            
+          
+  
+#Must have at least one set of measurement settings per sensor.
+#Key value pairs in settings vary by method but must include
+#serial number and measurement frequency.
+sensors: 
+  - name: rmyBP
+    sensortype: rmyBP
+    settings:     #Serial number and measurement are mandatory
+      serialnumber: '1'
+      measurement: 60   #MEASUREMENT interval
+      port: 'COM20'
+      baud: 9600
+  - name: tph1
+    sensortype: dyTPH
+    settings:     #Serial number and measurement are mandatory
+      serialnumber: '6166'
+      measurement: 30   #MEASUREMENT interval
+      port: 'COM12'
+      address: 4
+      baud: 19200
+  - name: tph2
+    sensortype: dyTPH
+    settings:     #Serial number and measurement are mandatory
+      serialnumber: '6251'
+      measurement: 30   #MEASUREMENT interval
+      port: 'COM7'
+      address: 2
+      baud: 19200
+   
+   
+
+      
+    
+

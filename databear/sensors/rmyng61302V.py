@@ -61,6 +61,7 @@ class rmyoungBP:
         if dbytes > 0:
             rawdata = self.comm.read(dbytes).decode('utf-8')
             self.data['raw'].append((dt,rawdata))
+            print('RMY - {}, value={}'.format(dt,rawdata))
 
     def getdata(self,name,startdt,enddt):
         '''
