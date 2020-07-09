@@ -32,10 +32,10 @@ class rmyoungBP:
             raise SensorConfigError('YAML missing required sensor setting')
 
         #Serial settings
-        self.rs = 'RS482'
+        self.rs = 'RS232'
         self.duplex = 'full'
-        self.resistors = 1
-        self.bias = 1
+        self.resistors = 0
+        self.bias = 0
 
         #Define characteristics of this sensor
         #Random guess at what might be a maximum sample frequency...

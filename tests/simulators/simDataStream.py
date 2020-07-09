@@ -18,7 +18,7 @@ import time
 import datetime
 
 #Run Settings
-hz = 20  #Output frequency in hz
+hz = 0.5  #Output frequency in hz
 #outfile = 'simdata.txt'
 
 #Set up comm
