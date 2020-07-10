@@ -1,8 +1,6 @@
 '''
 Dyacon TPH-1 Sensor
-- Platform: Windows
-- Connection: USB-RS485
-- Interface: DataBear Sensor Interface V0.1(?)
+- Sensor Interface V0.1
 
 '''
 
@@ -11,7 +9,7 @@ import minimalmodbus as mm
 from databear.errors import MeasureError, SensorConfigError
 
 class dyaconTPH:
-    #Inherit from "modbus sensor class"?
+    interface_version = '0.1'
     def __init__(self,name,settings):
         '''
         Create a new Dyacon TPH sensor
@@ -37,7 +35,6 @@ class dyaconTPH:
         self.bias = 1
 
         #Define characteristics of this sensor
-        self.sensor_type = 'polled'
         self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
 
         #Define measurements

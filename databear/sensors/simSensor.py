@@ -16,6 +16,7 @@ class sensorSim:
     Recommended class name: 
     <manufacturer><sensor model> ie. dyaconTPH1
     '''
+    interface_version = '0.1'
     def __init__(self,name,settings):
         '''
         Create a new sensor
@@ -41,6 +42,7 @@ class sensorSim:
         #Initialize data structure
         #Dictionary of the form {<measurement>:[],...}
         #This will determine the name(s) of each measurement made by the sensor
+        self.counter = 0 #measure 3 will simply be a measurement count
         self.data = {'measure1':[],'measure2':[],'measure3':[]}
 
     def measure(self):
@@ -57,19 +59,20 @@ class sensorSim:
         '''
         #Create a timestamp
         dt = datetime.datetime.now()
+        self.counter = self.counter + 1
 
-        #Randomly raise measurement error for testing
+        #Randomly raise measurement error in measurement 1 for testing
         if random.randint(0,5) == 3:
-            raise MeasureError(self.name,['Test'],{'Test':'Measure fail'})
+            raise MeasureError(self.name,['measure1'],{'measure1':'Test failure'})
 
         #Measurements are simply integers from the dt
-        self.data['measure1'].append((dt,dt.minute))
+        self.data['measure1'].append((dt,dt.second))
         self.data['measure2'].append((dt,dt.second))
-        self.data['measure3'].append((dt,dt.microsecond))
+        self.data['measure3'].append((dt,self.counter))
 
         #Print for testing
-        print('Sensor: {}  Time: {}  measure2: {}  measure3: {}'.format(
-            self.name,dt.strftime('%H:%M'),dt.second,dt.microsecond
+        print('{}  Time: {}  measures 1 and 2: {}  measure3: {}'.format(
+            self.name,dt.strftime('%M:%S:%f'),dt.second,self.counter
         ))
 
         #Pause to simulate a measurement time

@@ -47,11 +47,12 @@ class rmyoungBP:
         self.comm.reset_input_buffer()
 
         #Initialize data structure
-        self.data = {'raw':[]}
+        self.data = {'bp':[]}
 
     def measure(self):
         '''
         Read in data from RS232 serial port
+        Data will have the form: 
         '''
         dt = datetime.datetime.now()
 
@@ -60,7 +61,7 @@ class rmyoungBP:
 
         if dbytes > 0:
             rawdata = self.comm.read(dbytes).decode('utf-8')
-            self.data['raw'].append((dt,rawdata))
+            self.data['bp'].append((dt,rawdata))
             print('RMY - {}, value={}'.format(dt,rawdata))
 
     def getdata(self,name,startdt,enddt):
