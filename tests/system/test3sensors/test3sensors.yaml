@@ -9,20 +9,20 @@ datalogger:
   settings:
   - store: bp        #Measurement to be stored
     sensor: rmyBP     #Sensor that measurement is associated with
-    process: dump     #process: dump, sample, average, max, min
-    frequency: 60           #Data STORAGE frequency in seconds
+    process: average     #process: dump, sample, average, max, min
+    frequency: 30           #Data STORAGE frequency in seconds
   - store: airT  
     sensor: tph1     
     process: sample          
-    frequency: 60          
+    frequency: 20          
   - store: rh 
     sensor: tph1     
-    process: average         
+    process: min         
     frequency: 60          
   - store: bp  
     sensor: tph1    
-    process: max          
-    frequency: 60
+    process: average          
+    frequency: 30
   - store: measure1  
     sensor: sim     
     process: min          
@@ -52,7 +52,7 @@ sensors:
     sensortype: dyTPH
     settings:     #Serial number and measurement are mandatory
       serialnumber: '6166'
-      measurement: 10   #MEASUREMENT interval
+      measurement: 5   #MEASUREMENT interval
       port: 'COM12'
       address: 4
       baud: 19200
@@ -60,7 +60,7 @@ sensors:
     sensortype: sim
     settings:     #Serial number and measurement are mandatory
       serialnumber: 'X'
-      measurement: 10   #MEASUREMENT interval
+      measurement: 20   #MEASUREMENT interval
    
    
 

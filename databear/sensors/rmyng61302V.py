@@ -40,7 +40,7 @@ class rmyoungBP:
         #Define characteristics of this sensor
         #Random guess at what might be a maximum sample frequency...
         self.maxfrequency = 5  #Maximum frequency in seconds the sensor can be polled
-        self.timeout = 0
+        self.timeout = 0.5
 
         #Set up connection
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
@@ -52,7 +52,7 @@ class rmyoungBP:
     def measure(self):
         '''
         Read in data from RS232 serial port
-        Data will have the form: 
+        Data will have the form: dddd.dd
         '''
         dt = datetime.datetime.now()
 
@@ -60,9 +60,10 @@ class rmyoungBP:
         dbytes = self.comm.in_waiting
 
         if dbytes > 0:
-            rawdata = self.comm.read(dbytes).decode('utf-8')
-            self.data['bp'].append((dt,rawdata))
-            print('RMY - {}, value={}'.format(dt,rawdata))
+            rawdata = self.comm.read_until().decode('utf-8')
+            bpnum = float(rawdata) 
+            self.data['bp'].append((dt,bpnum))
+            print('RMY - {}, value={}'.format(dt,bpnum))
 
     def getdata(self,name,startdt,enddt):
         '''
