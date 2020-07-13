@@ -37,6 +37,7 @@ class sensorSim:
             raise SensorConfigError('YAML missing required sensor setting')
 
         #Define non-user configurable sensor settings
+        self.port = None
         self.maxfrequency = 1  #Required: Maximum frequency in seconds the sensor can be polled
 
         #Initialize data structure
