@@ -9,7 +9,7 @@ datalogger:
   settings:
   - store: bp        #Measurement to be stored
     sensor: rmyBP     #Sensor that measurement is associated with
-    process: average     #process: dump, sample, average, max, min
+    process: dump     #process: dump, sample, average, max, min
     frequency: 30           #Data STORAGE frequency in seconds
   - store: airT  
     sensor: tph1     

@@ -62,7 +62,7 @@ def sample(data):
     Retrieve the first value from current data
     Change datetime to string
     '''
-    dt = data[0][0].strftime('%Y-%m-%d %H:%M:%S:%f')
+    dt = data[0][0].strftime('%Y-%m-%d %H:%M:%S')
     outdata = [(dt,data[0][1])]
 
     return outdata

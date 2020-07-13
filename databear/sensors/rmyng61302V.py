@@ -63,7 +63,7 @@ class rmyoungBP:
             rawdata = self.comm.read_until().decode('utf-8')
             bpnum = float(rawdata) 
             self.data['bp'].append((dt,bpnum))
-            print('RMY - {}, value={}'.format(dt,bpnum))
+            print('RMY - {}, value={}'.format(dt.strftime('%M:%S:%f'),bpnum))
 
     def getdata(self,name,startdt,enddt):
         '''
