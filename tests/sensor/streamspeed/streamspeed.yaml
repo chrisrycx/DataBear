@@ -21,9 +21,9 @@ sensors:
     sensortype: dyDataStream
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
-      measurement: .05   #MEASUREMENT interval
+      measurement: .025   #MEASUREMENT interval
       port: 'COM7'
-      baud: 19200
+      baud: 38400
    
    
 
