@@ -1,11 +1,11 @@
 '''
-Dyacon DataStream 2
-This is the same as DataStream but the incoming data is not parsed.
-This can be used to better evaluate incoming data to the port.
-A testing module for reading streaming data from simDataStream.py 
-- Platform: Windows, Linux
-- Tested hardware: USB-RS485 (loopback)
-- Interface: DataBear Sensor Interface V0.1
+Dyacon DataStream
+A testing module for reading streaming data from simDataStream.py
+
+Setup:
+- Windows: loopback USB-RS485 and run both simDataStream and DataBear
+- Other: Connect PC to device and run simDataStream
+
 '''
 #Import any libraries needed for sensor operation. Also
 #import error classes to alert users to problems.
@@ -15,6 +15,7 @@ import serial
 import re
 
 class dyaconDataStream:
+    interface_version = '0.1'
     def __init__(self,name,settings):
         '''
         Create a new sensor

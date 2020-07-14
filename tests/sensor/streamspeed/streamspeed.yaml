@@ -5,10 +5,10 @@
 #Defines data logger settings
 #Settings key must have at least one set of storage settings
 datalogger:
-  name: simtest2
+  name: streamspeed
   settings:
   - store: raw  #Measurement to be stored
-    sensor: sim1      #Sensor that measurement is associated with
+    sensor: simStream      #Sensor that measurement is associated with
     process: dump          #process: dump, sample, average, max, min
     frequency: 1           #Data STORAGE frequency in seconds
           
@@ -17,8 +17,8 @@ datalogger:
 #Key value pairs in settings vary by method but must include
 #serial number and measurement frequency.
 sensors: 
-  - name: sim1
-    sensortype: datastream2
+  - name: simStream
+    sensortype: dyDataStream
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
       measurement: .05   #MEASUREMENT interval

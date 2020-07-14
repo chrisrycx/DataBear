@@ -9,10 +9,10 @@ from databear import logger,sensorfactory
 
 #-----  Register custom sensors with the sensor factory ----
 #import <module containing custom sensor class>
-sensorfactory.factory.register_sensor('datastream',dyaconDataStream.dyaconDataStream)
+sensorfactory.factory.register_sensor('dyDataStream',dyaconDataStream.dyaconDataStream)
 
 #------ Create a logger ------
-config = 'streamtest.yaml'
+config = 'streamspeed.yaml'
 datalogger = logger.DataLogger(config)
 
 #------- Run databear ------
