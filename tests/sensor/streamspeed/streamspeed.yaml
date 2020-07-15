@@ -22,7 +22,7 @@ sensors:
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
       measurement: .025   #MEASUREMENT interval
-      port: 'COM7'
+      port: 'COM5'
       baud: 38400
    
    
