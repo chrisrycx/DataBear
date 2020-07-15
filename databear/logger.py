@@ -118,10 +118,7 @@ class DataLogger:
                 'YAML configured wrong. Logger setting missing dash (-)')
             except DataLogConfigError:
                 print('in config error?')
-                raise
-
-
-            
+                raise            
 
         #Create output file
         self.csvfile = open(datalogger['name']+'.csv','w',newline='')
