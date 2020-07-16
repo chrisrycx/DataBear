@@ -20,7 +20,7 @@ Here are some random ideas to give a sense for DataBear capabilities (some capab
 | Ideal Feature                                  | Data Bear       |
 | -------------                                  | ---------       |
 | Adjustable sampling rates for all measurements | &#9745;         |
-| Concurrent measurement of all sensors          |                 |
+| Concurrent measurement of all sensors          | &#9745;         |
 | Adjustable rates of data storage               | &#9745;         |
 | Store metadata associated with data values     | &#9745;         |
 | Supports polled or continuously streaming sensors    | &#9745;         |
