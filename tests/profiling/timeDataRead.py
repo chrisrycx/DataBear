@@ -9,10 +9,10 @@ from timeit import timeit
 import serial
 import time
 
-comm = serial.Serial('COM7',19200,timeout=0)
+comm = serial.Serial('COM5',38400,timeout=0)
 data = []
-tests = 50
-time.sleep(10)
+tests = 200
+time.sleep(20)
 
 def measure():
     #Read in bytes from port
