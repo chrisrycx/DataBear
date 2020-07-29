@@ -27,13 +27,12 @@ import sys #For command line args
 import logging
 
 #------ A test socket ------
-def IPcomm(sock):
-    loops = 0
-    while loops < 2:
+def IPcomm(sock,trigger):
+    #Run until receiving signal from event object
+    while not trigger.is_set():
         msg, address = sock.recvfrom(1024)
         print('Got message from {}: {}'.format(address,msg))
         sock.sendto('Yes I hear you'.encode('utf-8'),address)
-        loops = loops + 1
 
 
 #-------- Logger Initialization and Setup ------
@@ -62,7 +61,8 @@ class DataLogger:
         #Open UDP socket for API
         udpsock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         udpsock.bind(('localhost',62000))
-        t = threading.Thread(target=IPcomm,args=(udpsock,))
+        self.e = threading.Event()
+        t = threading.Thread(target=IPcomm,args=(udpsock,self.e))
         t.start()
 
         #Determine what input is
@@ -261,6 +261,8 @@ class DataLogger:
                 self.logschedule.reset()
             except KeyboardInterrupt:
                 self.workerpool.shutdown()
+                #Shutdown comm thread
+                self.e.set()
                 break
 
         #Close CSV after stopping
