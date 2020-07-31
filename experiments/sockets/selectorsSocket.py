@@ -3,6 +3,7 @@ Testing out selectors and a socket
 '''
 import socket
 import selectors
+import threading
 import time
 
 sel = selectors.DefaultSelector()
@@ -19,6 +20,14 @@ class looper:
         self.udpsocket.setblocking(False)
         sel.register(self.udpsocket,selectors.EVENT_READ)
 
+    def listenUDP(self):
+        while self.listen:
+            #Check for UDP comm
+            event = sel.select(timeout=0)
+            if event:
+                print(self.readUDP())
+
+    
     def readUDP(self):
         '''
         Read message, respond, add message to list
@@ -33,16 +42,16 @@ class looper:
         '''
         Run loop doing work and looking for messages
         '''
+        self.listen = True
+        t = threading.Thread(target=self.listenUDP)
+        t.start()
+
         while True:
             try:
-                #Check for UDP comm
-                event = sel.select(timeout=0)
-                if event:
-                    print(self.readUDP())
-
                 print('Im working')
                 time.sleep(2)
             except KeyboardInterrupt as ki:
+                self.listen=False
                 print('Shutting down')
                 break
 
