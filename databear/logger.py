@@ -18,12 +18,21 @@ from databear import sensorfactory
 from databear.errors import DataLogConfigError, MeasureError
 from datetime import timedelta
 import concurrent.futures
+import threading #For IPC
+import socket
 import yaml
 import time #For sleeping during execution
 import csv
 import sys #For command line args
 import logging
 
+#------ A test socket ------
+def IPcomm(sock,trigger):
+    #Run until receiving signal from event object
+    while not trigger.is_set():
+        msg, address = sock.recvfrom(1024)
+        print('Got message from {}: {}'.format(address,msg))
+        sock.sendto('Yes I hear you'.encode('utf-8'),address)
 
 
 #-------- Logger Initialization and Setup ------
@@ -48,6 +57,13 @@ class DataLogger:
         self.sensors = {}
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
+
+        #Open UDP socket for API
+        udpsock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        udpsock.bind(('localhost',62000))
+        self.e = threading.Event()
+        t = threading.Thread(target=IPcomm,args=(udpsock,self.e))
+        t.start()
 
         #Determine what input is
         if (isinstance(config,dict)) or (config[-4:]=='yaml'):
@@ -245,6 +261,8 @@ class DataLogger:
                 self.logschedule.reset()
             except KeyboardInterrupt:
                 self.workerpool.shutdown()
+                #Shutdown comm thread
+                self.e.set()
                 break
 
         #Close CSV after stopping
