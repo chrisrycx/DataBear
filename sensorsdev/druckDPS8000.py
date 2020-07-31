@@ -50,29 +50,25 @@ class dps8000:
 
     def measure(self):
         '''
-        Read in data using modbus
+        Read in data from the sensor
         '''
-        fails = {} #keep track of measurement failures
-        for measure in self.measurements:
+        try:
             dt = datetime.datetime.now()
-            timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
-            
-            try:
-                val = self.comm.read_float(measure['register'])
-                
-                #Output results for testing
-                print('{} - Measure {}: {}, value= {}'.format(
-                    self.name,
-                    measure['name'],
-                    timestamp,
-                    val))
 
-                self.data[measure['name']].append((dt,val))
-            except mm.NoResponseError as norsp:
-                fails[measure['name']] = 'No response from sensor'
-        #Raise a measurement error if a fail is detected
-        if len(fails)>0:
-            failnames = list(fails.keys())
+            #Send a request for measurement
+            cmd = self.address + 'G\r'
+            self.comm.write(cmd.encode('utf-8'))
+
+            #Wait for response
+            response = self.comm.read(timeout=...)
+
+            #Parse response
+            re.match...
+
+            if no match
+                raise 
+        except timeout...:
+        except no match
             raise MeasureError(self.name,failnames,fails)
 
     def getdata(self,name,startdt,enddt):
