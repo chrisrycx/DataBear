@@ -20,23 +20,37 @@ class looper:
         self.udpsocket.setblocking(False)
         sel.register(self.udpsocket,selectors.EVENT_READ)
 
+        #A message queue
+        self.messages = []
+
+        #Simulate some data in RAM
+        self.data = {'m1':[0],'m2':[0]}
+
+
     def listenUDP(self):
         while self.listen:
             #Check for UDP comm
             event = sel.select(timeout=0)
             if event:
-                print(self.readUDP())
+                self.readUDP()
 
-    
     def readUDP(self):
         '''
         Read message, respond, add message to list
         '''
         msg, address = self.udpsocket.recvfrom(1024)
         print('Got message from {}: {}'.format(address,msg))
-        self.udpsocket.sendto('Yes I hear you'.encode('utf-8'),address)
-        
-        return 'Got one!'
+
+        #Send back data if applicable
+        msgstr = msg.decode('utf-8')
+        if msgstr == 'm1':
+            data = 'm1: '+ str(self.data['m1'][-1])
+            self.udpsocket.sendto(data.encode('utf-8'),address)
+        elif msgstr == 'm2':
+            data = 'm2: '+ str(self.data['m2'][-1])
+            self.udpsocket.sendto(data.encode('utf-8'),address)
+        else:
+            self.messages.append(msgstr)
 
     def run(self):
         '''
@@ -49,11 +63,27 @@ class looper:
         while True:
             try:
                 print('Im working')
+                m1 = self.data['m1'][-1]
+                m2 = self.data['m2'][-1]
+                self.data['m1'].append(m1+1)
+                self.data['m2'].append(m2+2)
+
+                #Check messages
+                if self.messages:
+                    msg = self.messages.pop()
+                    print('Popped {} off the stack'.format(msg))
+
                 time.sleep(2)
             except KeyboardInterrupt as ki:
                 self.listen=False
+                t.join() #Wait for thread to end
                 print('Shutting down')
                 break
+            except:
+                self.listen=False
+                t.join() #Wait for thread to end
+                raise
+    
 
 if __name__ == "__main__":
     myloop = looper()

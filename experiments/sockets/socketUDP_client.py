@@ -6,7 +6,7 @@ import socket
 ipaddress = 'localhost'
 udp_port = 62000
 
-msg = 'Can you hear me?'
+msg = 'm2'
 
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 sock.settimeout(5)
