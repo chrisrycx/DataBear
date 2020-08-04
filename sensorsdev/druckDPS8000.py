@@ -41,7 +41,7 @@ class dps8000:
         self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
 
         #Set up connection
-        self.timeout = 0.5
+        self.timeout = 1
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
         self.comm.reset_input_buffer()
 
@@ -60,10 +60,11 @@ class dps8000:
             self.comm.write(cmd.encode('utf-8'))
 
             #Wait for response
-            response = self.comm.read(timeout=...)
+            dataraw = self.comm.read()
+            print(dataraw)
 
             #Parse response
-            re.match...
+            #re.match...
 
             if no match
                 raise 
