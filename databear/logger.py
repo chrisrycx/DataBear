@@ -19,20 +19,14 @@ from databear.errors import DataLogConfigError, MeasureError
 from datetime import timedelta
 import concurrent.futures
 import threading #For IPC
+import selectors #For IPC via UDP
 import socket
 import yaml
+import json
 import time #For sleeping during execution
 import csv
 import sys #For command line args
 import logging
-
-#------ A test socket ------
-def IPcomm(sock,trigger):
-    #Run until receiving signal from event object
-    while not trigger.is_set():
-        msg, address = sock.recvfrom(1024)
-        print('Got message from {}: {}'.format(address,msg))
-        sock.sendto('Yes I hear you'.encode('utf-8'),address)
 
 
 #-------- Logger Initialization and Setup ------
@@ -58,12 +52,14 @@ class DataLogger:
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
 
-        #Open UDP socket for API
-        udpsock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        udpsock.bind(('localhost',62000))
-        self.e = threading.Event()
-        t = threading.Thread(target=IPcomm,args=(udpsock,self.e))
-        t.start()
+        #Configure UDP socket for API
+        self.udpsocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        self.udpsocket.bind(('localhost',62000))
+        self.udpsocket.setblocking(False)
+        self.sel = selectors.DefaultSelector()
+        self.sel.register(self.udpsocket,selectors.EVENT_READ)
+        self.listen = False
+        self.messages = []
 
         #Determine what input is
         if (isinstance(config,dict)) or (config[-4:]=='yaml'):
@@ -191,7 +187,6 @@ class DataLogger:
                         m,
                         merrors.messages[m]))
 
-
     def scheduleStorage(self,name,sensor,frequency,process):
         '''
         Schedule when storage takes place
@@ -244,26 +239,82 @@ class DataLogger:
             #Output row to CSV
             self.csvwrite.writerow(datadict)
             
+    def listenUDP(self):
+        '''
+        Listen on UDP socket
+        '''
+        while self.listen:
+            #Check for UDP comm
+            event = self.sel.select(timeout=0)
+            if event:
+                self.readUDP()
+
+    def readUDP(self):
+        '''
+        Read message, respond, add any messages
+        to the message queue
+        Message should be JSON
+        {'command': <cmd> , 'option': <option>}
+
+        Commands
+        - test - Just for initial testing
+        - getdata
+            -- option - sensor name
+        '''
+        msgraw, address = self.udpsocket.recvfrom(1024)
+
+        #Decode message
+        msg = json.loads(msgraw)
+        if msg['command'] == 'getdata':
+            response = {'response':'testing'}
+        else:
+            response = {'response':'OK'}
+            self.messages.append(msg['command'])
+        
+        #Send a response
+        self.udpsocket.sendto(json.dumps(response).encode('utf-8'),address)
+
+    
     def run(self):
         '''
         Run the logger
         ctrl-C to stop
         '''
         print('DataBear: Logger starting - ctrl-C to stop')
+        #Start listening for UDP
+        self.listen = True
+        t = threading.Thread(target=self.listenUDP)
+        t.start()
+
         while True:
             try:
                 self.logschedule.run_pending()
                 sleeptime = self.logschedule.idle_seconds
                 if sleeptime > 0:
                     time.sleep(sleeptime)
+
+                #Check for messages
+                if self.messages:
+                    msg = self.messages.pop()
+                    print('Message: {}'.format(msg))
             except AssertionError:
                 logging.error('Measurement too late, logger resetting')
                 self.logschedule.reset()
             except KeyboardInterrupt:
+                #Shut down threads
                 self.workerpool.shutdown()
-                #Shutdown comm thread
-                self.e.set()
+                self.listen=False
+                t.join() #Wait for thread to end
+                print('Shutting down')
                 break
+            except:
+                #Handle any other exception so threads
+                #don't keep running
+                self.workerpool.shutdown()
+                self.listen=False
+                t.join() #Wait for thread to end
+                raise
+
 
         #Close CSV after stopping
         self.csvfile.close()
