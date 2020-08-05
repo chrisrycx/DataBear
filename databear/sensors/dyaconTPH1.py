@@ -76,7 +76,24 @@ class dyaconTPH:
         if len(fails)>0:
             failnames = list(fails.keys())
             raise MeasureError(self.name,failnames,fails)
+    
+    def getcurrentdata(self):
+        '''
+        Return most recent data from sensor
+        Output:
+            {'name':(dt,val),'name2'...}
+        Return None if no data for particular measurement
+        '''
+        currentdata = {}
+        for key,val in self.data.items():
+            try:
+                currentdata[key]=val[-1]
+            except IndexError:
+                #Assign none if there is nothing in list
+                currentdata[key]=None
 
+        return currentdata
+    
     def getdata(self,name,startdt,enddt):
         '''
         Return a list of values such that
