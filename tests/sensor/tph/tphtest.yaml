@@ -20,8 +20,6 @@ datalogger:
     process: min          
     frequency: 60
   
-
-
 #Must have at least one set of measurement settings per sensor.
 #Key value pairs in settings vary by method but must include
 #serial number and measurement frequency.
@@ -31,7 +29,7 @@ sensors:
     settings:     #Serial number and measurement are mandatory
       serialnumber: '6166'
       measurement: 5   #MEASUREMENT frequency in seconds
-      port: 'COM5'
+      port: 'COM23'
       baud: 19200
       address: 4
    

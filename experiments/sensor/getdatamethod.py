@@ -2,6 +2,7 @@
 Developing the get data method
 '''
 import datetime
+import json
 
 dt = datetime.datetime.now()
 
@@ -29,4 +30,9 @@ def getcurrentdata():
 
     return currentdata
 
-print(getcurrentdata())
+cdata = getcurrentdata()
+
+#Convert to JSON appropriate
+
+
+print(json.dumps(cdata))
