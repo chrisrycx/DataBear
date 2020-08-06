@@ -2,11 +2,12 @@
 GE Druck DPS 8000 pressure sensor
 - DataBear Sensor Interface V0.1
 
+** Assumes "direct" mode of comm, addressing not yet implemented
 '''
 
 import datetime
 import serial
-import re
+import time
 from databear.errors import MeasureError, SensorConfigError
 
 class dps8000:
@@ -41,7 +42,7 @@ class dps8000:
         self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
 
         #Set up connection
-        self.timeout = 0.5
+        self.timeout = 1
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
         self.comm.reset_input_buffer()
 
@@ -52,23 +53,27 @@ class dps8000:
         '''
         Read in data from the sensor
         '''
+        failnames = ['pressure']
+        fails = {}
         try:
             dt = datetime.datetime.now()
 
             #Send a request for measurement
-            cmd = self.address + 'G\r'
+            cmd = 'R\r'
             self.comm.write(cmd.encode('utf-8'))
 
             #Wait for response
-            response = self.comm.read(timeout=...)
+            time.sleep(0.5)
+            response = self.comm.read(size=10)
 
-            #Parse response
-            re.match...
+            #Parse response - should just be a number
+            pressure = float(response)
 
-            if no match
-                raise 
-        except timeout...:
-        except no match
+        except serial.SerialTimeoutException as norsp:
+            fails['pressure'] = 'No response from sensor'
+            raise MeasureError(self.name,failnames,fails)
+        except ValueError as ve:
+            fails['pressure'] = 'Cannot convert data to float'
             raise MeasureError(self.name,failnames,fails)
 
     def getdata(self,name,startdt,enddt):
