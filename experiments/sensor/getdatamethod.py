@@ -33,6 +33,12 @@ def getcurrentdata():
 cdata = getcurrentdata()
 
 #Convert to JSON appropriate
+cdatastr = {}
+for name, val in cdata.items():
+    if val:
+        dtstr = val[0].strftime('%Y-%m-%d %H:%M')
+        cdatastr[name] = (dtstr,val[1])
+    else:
+        cdatastr[name] = val 
 
-
-print(json.dumps(cdata))
+print(json.dumps(cdatastr))

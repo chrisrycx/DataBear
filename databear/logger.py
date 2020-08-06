@@ -269,7 +269,16 @@ class DataLogger:
         if msg['command'] == 'getdata':
             sensorname = msg['option']
             data = self.sensors[sensorname].getcurrentdata()
-            response = {'response':'testing'}
+            #Convert to JSON appropriate
+            datastr = {}
+            for name, val in data.items():
+                if val:
+                    dtstr = val[0].strftime('%Y-%m-%d %H:%M')
+                    datastr[name] = (dtstr,val[1])
+                else:
+                    datastr[name] = val 
+                    
+            response = {'response':'OK','data':datastr}
         else:
             response = {'response':'OK'}
             self.messages.append(msg['command'])
