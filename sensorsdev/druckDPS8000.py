@@ -2,7 +2,6 @@
 GE Druck DPS 8000 pressure sensor
 - DataBear Sensor Interface V0.1
 
-** Assumes "direct" mode of comm, addressing not yet implemented
 '''
 
 import datetime
