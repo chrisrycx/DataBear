@@ -52,7 +52,6 @@ class DataLogger:
         self.sensors = {}
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
-        self.db = sqlite3.connect('test.db')
 
         #Configure UDP socket for API
         self.udpsocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
@@ -240,15 +239,6 @@ class DataLogger:
 
             #Output row to CSV
             self.csvwrite.writerow(datadict)
-
-            #Output data to database
-            self.db.execute(
-                '''INSERT INTO data 
-                (dtstamp,value,measure_id,process_id,qc_flag)
-                values (?,?,1,1,0)''',(row[0],row[1])
-            )
-
-        self.db.commit()
             
     def listenUDP(self):
         '''
@@ -277,7 +267,18 @@ class DataLogger:
         #Decode message
         msg = json.loads(msgraw)
         if msg['command'] == 'getdata':
-            response = {'response':'testing'}
+            sensorname = msg['option']
+            data = self.sensors[sensorname].getcurrentdata()
+            #Convert to JSON appropriate
+            datastr = {}
+            for name, val in data.items():
+                if val:
+                    dtstr = val[0].strftime('%Y-%m-%d %H:%M')
+                    datastr[name] = (dtstr,val[1])
+                else:
+                    datastr[name] = val 
+                    
+            response = {'response':'OK','data':datastr}
         else:
             response = {'response':'OK'}
             self.messages.append(msg['command'])
@@ -329,7 +330,7 @@ class DataLogger:
 
         #Close CSV after stopping
         self.csvfile.close()
-        self.db.close()
+      
             
 
 #-------- Run from command line -----
