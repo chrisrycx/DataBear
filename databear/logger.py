@@ -279,10 +279,14 @@ class DataLogger:
                     datastr[name] = val 
                     
             response = {'response':'OK','data':datastr}
-        else:
+        elif msg['command'] == 'status':
             response = {'response':'OK'}
+        elif msg['command'] == 'shutdown':
             self.messages.append(msg['command'])
-        
+            response = {'response':'OK'}
+        else:
+            response = {'response':'Invalid Command'}
+            
         #Send a response
         self.udpsocket.sendto(json.dumps(response).encode('utf-8'),address)
 
@@ -308,7 +312,13 @@ class DataLogger:
                 #Check for messages
                 if self.messages:
                     msg = self.messages.pop()
-                    print('Message: {}'.format(msg))
+                    if msg == 'shutdown':
+                        #Shut down threads
+                        self.workerpool.shutdown()
+                        self.listen=False
+                        t.join() #Wait for thread to end
+                        print('Shutting down')
+                        break
             except AssertionError:
                 logging.error('Measurement too late, logger resetting')
                 self.logschedule.reset()

@@ -1,8 +1,8 @@
 '''
-A test client for UDP socket
+A test client for DataBear UDP socket
 - Send a command and get a response
 
-python socketUDP_client.py <cmd> <option>
+python DBUDPclient.py <cmd> <option>
 '''
 import socket
 import json

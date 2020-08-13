@@ -29,9 +29,9 @@ sensors:
     settings:     #Serial number and measurement are mandatory
       serialnumber: '6166'
       measurement: 5   #MEASUREMENT frequency in seconds
-      port: 'COM23'
+      port: 'COM3'
       baud: 19200
-      address: 4
+      address: 2
    
 
       
