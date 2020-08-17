@@ -25,7 +25,7 @@ datalogger:
 #serial number and measurement frequency.
 sensors: 
   - name: tph
-    sensortype: dyTPH1
+    sensortype: dyTPH1old
     settings:     #Serial number and measurement are mandatory
       serialnumber: '6166'
       measurement: 5   #MEASUREMENT frequency in seconds

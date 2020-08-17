@@ -147,6 +147,14 @@ class DataLogger:
         '''
         self.sensors[name] = sensorfactory.factory.get_sensor(sensortype,name,settings)
 
+    def stopSensor(self,name):
+        '''
+        Stop sensor measurement and storage
+        Input - sensor name
+        '''
+        for job in self.logschedule.jobs:
+            print(job)
+    
     def scheduleMeasurement(self,sensor,frequency):
         '''
         Schedule a measurement
