@@ -118,6 +118,17 @@ class Job:
                  self.job_func.args,
                  self.job_func.keywords)
 
+    def getsettings(self):
+        '''
+        Return job "settings"
+        '''
+        return {
+            'interval':self.interval,
+            'function':self.job_func.__name__,
+            'args':self.job_func.args
+        }
+
+    
     def _schedule_first_run(self):
         """
         Schedule first run of job.

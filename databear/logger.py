@@ -152,8 +152,22 @@ class DataLogger:
         Stop sensor measurement and storage
         Input - sensor name
         '''
+        successflag = 0
         for job in self.logschedule.jobs:
-            print(job)
+            jobsettings = job.getsettings()
+            #Extract sensor name
+            if jobsettings['function'] == 'doMeasurement':
+                sensorname = jobsettings['args'][0]
+            elif jobsettings['function'] == 'storeMeasurement':
+                sensorname = jobsettings['args'][1]
+
+            #Cancel job if matches sensor name
+            if sensorname == name:
+                self.logschedule.cancel_job(job)
+                logging.warning('Shutdown sensor {}'.format(name))
+                successflag = 1
+
+        return successflag
     
     def scheduleMeasurement(self,sensor,frequency):
         '''
@@ -292,6 +306,12 @@ class DataLogger:
         elif msg['command'] == 'shutdown':
             self.messages.append(msg['command'])
             response = {'response':'OK'}
+        elif msg['command'] == 'stop':
+            success = self.stopSensor(msg['option'])
+            if success:
+                response = {'response':'OK'}
+            else:
+                response = {'response':'Sensor not found'}
         else:
             response = {'response':'Invalid Command'}
             

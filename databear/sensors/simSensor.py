@@ -79,6 +79,23 @@ class sensorSim:
         #Pause to simulate a measurement time
         time.sleep(0.5)
 
+    def getcurrentdata(self):
+        '''
+        Return most recent data from sensor
+        Output:
+            {'name':(dt,val),'name2'...}
+        Return None if no data for particular measurement
+        '''
+        currentdata = {}
+        for key,val in self.data.items():
+            try:
+                currentdata[key]=val[-1]
+            except IndexError:
+                #Assign none if there is nothing in list
+                currentdata[key]=None
+
+        return currentdata
+    
     def getdata(self,name,startdt,enddt):
         '''
         Return a list of values such that
