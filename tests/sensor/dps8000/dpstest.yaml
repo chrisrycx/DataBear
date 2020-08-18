@@ -1,0 +1,35 @@
+#Example configuration file for DataBear
+#Create a new file with specific settings
+#Must include datalogger and sensors keys 
+
+#Defines data logger settings
+#Settings key must have at least one set of storage settings
+datalogger:
+  name: dpstest
+  settings:
+  - store: pressure  #Measurement to be stored
+    sensor: dps      #Sensor that measurement is associated with
+    process: dump          #process: dump, sample, average, max, min
+    frequency: 30           #Data STORAGE frequency in seconds
+       
+
+  
+
+
+#Must have at least one set of measurement settings per sensor.
+#Key value pairs in settings vary by method but must include
+#serial number and measurement frequency.
+sensors: 
+  - name: dps
+    sensortype: druck
+    settings:     #Serial number and measurement are mandatory
+      serialnumber: '666'
+      measurement: 5   #MEASUREMENT frequency in seconds
+      port: 'COM6'
+      baud: 19200
+      address: 3
+   
+
+      
+    
+

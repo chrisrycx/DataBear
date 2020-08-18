@@ -64,13 +64,10 @@ class dps8000:
             #Wait for response
             time.sleep(0.5)
             response = self.comm.read_until().decode('utf-8')
-            print(response)
 
             #Parse response - expected: ddd.dd
             pressure = float(response[0:6])
             self.data['pressure'] = (dt,pressure)
-
-        '''    
 
         except serial.SerialTimeoutException as norsp:
             fails['pressure'] = 'No response from sensor'
@@ -78,7 +75,6 @@ class dps8000:
         except ValueError as ve:
             fails['pressure'] = 'Cannot convert data to float'
             raise MeasureError(self.name,failnames,fails)
-        '''
 
     def getdata(self,name,startdt,enddt):
         '''
