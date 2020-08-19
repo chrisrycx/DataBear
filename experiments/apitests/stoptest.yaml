@@ -15,8 +15,8 @@ datalogger:
     sensor: tph                 #Sensor that measurement is associated with
     process: average           #process: dump, sample, average, max, min
     frequency: 20
-  - store: bp               
-    sensor: tph                 
+  - store: measure2               
+    sensor: sim                 
     process: min          
     frequency: 60
   
@@ -32,6 +32,11 @@ sensors:
       port: 'COM3'
       baud: 19200
       address: 2
+  - name: sim
+    sensortype: simsensor
+    settings:
+      serialnumber: 'x'
+      measurement: 10
    
 
       

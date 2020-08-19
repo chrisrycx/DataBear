@@ -69,6 +69,16 @@ class Scheduler:
     def _run_job(self, job):
         ret = job.run()
 
+    def cancel_job(self, job):
+        """
+        Delete a scheduled job.
+        :param job: The job to be unscheduled
+        """
+        try:
+            self.jobs.remove(job)
+        except ValueError:
+            pass
+    
     def reset(self):
         '''
         Reset schedule for all jobs
@@ -97,6 +107,28 @@ class Job:
         """
         return self.next_run < other.next_run
 
+    def __str__(self):
+        return (
+            "Job(interval={}, "
+            "do={}, "
+            "args={}, "
+            "kwargs={})"
+        ).format(self.interval,
+                 self.job_func.__name__,
+                 self.job_func.args,
+                 self.job_func.keywords)
+
+    def getsettings(self):
+        '''
+        Return job "settings"
+        '''
+        return {
+            'interval':self.interval,
+            'function':self.job_func.__name__,
+            'args':self.job_func.args
+        }
+
+    
     def _schedule_first_run(self):
         """
         Schedule first run of job.

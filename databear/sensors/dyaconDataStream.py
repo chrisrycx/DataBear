@@ -15,7 +15,7 @@ import serial
 import re
 
 class dyaconDataStream:
-    interface_version = '0.1'
+    interface_version = '0.2'
     def __init__(self,name,settings):
         '''
         Create a new sensor
@@ -68,6 +68,23 @@ class dyaconDataStream:
             rawdata = self.comm.read(dbytes).decode('utf-8')
             self.data['raw'].append((dt,rawdata))
 
+    def getcurrentdata(self):
+        '''
+        Return most recent data from sensor
+        Output:
+            {'name':(dt,val),'name2'...}
+        Return None if no data for particular measurement
+        '''
+        currentdata = {}
+        for key,val in self.data.items():
+            try:
+                currentdata[key]=val[-1]
+            except IndexError:
+                #Assign none if there is nothing in list
+                currentdata[key]=None
+
+        return currentdata
+    
     def getdata(self,name,startdt,enddt):
             '''
             Return a list of values such that

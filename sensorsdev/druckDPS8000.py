@@ -1,31 +1,31 @@
 '''
-RM Young 61302V Barometric Pressure sensor
-- DataBear Sensor Interface: V0.1
+GE Druck DPS 8000 pressure sensor
+- DataBear Sensor Interface V0.1
+
 '''
 
 import datetime
-from databear.errors import MeasureError, SensorConfigError
 import serial
+import re
+from databear.errors import MeasureError, SensorConfigError
 
-class rmyoungBP:
-    '''
-    DataBear Sensor Interface V0.2
-    '''
+class dps8000:
+    interface_version = '0.1'
     def __init__(self,name,settings):
         '''
         Create a new Dyacon TPH sensor
         Inputs
-        - name: string - name for sensor
-        - settings: dictionary
-            settings['serialnum'] = Serial Number 
-            settings['measurement'] = Sensor measurement interval sec 
-            settings['port'] = Serial port
-            settings['baud'] = Baud rate
+            - Name for sensor
+            - settings['serialnum'] = Serial Number
+            - settings['port'] = Serial com port
+            - settings['address'] = Sensor modbus address
+            - settings['baud'] = Baud rate
         '''
         try:
             self.name = name
             self.sn = settings['serialnumber']
             self.port = settings['port']
+            self.address = settings['address']
             self.frequency = settings['measurement']
             self.baud = settings['baud']
         except KeyError as ke:
@@ -38,49 +38,39 @@ class rmyoungBP:
         self.bias = 0
 
         #Define characteristics of this sensor
-        #Random guess at what might be a maximum sample frequency...
-        self.maxfrequency = 5  #Maximum frequency in seconds the sensor can be polled
-        self.timeout = 0.5
+        self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
 
         #Set up connection
+        self.timeout = 1
         self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
         self.comm.reset_input_buffer()
 
         #Initialize data structure
-        self.data = {'bp':[]}
+        self.data = {'pressure':[]} #Empty data dictionary
 
     def measure(self):
         '''
-        Read in data from RS232 serial port
-        Data will have the form: dddd.dd
+        Read in data from the sensor
         '''
-        dt = datetime.datetime.now()
+        try:
+            dt = datetime.datetime.now()
 
-        #Read in bytes from port
-        dbytes = self.comm.in_waiting
+            #Send a request for measurement
+            cmd = self.address + 'G\r'
+            self.comm.write(cmd.encode('utf-8'))
 
-        if dbytes > 0:
-            rawdata = self.comm.read_until().decode('utf-8')
-            bpnum = float(rawdata) 
-            self.data['bp'].append((dt,bpnum))
-            print('RMY - {}, value={}'.format(dt.strftime('%M:%S:%f'),bpnum))
+            #Wait for response
+            dataraw = self.comm.read()
+            print(dataraw)
 
-    def getcurrentdata(self):
-        '''
-        Return most recent data from sensor
-        Output:
-            {'name':(dt,val),'name2'...}
-        Return None if no data for particular measurement
-        '''
-        currentdata = {}
-        for key,val in self.data.items():
-            try:
-                currentdata[key]=val[-1]
-            except IndexError:
-                #Assign none if there is nothing in list
-                currentdata[key]=None
+            #Parse response
+            #re.match...
 
-        return currentdata
+            if no match
+                raise 
+        except timeout...:
+        except no match
+            raise MeasureError(self.name,failnames,fails)
 
     def getdata(self,name,startdt,enddt):
         '''

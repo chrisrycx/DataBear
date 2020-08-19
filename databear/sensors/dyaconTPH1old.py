@@ -1,5 +1,6 @@
 '''
 Dyacon TPH-1 Sensor
+This version is the older rev with no high resolution registers
 - Sensor Interface V0.1
 
 '''
@@ -9,7 +10,7 @@ import minimalmodbus as mm
 from databear.errors import MeasureError, SensorConfigError
 
 class dyaconTPH:
-    interface_version = '0.2'
+    interface_version = '0.1'
     def __init__(self,name,settings):
         '''
         Create a new Dyacon TPH sensor
@@ -38,9 +39,9 @@ class dyaconTPH:
         self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
 
         #Define measurements
-        airT = {'name':'airT','register':210,'regtype':'float'}
-        rh = {'name':'rh','register':212,'regtype':'float'}
-        bp = {'name':'bp','register':214,'regtype':'float'}
+        airT = {'name':'airT','register':201}
+        rh = {'name':'rh','register':202}
+        bp = {'name':'bp','register':203}
         self.measurements = [airT,rh,bp]
 
         #Setup measurement
@@ -60,8 +61,9 @@ class dyaconTPH:
             timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
             
             try:
-                val = self.comm.read_float(measure['register'])
-                
+                val = self.comm.read_register(measure['register'],signed=True)
+                val = val/10
+
                 #Output results for testing
                 print('{} - Measure {}: {}, value= {}'.format(
                     self.name,
