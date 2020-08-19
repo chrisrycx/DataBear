@@ -16,7 +16,7 @@ class sensorSim:
     Recommended class name: 
     <manufacturer><sensor model> ie. dyaconTPH1
     '''
-    interface_version = '0.1'
+    interface_version = '0.2'
     def __init__(self,name,settings):
         '''
         Create a new sensor

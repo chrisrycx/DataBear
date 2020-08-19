@@ -9,7 +9,7 @@ import minimalmodbus as mm
 from databear.errors import MeasureError, SensorConfigError
 
 class dyaconTPH:
-    interface_version = '0.1'
+    interface_version = '0.2'
     def __init__(self,name,settings):
         '''
         Create a new Dyacon TPH sensor

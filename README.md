@@ -40,7 +40,18 @@ with the DataBear project so others can use it.
 register your sensor(s) class with DataBear and load the configuration file.
 See example.py for details. 
 
-### Sensor Class Interface (V0.1)
+### DataBear API
+DataBear now features a rudimentary API for use with interprocess communication. Commands and responses are exchanged in JSON via UDP.
+* UDP Port: 62000
+* Command Format: {'command': \<command\>, 'arg': \<Optional Argument\>}
+* Commands
+    * status - Return a response if logger is active.
+    * getdata \<sensor name\> - Return most recent measurement data for sensor.
+    * stop \<sensor name\> - Stop measurement and data storage for sensor.
+    * shutdown - Stop logger.
+
+
+### Sensor Class Interface (V0.2)
 Class Name: (Format optional but recommended)
 * \<manufacturer>\<Model>	Example - class dyaconWSD2:
 
@@ -65,6 +76,8 @@ Methods (Mandatory)
     * Data for each measurement is added to the ‘data’ attribute.
     * Data should consist of a tuple of the form (\<timestamp>,\<datavalue>)
         * data[\<measurement name>] = (\<timestamp>,\<datavalue>)
+* 'getcurrentdata( ) - Return the most recent data associated with the sensor.
+    * Output format: {'measurement 1':(dt,val), 'measurement 2': ...}
 * 'getdata(name, startdate, enddate)' - Retrieves data from the 'data' dictionary 
                                         for a measurement
     * Return - [(timestamp,value),(timestamp,value),...]

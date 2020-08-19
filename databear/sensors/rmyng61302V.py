@@ -9,7 +9,7 @@ import serial
 
 class rmyoungBP:
     '''
-    DataBear Sensor Interface V0.1
+    DataBear Sensor Interface V0.2
     '''
     def __init__(self,name,settings):
         '''
@@ -64,6 +64,23 @@ class rmyoungBP:
             bpnum = float(rawdata) 
             self.data['bp'].append((dt,bpnum))
             print('RMY - {}, value={}'.format(dt.strftime('%M:%S:%f'),bpnum))
+
+    def getcurrentdata(self):
+        '''
+        Return most recent data from sensor
+        Output:
+            {'name':(dt,val),'name2'...}
+        Return None if no data for particular measurement
+        '''
+        currentdata = {}
+        for key,val in self.data.items():
+            try:
+                currentdata[key]=val[-1]
+            except IndexError:
+                #Assign none if there is nothing in list
+                currentdata[key]=None
+
+        return currentdata
 
     def getdata(self,name,startdt,enddt):
         '''
