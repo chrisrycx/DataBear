@@ -277,19 +277,22 @@ class DataLogger:
         Read message, respond, add any messages
         to the message queue
         Message should be JSON
-        {'command': <cmd> , 'option': <option>}
+        {'command': <cmd> , 'arg': <optional argument>}
 
         Commands
-        - test - Just for initial testing
+        - status
         - getdata
-            -- option - sensor name
+            -- argument: sensor name
+        - stop
+            -- argument: sensor name
+        - shutdown
         '''
         msgraw, address = self.udpsocket.recvfrom(1024)
 
         #Decode message
         msg = json.loads(msgraw)
         if msg['command'] == 'getdata':
-            sensorname = msg['option']
+            sensorname = msg['arg']
             data = self.sensors[sensorname].getcurrentdata()
             #Convert to JSON appropriate
             datastr = {}
@@ -307,7 +310,7 @@ class DataLogger:
             self.messages.append(msg['command'])
             response = {'response':'OK'}
         elif msg['command'] == 'stop':
-            success = self.stopSensor(msg['option'])
+            success = self.stopSensor(msg['arg'])
             if success:
                 response = {'response':'OK'}
             else:

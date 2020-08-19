@@ -1,0 +1,58 @@
+#Example configuration file for DataBear
+#Create a new file with specific settings
+#Must include datalogger and sensors keys 
+
+#Defines data logger settings
+#Settings key must have at least one set of storage settings
+datalogger:
+  name: test2sensors
+  settings:
+  - store: airT  
+    sensor: tph1     
+    process: sample          
+    frequency: 20          
+  - store: rh 
+    sensor: tph1     
+    process: min         
+    frequency: 60          
+  - store: bp  
+    sensor: tph1    
+    process: average          
+    frequency: 10
+  - store: measure1  
+    sensor: sim     
+    process: min          
+    frequency: 60          
+  - store: measure2 
+    sensor: sim    
+    process: max         
+    frequency: 60          
+  - store: measure3  
+    sensor: sim    
+    process: average          
+    frequency: 60            
+          
+  
+#Must have at least one set of measurement settings per sensor.
+#Key value pairs in settings vary by method but must include
+#serial number and measurement frequency.
+sensors: 
+  - name: tph1
+    sensortype: dyTPH
+    settings:     #Serial number and measurement are mandatory
+      serialnumber: '6166'
+      measurement: 5   #MEASUREMENT interval
+      port: 'COM3'
+      address: 2
+      baud: 19200
+  - name: sim
+    sensortype: sim
+    settings:     #Serial number and measurement are mandatory
+      serialnumber: 'X'
+      measurement: 20   #MEASUREMENT interval
+   
+   
+
+      
+    
+

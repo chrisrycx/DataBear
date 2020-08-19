@@ -19,7 +19,7 @@ if len(sys.argv) > 2:
 else:
     option = ''
 
-msg = {'command':cmd,'option':option}
+msg = {'command':cmd,'arg':option}
 
 #Set up connection
 ipaddress = 'localhost'
