@@ -9,29 +9,28 @@ This version is the older rev with no high resolution registers
 
 import datetime
 from databear.errors import MeasureError, SensorConfigError
-
-
-
+import minimalmodbus as mm
 
 class dyaconTPH:
     interface_version = '0.1'
-    def __init__(self,name,settings):
+    def __init__(self,name,sn,interval,dbport,driver,address=0):
         '''
         Create a new Dyacon TPH sensor
         Inputs
-            - Name for sensor
-            - settings['serialnum'] = Serial Number
-            - settings['port'] = Serial com port
-            - settings['address'] = Sensor modbus address
+            - name
+            - sn: Serial Number (string)
+            - interval: measurement interval in seconds (float)
+            - dbport: DataBear port (string)
+            - driver: DataBear hardware driver object
+            - modbus address: (int)
         '''
-        try:
-            self.name = name
-            self.sn = settings['serialnumber']
-            self.port = settings['port']
-            self.address = settings['address']
-            self.frequency = settings['measurement']
-        except KeyError as ke:
-            raise SensorConfigError('YAML missing required sensor setting')
+       
+        self.name = name
+        self.sn = sn
+        self.port = dbport
+        self.address = address
+        self.interval = interval
+        #***raise SensorConfigError('YAML missing required sensor setting')
 
         #Serial settings
         self.rs = 'RS485'
@@ -40,7 +39,7 @@ class dyaconTPH:
         self.bias = 1
 
         #Define characteristics of this sensor
-        self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
+        self.min_interval = 1  #Maximum frequency in seconds the sensor can be polled
 
         #Define measurements
         airT = {'name':'airT','register':201}
@@ -49,7 +48,7 @@ class dyaconTPH:
         self.measurements = [airT,rh,bp]
 
         #Setup measurement
-        self.comm = mm.Instrument(self.port,self.address)
+        self.comm = mm.Instrument(driver.connect(self.port),self.address)
         self.comm.serial.timeout = 0.3
 
         #Initialize data structure

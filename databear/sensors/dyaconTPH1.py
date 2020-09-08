@@ -107,7 +107,6 @@ class dyaconTPH:
                 output.append(val)
         return output
 
-
     def cleardata(self,name,startdt,enddt):
         '''
         Clear data values for a particular measurement
