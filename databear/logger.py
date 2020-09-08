@@ -321,7 +321,6 @@ class DataLogger:
         #Send a response
         self.udpsocket.sendto(json.dumps(response).encode('utf-8'),address)
 
-    
     def run(self):
         '''
         Run the logger

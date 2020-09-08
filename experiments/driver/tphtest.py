@@ -5,11 +5,7 @@ A basic test of the sensor simulator
 
 #----- Import databear components ----
 from databear.sensors import dyaconTPH1old
-from databear import logger,sensorfactory
-import testdriver 
-
-#----- Load a hardware driver -------
-hwdriver = testdriver.win1port()
+from databear import logger,sensorfactory 
 
 #-----  Register custom sensors with the sensor factory ----
 #import <module containing custom sensor class>
