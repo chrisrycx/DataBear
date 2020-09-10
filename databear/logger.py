@@ -38,20 +38,23 @@ class DataLogger:
     #Error logging format
     errorfmt = '%(asctime)s %(levelname)s %(lineno)s %(message)s'
 
-    def __init__(self,config):
+    def __init__(self,config,dbdriver):
         '''
         Initialize a new data logger
         Input (various options)
-        - string corresponding to name of logger 
-          (enables manual config for testing)
-        - path to yaml config file (must have .yaml)
-        - dictionary with configuration
-          
+        config:
+            - string corresponding to name of logger 
+            (enables manual config for testing)
+            - path to yaml config file (must have .yaml)
+            - dictionary with configuration
+        dbdriver:
+            - An instance of a DB hardware driver
         '''
         #Initialize properties
         self.sensors = {}
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
+        self.driver = dbdriver
 
         #Configure UDP socket for API
         self.udpsocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
@@ -145,6 +148,7 @@ class DataLogger:
         '''
         Add a sensor to the logger
         '''
+        settings['port'] = self.driver.connect(settings['virtualport'])
         self.sensors[name] = sensorfactory.factory.get_sensor(sensortype,name,settings)
 
     def stopSensor(self,name):
