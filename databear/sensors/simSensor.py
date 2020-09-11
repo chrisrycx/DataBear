@@ -16,7 +16,8 @@ class sensorSim:
     Recommended class name: 
     <manufacturer><sensor model> ie. dyaconTPH1
     '''
-    interface_version = '0.2'
+    interface_version = '1.0'
+    hardware_settings = {}
     def __init__(self,name,settings):
         '''
         Create a new sensor
@@ -24,27 +25,29 @@ class sensorSim:
         - name: string - name for sensor
         - settings: dictionary
             settings['serialnum'] = Serial Number (required)
-            settings['measurement'] = Sensor measurement frequency in sec (required)
+            settings['measure_interval'] = Sensor measurement frequency in sec (required)
             settings[<other>] = Any other user configurable setting
         '''
         #Load settings to instance attributes
         try:
             self.name = name
             self.sn = settings['serialnumber']
-            self.frequency = settings['measurement']
+            self.interval = settings['measure_interval']
             #Add other variables as necessary
         except KeyError as ke:
             raise SensorConfigError('YAML missing required sensor setting')
 
         #Define non-user configurable sensor settings
-        self.port = None
-        self.maxfrequency = 1  #Required: Maximum frequency in seconds the sensor can be polled
+        self.min_interval = 1  #Required: Maximum frequency in seconds the sensor can be polled
 
         #Initialize data structure
         #Dictionary of the form {<measurement>:[],...}
         #This will determine the name(s) of each measurement made by the sensor
         self.counter = 0 #measure 3 will simply be a measurement count
         self.data = {'measure1':[],'measure2':[],'measure3':[]}
+    
+    def connect(self,port):
+        pass
 
     def measure(self):
         '''

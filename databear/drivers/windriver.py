@@ -13,7 +13,7 @@ class dbdriver:
             'port2':'COM21'
         }
 
-    def connect(self,databearport):
+    def connect(self,databearport,hardware_settings):
         '''
         Hardware configuration:
         Windows driver currently requires no

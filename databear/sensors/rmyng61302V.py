@@ -1,6 +1,6 @@
 '''
 RM Young 61302V Barometric Pressure sensor
-- DataBear Sensor Interface: V0.1
+- DataBear Sensor Interface: V1.0
 '''
 
 import datetime
@@ -8,9 +8,14 @@ from databear.errors import MeasureError, SensorConfigError
 import serial
 
 class rmyoungBP:
-    '''
-    DataBear Sensor Interface V0.2
-    '''
+    interface_version = '1.0'
+    hardware_settings = {
+        'serial':'RS232',
+        'duplex':'full',
+        'resistors':0,
+        'bias':0
+    }
+
     def __init__(self,name,settings):
         '''
         Create a new Dyacon TPH sensor
@@ -18,36 +23,31 @@ class rmyoungBP:
         - name: string - name for sensor
         - settings: dictionary
             settings['serialnum'] = Serial Number 
-            settings['measurement'] = Sensor measurement interval sec 
-            settings['port'] = Serial port
-            settings['baud'] = Baud rate
+            settings['measure_interval'] = Sensor measurement interval sec 
         '''
         try:
             self.name = name
             self.sn = settings['serialnumber']
-            self.port = settings['port']
-            self.frequency = settings['measurement']
-            self.baud = settings['baud']
+            self.interval = settings['measure_interval']
         except KeyError as ke:
             raise SensorConfigError('YAML missing required sensor setting')
 
-        #Serial settings
-        self.rs = 'RS232'
-        self.duplex = 'full'
-        self.resistors = 0
-        self.bias = 0
 
         #Define characteristics of this sensor
         #Random guess at what might be a maximum sample frequency...
-        self.maxfrequency = 5  #Maximum frequency in seconds the sensor can be polled
+        self.min_interval = 5  #minimum interval in seconds the sensor can be polled
         self.timeout = 0.5
-
-        #Set up connection
-        self.comm = serial.Serial(self.port,self.baud,timeout=self.timeout)
-        self.comm.reset_input_buffer()
+        self.connected = False
 
         #Initialize data structure
         self.data = {'bp':[]}
+
+    def connect(self,port):
+        if not self.connected:
+            self.port = port
+            self.comm = serial.Serial(self.port,9600,timeout=self.timeout)
+            self.comm.reset_input_buffer()
+            self.connected = True
 
     def measure(self):
         '''

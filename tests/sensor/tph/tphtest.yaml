@@ -28,9 +28,8 @@ sensors:
     sensortype: dyTPH1old
     settings:     #Serial number and measurement are mandatory
       serialnumber: '6166'
-      measurement: 5   #MEASUREMENT frequency in seconds
+      measure_interval: 5   #MEASUREMENT frequency in seconds
       virtualport: 'port1'
-      baud: 19200
       address: 2
    
 

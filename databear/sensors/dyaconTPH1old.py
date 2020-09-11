@@ -10,33 +10,31 @@ import minimalmodbus as mm
 from databear.errors import MeasureError, SensorConfigError
 
 class dyaconTPH:
-    interface_version = '0.1'
+    interface_version = '1.0'
+    hardware_settings = {
+        'serial':'RS485',
+        'duplex':'half',
+        'resistors':1,
+        'bias':1
+    }
     def __init__(self,name,settings):
         '''
         Create a new Dyacon TPH sensor
         Inputs
             - Name for sensor
             - settings['serialnum'] = Serial Number
-            - settings['port'] = Serial com port
             - settings['address'] = Sensor modbus address
         '''
         try:
             self.name = name
             self.sn = settings['serialnumber']
-            self.port = settings['port']
             self.address = settings['address']
-            self.frequency = settings['measurement']
+            self.interval = settings['measure_interval']
         except KeyError as ke:
             raise SensorConfigError('YAML missing required sensor setting')
 
-        #Serial settings
-        self.rs = 'RS485'
-        self.duplex = 'half'
-        self.resistors = 1
-        self.bias = 1
-
         #Define characteristics of this sensor
-        self.maxfrequency = 1  #Maximum frequency in seconds the sensor can be polled
+        self.min_interval = 1  #Minimum interval that sensor can be polled
 
         #Define measurements
         airT = {'name':'airT','register':201}
@@ -44,12 +42,16 @@ class dyaconTPH:
         bp = {'name':'bp','register':203}
         self.measurements = [airT,rh,bp]
 
-        #Setup measurement
-        self.comm = mm.Instrument(self.port,self.address)
-        self.comm.serial.timeout = 0.3
-
         #Initialize data structure
         self.data = {'airT':[],'rh':[],'bp':[]} #Empty data dictionary
+        self.connected = False
+
+    def connect(self,port):
+        if not self.connected:
+            self.port = port
+            self.comm = mm.Instrument(self.port,self.address)
+            self.comm.serial.timeout = 0.3
+            self.connected = True
 
     def measure(self):
         '''

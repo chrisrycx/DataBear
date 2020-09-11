@@ -45,22 +45,20 @@ sensors:
     sensortype: rmyBP
     settings:     #Serial number and measurement are mandatory
       serialnumber: 'BPA88'
-      measurement: 10   #MEASUREMENT interval
+      measure_interval: 10   #MEASUREMENT interval
       virtualport: 'port2'
-      baud: 9600
   - name: tph1
     sensortype: dyTPH
     settings:     #Serial number and measurement are mandatory
       serialnumber: '6166'
-      measurement: 5   #MEASUREMENT interval
+      measure_interval: 5   #MEASUREMENT interval
       virtualport: 'port1'
       address: 2
-      baud: 19200
   - name: sim
     sensortype: sim
     settings:     #Serial number and measurement are mandatory
       serialnumber: 'X'
-      measurement: 20   #MEASUREMENT interval
+      measure_interval: 20   #MEASUREMENT interval
       virtualport: 'port0'
    
    

@@ -118,9 +118,9 @@ class DataLogger:
                 raise DataLogConfigError(
                 'YAML configured wrong. Sensor block missing dash (-)')
             
-            samplefreq = sensorsettings['measurement']
+            interval = sensorsettings['measure_interval']
             self.addSensor(sensor['sensortype'],sensor['name'],sensor['settings'])
-            self.scheduleMeasurement(sensor['name'],samplefreq)
+            self.scheduleMeasurement(sensor['name'],interval)
 
         for setting in loggersettings:
             try:
@@ -148,10 +148,22 @@ class DataLogger:
         '''
         Add a sensor to the logger
         '''
+        #Create sensor object
+        sensor = sensorfactory.factory.get_sensor(sensortype,name,settings)
+
+        #"Connect" virtual port to hardware using driver
+        #Ignore if port0 (simulated sensors)
         if settings['virtualport']!='port0':
-            #Get real hardware port, ignore this if port0 (simulated sensors)
-            settings['port'] = self.driver.connect(settings['virtualport'])
-        self.sensors[name] = sensorfactory.factory.get_sensor(sensortype,name,settings)
+            hardware_port = self.driver.connect(
+                settings['virtualport'],sensor.hardware_settings)
+        else:
+            hardware_port = ''
+
+        #"Connect" sensor to hardware
+        sensor.connect(hardware_port)
+
+        #Add sensor to collection
+        self.sensors[name] = sensor
 
     def stopSensor(self,name):
         '''
@@ -175,18 +187,18 @@ class DataLogger:
 
         return successflag
     
-    def scheduleMeasurement(self,sensor,frequency):
+    def scheduleMeasurement(self,sensor,interval):
         '''
         Schedule a measurement
-        Frequency is seconds
+        Interval is seconds
         '''
-        #Check frequency against max
-        if frequency < self.sensors[sensor].maxfrequency:
+        #Check interval to ensure it isn't too small
+        if interval < self.sensors[sensor].min_interval:
             raise DataLogConfigError('Logger frequency exceeds sensor max')
         
         #Schedule measurement
         m = self.doMeasurement
-        self.logschedule.every(frequency).do(m,sensor)
+        self.logschedule.every(interval).do(m,sensor)
     
     def doMeasurement(self,sensor,storetime,lasttime):
         '''
@@ -216,17 +228,17 @@ class DataLogger:
                         m,
                         merrors.messages[m]))
 
-    def scheduleStorage(self,name,sensor,frequency,process):
+    def scheduleStorage(self,name,sensor,interval,process):
         '''
         Schedule when storage takes place
         '''
         #Check storage frequency doesn't exceed measurement frequency
-        if frequency < self.sensors[sensor].frequency:
+        if interval < self.sensors[sensor].interval:
             raise DataLogConfigError('Storage frequency exceeds sensor measurement frequency')
 
         s = self.storeMeasurement
         #Note: Some parameters for function supplied by Job class in Schedule
-        self.logschedule.every(frequency).do(s,name,sensor,process)
+        self.logschedule.every(interval).do(s,name,sensor,process)
 
     def storeMeasurement(self,name,sensor,process,storetime,lasttime):
         '''
