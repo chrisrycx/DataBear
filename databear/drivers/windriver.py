@@ -9,7 +9,8 @@ class dbdriver:
         '''
         #Map DataBear ports to Windows
         self.ports = {
-            'port1':'COM23'
+            'port1':'COM23',
+            'port2':'COM21'
         }
 
     def connect(self,databearport):

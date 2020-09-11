@@ -148,7 +148,9 @@ class DataLogger:
         '''
         Add a sensor to the logger
         '''
-        settings['port'] = self.driver.connect(settings['virtualport'])
+        if settings['virtualport']!='port0':
+            #Get real hardware port, ignore this if port0 (simulated sensors)
+            settings['port'] = self.driver.connect(settings['virtualport'])
         self.sensors[name] = sensorfactory.factory.get_sensor(sensortype,name,settings)
 
     def stopSensor(self,name):
