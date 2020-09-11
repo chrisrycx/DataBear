@@ -15,7 +15,6 @@ datalogger:
     sensor: sim2                 #Sensor that measurement is associated with
     process: dump           #process: dump, sample, average, max, min
     frequency: 10
-  
 
 
 #Must have at least one set of measurement settings per sensor.
@@ -26,12 +25,14 @@ sensors:
     sensortype: sensorSim
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
-      measurement: 5   #MEASUREMENT frequency in seconds
+      measure_interval: 5   #MEASUREMENT frequency in seconds
+      virtualport: 'port0'
   - name: sim2
     sensortype: sensorSim
     settings:     
       serialnumber: '2'
-      measurement: 5   
+      measure_interval: 5 
+      virtualport: 'port0'  
    
 
       
