@@ -10,11 +10,11 @@ datalogger:
   - store: measure3  #Measurement to be stored
     sensor: sim1      #Sensor that measurement is associated with
     process: dump          #process: dump, sample, average, max, min
-    frequency: 10           #Data STORAGE frequency in seconds
+    storage_interval: 10           #Data STORAGE frequency in seconds
   - store: measure3                 #Measurement to be stored
     sensor: sim2                 #Sensor that measurement is associated with
     process: dump           #process: dump, sample, average, max, min
-    frequency: 10
+    storage_interval: 10
   
 
 
@@ -23,15 +23,19 @@ datalogger:
 #serial number and measurement frequency.
 sensors: 
   - name: sim1
-    sensortype: sensorSim
+    sensortype: simulator
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
-      measurement: 5   #MEASUREMENT frequency in seconds
+      address: 0
+      virtualport: 'port0'
+      measure_interval: 5   #MEASUREMENT frequency in seconds
   - name: sim2
-    sensortype: sensorSim
+    sensortype: simulator
     settings:     
       serialnumber: '2'
-      measurement: 5   
+      address: 0
+      virtualport: 'port0'
+      measure_interval: 5   
    
 
       

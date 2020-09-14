@@ -127,7 +127,7 @@ class DataLogger:
                 self.scheduleStorage(
                     setting['store'],
                     setting['sensor'],
-                    setting['frequency'],
+                    setting['storage_interval'],
                     setting['process'])
             except TypeError as tp:
                 raise DataLogConfigError(
@@ -149,7 +149,13 @@ class DataLogger:
         Add a sensor to the logger
         '''
         #Create sensor object
-        sensor = sensorfactory.factory.get_sensor(sensortype,name,settings)
+        sensor = sensorfactory.factory.get_sensor(
+            sensortype,
+            name,
+            settings['serialnumber'],
+            settings['address'],
+            settings['measure_interval']
+            )
 
         #"Connect" virtual port to hardware using driver
         #Ignore if port0 (simulated sensors)
