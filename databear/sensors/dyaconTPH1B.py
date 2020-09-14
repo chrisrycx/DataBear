@@ -1,37 +1,26 @@
 '''
-Dyacon TPH-1 Sensor
+Dyacon TPH-1B
 This version is the older rev with no high resolution registers
-- Sensor Interface V0.1
 
 '''
 
 import datetime
 import minimalmodbus as mm
 from databear.errors import MeasureError, SensorConfigError
+from databear.sensors import sensor
 
-class dyaconTPH:
-    interface_version = '1.0'
+class dyaconTPH(sensor.Sensor):
     hardware_settings = {
         'serial':'RS485',
         'duplex':'half',
         'resistors':1,
         'bias':1
     }
-    def __init__(self,name,settings):
+    def __init__(self,name,sn,address,interval):
         '''
-        Create a new Dyacon TPH sensor
-        Inputs
-            - Name for sensor
-            - settings['serialnum'] = Serial Number
-            - settings['address'] = Sensor modbus address
+        Override base class
         '''
-        try:
-            self.name = name
-            self.sn = settings['serialnumber']
-            self.address = settings['address']
-            self.interval = settings['measure_interval']
-        except KeyError as ke:
-            raise SensorConfigError('YAML missing required sensor setting')
+        super().__init__(name,sn,address,interval)
 
         #Define characteristics of this sensor
         self.min_interval = 1  #Minimum interval that sensor can be polled
@@ -81,47 +70,8 @@ class dyaconTPH:
             failnames = list(fails.keys())
             raise MeasureError(self.name,failnames,fails)
     
-    def getcurrentdata(self):
-        '''
-        Return most recent data from sensor
-        Output:
-            {'name':(dt,val),'name2'...}
-        Return None if no data for particular measurement
-        '''
-        currentdata = {}
-        for key,val in self.data.items():
-            try:
-                currentdata[key]=val[-1]
-            except IndexError:
-                #Assign none if there is nothing in list
-                currentdata[key]=None
-
-        return currentdata
-    
-    def getdata(self,name,startdt,enddt):
-        '''
-        Return a list of values such that
-        startdt <= timestamps < enddt
-        - Inputs: datetime objects
-        '''
-        output = []
-        data = self.data[name]
-        for val in data:
-            if (val[0]>=startdt) and (val[0]<enddt):
-                output.append(val)
-        return output
+   
+   
 
 
-    def cleardata(self,name,startdt,enddt):
-        '''
-        Clear data values for a particular measurement
-        Loop through values and remove. Note: This is probably
-        inefficient if the data structure is large.
-        '''
-        savedata = []
-        data = self.data[name]
-        for val in data:
-            if (val[0]<startdt) or (val[0]>=enddt):
-                savedata.append(val)
-
-        self.data[name] = savedata
+  

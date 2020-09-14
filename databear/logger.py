@@ -397,21 +397,6 @@ class DataLogger:
       
             
 
-#-------- Run from command line -----
-if __name__ == "__main__":
-
-    #Process command line args
-    if len(sys.argv) < 2:
-        print('Enter path to config file from current directory')
-        exit(0)
-
-    confpath = sys.argv[1]
-    print(confpath)
-
-    datalogger = DataLogger(confpath)
-
-    #Run logger
-    datalogger.run()
 
 
 

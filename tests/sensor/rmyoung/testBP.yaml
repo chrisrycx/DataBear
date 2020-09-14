@@ -7,10 +7,10 @@
 datalogger:
   name: BPtest
   settings:
-  - store: raw  #Measurement to be stored
+  - store: bp  #Measurement to be stored
     sensor: rmyBP     #Sensor that measurement is associated with
     process: dump          #process: dump, sample, average, max, min
-    frequency: 60           #Data STORAGE frequency in seconds
+    storage_interval: 60           #Data STORAGE frequency in seconds
           
   
 #Must have at least one set of measurement settings per sensor.
@@ -21,9 +21,10 @@ sensors:
     sensortype: rmyBP
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
-      measurement: 60   #MEASUREMENT interval
-      port: 'COM20'
-      baud: 9600
+      address: 0
+      measure_interval: 20   #MEASUREMENT interval
+      virtualport: 'port2'
+      
    
    
 
