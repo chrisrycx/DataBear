@@ -40,10 +40,12 @@ class Sensor:
         #Get current values
         currentdata = self.getcurrentdata()
         #Create output string
-        if currentdata:
-            for m,v in currentdata.items():
+        for m,v in currentdata.items():
+            if v:
                 dtstr = v[0].strftime('%Y-%m-%d %H:%M:%S:%f')
                 output = output + '{}: {}, {}\n'.format(m,dtstr,v[1])
+            else:
+                output = output + '{}: No Data'.format(m)
 
         return output
 
