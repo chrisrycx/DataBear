@@ -29,6 +29,22 @@ class Sensor:
         #Initialize data structure
         self.data = {}
         self.connected = False
+    
+    def __str__(self):
+        '''
+        Standardized way to print sensor:
+        <Sensor Name> - <measure name>:(dt,val), ...
+        '''
+        output = self.name + '\n' #Initialize
+
+        #Get current values
+        currentdata = self.getcurrentdata()
+        #Create output string
+        for m,v in currentdata.items():
+            dtstr = v[0].strftime('%Y-%m-%d %H:%M:%S:%f')
+            output = output + '{}: {}, {}\n'.format(m,dtstr,v[1])
+
+        return output
 
     def connect(self,port):
         pass

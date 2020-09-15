@@ -55,14 +55,8 @@ class dyaconTPH(sensor.Sensor):
                 val = self.comm.read_register(measure['register'],signed=True)
                 val = val/10
 
-                #Output results for testing
-                print('{} - Measure {}: {}, value= {}'.format(
-                    self.name,
-                    measure['name'],
-                    timestamp,
-                    val))
-
                 self.data[measure['name']].append((dt,val))
+                
             except mm.NoResponseError as norsp:
                 fails[measure['name']] = 'No response from sensor'
         #Raise a measurement error if a fail is detected

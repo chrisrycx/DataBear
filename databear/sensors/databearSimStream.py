@@ -27,7 +27,6 @@ class databearSimStream(sensor.Sensor):
         '''
         super().__init__(name,sn,address,interval)
        
-        
         #Define characteristics of this sensor
         self.min_interval = 0
         self.connected = False

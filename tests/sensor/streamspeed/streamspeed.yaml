@@ -10,7 +10,7 @@ datalogger:
   - store: raw  #Measurement to be stored
     sensor: simStream      #Sensor that measurement is associated with
     process: dump          #process: dump, sample, average, max, min
-    frequency: 1           #Data STORAGE frequency in seconds
+    storage_interval: 1           #Data STORAGE frequency in seconds
           
   
 #Must have at least one set of measurement settings per sensor.
@@ -18,12 +18,12 @@ datalogger:
 #serial number and measurement frequency.
 sensors: 
   - name: simStream
-    sensortype: dyDataStream
+    sensortype: dbstream
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
-      measurement: .025   #MEASUREMENT interval
-      port: 'COM6'
-      baud: 38400
+      address: 0
+      measure_interval: 1   #MEASUREMENT interval
+      virtualport: 'port1'
    
    
 

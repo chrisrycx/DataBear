@@ -10,54 +10,56 @@ datalogger:
   - store: bp        #Measurement to be stored
     sensor: rmyBP     #Sensor that measurement is associated with
     process: dump     #process: dump, sample, average, max, min
-    frequency: 30           #Data STORAGE frequency in seconds
+    storage_interval: 30           #Data STORAGE storage_interval in seconds
   - store: airT  
     sensor: tph1     
     process: sample          
-    frequency: 20          
+    storage_interval: 20          
   - store: rh 
     sensor: tph1     
     process: min         
-    frequency: 60          
+    storage_interval: 60          
   - store: bp  
     sensor: tph1    
     process: average          
-    frequency: 30
+    storage_interval: 30
   - store: measure1  
     sensor: sim     
     process: min          
-    frequency: 60          
+    storage_interval: 60          
   - store: measure2 
     sensor: sim    
     process: max         
-    frequency: 60          
+    storage_interval: 60          
   - store: measure3  
     sensor: sim    
     process: average          
-    frequency: 60            
+    storage_interval: 60            
           
   
 #Must have at least one set of measurement settings per sensor.
 #Key value pairs in settings vary by method but must include
-#serial number and measurement frequency.
+#serial number and measurement storage_interval.
 sensors: 
   - name: rmyBP
     sensortype: rmyBP
     settings:     #Serial number and measurement are mandatory
       serialnumber: 'BPA88'
+      address: 0
       measure_interval: 10   #MEASUREMENT interval
       virtualport: 'port2'
   - name: tph1
     sensortype: dyTPH
     settings:     #Serial number and measurement are mandatory
       serialnumber: '6166'
+      address: 2
       measure_interval: 5   #MEASUREMENT interval
       virtualport: 'port1'
-      address: 2
   - name: sim
     sensortype: sim
     settings:     #Serial number and measurement are mandatory
       serialnumber: 'X'
+      address: 0
       measure_interval: 20   #MEASUREMENT interval
       virtualport: 'port0'
    

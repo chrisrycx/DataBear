@@ -193,20 +193,20 @@ class DataLogger:
 
         return successflag
     
-    def scheduleMeasurement(self,sensor,interval):
+    def scheduleMeasurement(self,sensorname,interval):
         '''
         Schedule a measurement
         Interval is seconds
         '''
         #Check interval to ensure it isn't too small
-        if interval < self.sensors[sensor].min_interval:
+        if interval < self.sensors[sensorname].min_interval:
             raise DataLogConfigError('Logger frequency exceeds sensor max')
         
         #Schedule measurement
         m = self.doMeasurement
-        self.logschedule.every(interval).do(m,sensor)
+        self.logschedule.every(interval).do(m,sensorname)
     
-    def doMeasurement(self,sensor,storetime,lasttime):
+    def doMeasurement(self,sensorname,storetime,lasttime):
         '''
         Perform a measurement on a sensor
         Inputs
@@ -214,7 +214,8 @@ class DataLogger:
         - storetime and lasttime are not currently used here
           but are passed by Schedule when this function is called.
         '''
-        mfuture = self.workerpool.submit(self.sensors[sensor].measure)
+        mfuture = self.workerpool.submit(self.sensors[sensorname].measure)
+        mfuture.sname = sensorname
         mfuture.add_done_callback(self.endMeasurement)
         
     def endMeasurement(self,mfuture):
@@ -223,6 +224,8 @@ class DataLogger:
         Use to log any exceptions that occurred
         input: mfuture - a futures object that gets passed when complete
         '''
+        print(self.sensors[mfuture.sname])
+
         #Retrieve exception. Returns none is no exceptions
         merrors = mfuture.exception()
 

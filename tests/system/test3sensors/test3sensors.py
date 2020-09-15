@@ -8,7 +8,7 @@ A test of three different sensors to gage general functionality
 '''
 
 #----- Import databear components ----
-from databear.sensors import rmyng61302V, dyaconTPH1old,simSensor
+from databear.sensors import rmyng61302V, dyaconTPH1B, databearSim
 from databear import logger,sensorfactory
 import os, importlib
 
@@ -20,8 +20,8 @@ driver = driver_module.dbdriver()
 #-----  Register custom sensors with the sensor factory ----
 #import <module containing custom sensor class>
 sensorfactory.factory.register_sensor('rmyBP',rmyng61302V.rmyoungBP)
-sensorfactory.factory.register_sensor('dyTPH',dyaconTPH1old.dyaconTPH)
-sensorfactory.factory.register_sensor('sim',simSensor.sensorSim)
+sensorfactory.factory.register_sensor('dyTPH',dyaconTPH1B.dyaconTPH)
+sensorfactory.factory.register_sensor('sim',databearSim.databearSim)
 
 #------ Create a logger ------
 config = 'test3sensors.yaml'

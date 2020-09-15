@@ -40,11 +40,6 @@ class databearSim(sensor.Sensor):
         self.data['measure2'].append((dt,dt.second))
         self.data['measure3'].append((dt,self.counter))
 
-        #Print for testing
-        print('{}  Time: {}  measures 1 and 2: {}  measure3: {}'.format(
-            self.name,dt.strftime('%M:%S:%f'),dt.second,self.counter
-        ))
-
         #Pause to simulate a measurement time
         time.sleep(0.5)
 

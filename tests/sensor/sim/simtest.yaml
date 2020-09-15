@@ -16,8 +16,6 @@ datalogger:
     process: dump           #process: dump, sample, average, max, min
     storage_interval: 10
   
-
-
 #Must have at least one set of measurement settings per sensor.
 #Key value pairs in settings vary by method but must include
 #serial number and measurement frequency.
