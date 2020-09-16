@@ -7,11 +7,11 @@
 datalogger:
   name: simtest
   settings:
-  - store: measure3  #Measurement to be stored
+  - store: second2  #Measurement to be stored
     sensor: sim1      #Sensor that measurement is associated with
     process: dump          #process: dump, sample, average, max, min
     storage_interval: 10           #Data STORAGE frequency in seconds
-  - store: measure3                 #Measurement to be stored
+  - store: counter                 #Measurement to be stored
     sensor: sim2                 #Sensor that measurement is associated with
     process: dump           #process: dump, sample, average, max, min
     storage_interval: 10
