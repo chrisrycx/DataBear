@@ -23,15 +23,15 @@ datalogger:
     sensor: tph1    
     process: average          
     storage_interval: 30
-  - store: measure1  
+  - store: second  
     sensor: sim     
     process: min          
     storage_interval: 60          
-  - store: measure2 
+  - store: second2 
     sensor: sim    
     process: max         
     storage_interval: 60          
-  - store: measure3  
+  - store: counter  
     sensor: sim    
     process: average          
     storage_interval: 60            

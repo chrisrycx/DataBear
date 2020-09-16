@@ -45,7 +45,7 @@ class Sensor:
                 dtstr = v[0].strftime('%Y-%m-%d %H:%M:%S:%f')
                 output = output + '{}: {}, {}\n'.format(m,dtstr,v[1])
             else:
-                output = output + '{}: No Data'.format(m)
+                output = output + '{}: No Data\n'.format(m)
 
         return output
 
