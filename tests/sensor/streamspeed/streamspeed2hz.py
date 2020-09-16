@@ -18,7 +18,7 @@ driver = driver_module.dbdriver()
 sensorfactory.factory.register_sensor('dbstream',databearSimStream.databearSimStream)
 
 #------ Create a logger ------
-config = 'streamspeed.yaml'
+config = 'streamspeed2hz.yaml'
 datalogger = logger.DataLogger(config,driver)
 
 #------- Run databear ------

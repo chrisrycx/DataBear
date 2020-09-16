@@ -5,7 +5,7 @@
 #Defines data logger settings
 #Settings key must have at least one set of storage settings
 datalogger:
-  name: streamspeed
+  name: streamspeed20hz
   settings:
   - store: raw  #Measurement to be stored
     sensor: simStream      #Sensor that measurement is associated with
@@ -22,7 +22,7 @@ sensors:
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
       address: 0
-      measure_interval: 1   #MEASUREMENT interval
+      measure_interval: 0.05   #MEASUREMENT interval
       virtualport: 'port1'
    
    
