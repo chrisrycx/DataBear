@@ -1,32 +1,62 @@
-#Example configuration file for DataBear
-#Create a new file with specific settings
-#Must include datalogger and sensors keys 
+#
+# DataBear configuration file
+# Example Logger using databearSim simulated sensor
+#
+ 
 
-#Defines data logger settings
-#Settings key must have at least one set of storage settings
+#-----------------------------------------------------------#
+# Datalogger definition
+# The measurements specified here are defined in the sensor
+# section further down in the config file.
+#
+# Example:
+# datalogger:
+#    name: 'mylogger'    This will be the name of the output CSV
+#    settings:
+#    - store: 'mymeasurement'  The measurement to be stored
+#      sensor: 'mysensor'      Sensor that measurement is associated with
+#      process: 'dump'         Available options: 'dump','sample','min',
+#                                                 'max','average'
+#      storage_interval: 60    Storage interval in seconds       
 datalogger:
-  name: <yourloggername>
+  name: examplelog
   settings:
-    - store: 'mymeasurement'  #Measurement to be stored
-      sensor: 'mysensor'      #Sensor that measurement is associated with
-      process: None           #Not yet implemented. Leave as None
-      frequency: 60           #Data STORAGE frequency in seconds
-    - store: 'mymeasurement2'
-      sensor: 'mysensor'
-      process: None
-      frequency: 30
-
-#Must have at least one set of measurement settings per sensor.
-#Key value pairs in settings vary by method but must include
-#serial number and measurement frequency.
+  - store: second2  
+    sensor: sim1      
+    process: dump         
+    storage_interval: 10           
+  - store: counter                 
+    sensor: sim2          
+    process: dump           
+    storage_interval: 10
+    
+#-----------------------------------------------------------#
+# Sensor definition
+#
+# Example:
+# sensors: 
+#  - name: 'mysensor'
+#    sensortype: 'mymethod'  This must match sensor factory registry
+#    settings:   
+#      serialnumber: 'xxxx'
+#      address: 0            Required even for sensors without address (use 0)
+#      virtualport: 'port1'  'port0' is reserved for simulated sensors
+#      measure_interval: 1   Measurement interval in seconds. Can be < 1 
 sensors: 
-  - name: 'mysensor'
-    sensortype: 'mymethod'
+  - name: sim1
+    sensortype: simulator
     settings:     #Serial number and measurement are mandatory
-      serialnumber: 'xxxx'
-      measurement: 10   #MEASUREMENT frequency in seconds
-      port: COM10       #Next settings are specific to measurement method
-      address: 3
+      serialnumber: '1'
+      address: 0
+      virtualport: 'port0'
+      measure_interval: 5   #MEASUREMENT frequency in seconds
+  - name: sim2
+    sensortype: simulator
+    settings:     
+      serialnumber: '2'
+      address: 0
+      virtualport: 'port0'
+      measure_interval: 5 
       
     
 
