@@ -54,30 +54,38 @@ DataBear now features a rudimentary API for use with interprocess communication.
     * shutdown - Stop logger.
 
 
-### Sensor Class Interface (V1.0)
+### Sensor Interface (V1.0)
 Class Name: (Format optional but recommended)
-* \<manufacturer>\<Model>	Example - class dyaconWSD2:
+* \<manufacturer>\<Model>	
 * Use databear.sensors.Sensor as a base class
+* Example - class dyaconWSD(sensors.Sensor):
 
-Instantiation (Mandatory)
-* Inputs:
-    * ‘name’ - [string] User configurable sensor name
-    * ‘settings’ - [dictionary] A dictionary of settings that are necessary for mandatory methods and attributes. 
-* Attributes:
-    * sn - [string] Sensor serial number specified in ‘settings’.
-    * frequency - [float] Sensor measurement frequency in seconds specified in ‘settings’ dictionary.
-    * maxfrequency - [float] Maximum frequency in seconds that the sensor can   measure. 
-    * data - [dictionary] Stores data for each measurement.
-        * Initialize to {\<key>: [ ] , ...} where \<key> is the name of each measurement.
-    * Any other sensor specific setting.
-        * For example, some sensors/hardware may require certain settings like 'serial protocol' and 'duplex'.  
-* Errors
-    * A sensorConfigError should be raised if there is a missed setting.
-
-Methods (Mandatory)
-* connect(virtualport)
-* measure( ) - Implements coding required to obtain data for each measurement.
-    * No inputs
+Methods
+* __init__(self,name,sn,address,interval)
+    * Inputs
+        * name - name of sensor
+        * sn - serial number of sensor
+        * address - sensor address, set to 0 if none
+        * interval - measurement interval (may be removed in future release)
+    * Define a data dictionary for the sensor after calling the base class
+      __init__.
+        * data = {"measure1":[],"measure2":[],...}
+* connect(self,port)
+    * Use to initialize a connection to actual hardware port.
+* measure(self)
+    * Performs sensor measurement. No inputs.
     * Data for each measurement is added to the ‘data’ attribute.
     * Data should consist of a tuple of the form (\<timestamp>,\<datavalue>)
         * data[\<measurement name>] = (\<timestamp>,\<datavalue>)
+
+### Driver Interface (V0)
+Class definition:
+* dbdriver
+    * No base class to inherit from
+Methods
+* __init__
+    * Use to map virtual ports to real hardware ports
+* connect(self,virtualport,hardware_settings)
+    * Use to configure hardware and return hardware port name from mapping
+
+
