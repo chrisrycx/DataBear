@@ -51,12 +51,6 @@ CREATE TABLE IF NOT EXISTS "processes" (
 	"name"	TEXT NOT NULL,
 	"description"	TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS "users" (
-	"user_id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	"username"	TEXT NOT NULL,
-	"password_hash"	TEXT,
-	"permission_level"	INTEGER
-);
 INSERT INTO "sensors" ("sensor_id","name","serial_number","address","virtualport","sensor_type","description") VALUES (1,'simulator','0',NULL,'port0','dbSim','Default simulator sensor');
 INSERT INTO "measurements" ("measurement_id","sensor_id","name","units","description") VALUES (1,1,'simsecond','second','The first simulator measurement.');
 INSERT INTO "processes" ("process_id","name","description") VALUES (1,'Sample','Select the first measurement from storage interval for storage'),
