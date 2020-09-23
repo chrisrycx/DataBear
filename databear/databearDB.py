@@ -11,9 +11,10 @@ DataBear database manager class
 
 '''
 
-import yaml
 import json
+import os
 import sqlite3
+import yaml
 
 
 #-------- Database Initialization and Setup ------
@@ -32,7 +33,15 @@ class DataBearDB:
           if config is given
         '''
         #Initialize database sqlite conneciton object
+        self.path = os.path.dirname(__file__)
+        self.dbconnection = sqlite3.connect(self.path + '/mdl.db')
 
+        self.dbcursor = self.dbconnection.cursor()
+
+        with open(self.path + '/databearDBv2.sql', 'r') as sql_init_file:
+            sql_script = sql_init_file.read()
+
+        self.dbcursor.executescript(sql_script)
 
         #Determine what input is
         if (isinstance(config,dict)) or (config[-4:]=='yaml'):

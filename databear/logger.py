@@ -14,6 +14,7 @@ Data Logger
 
 import databear.schedule as schedule
 import databear.process as processdata
+import databear.databearDB as databearDB
 from databear import sensorfactory
 from databear.errors import DataLogConfigError, MeasureError
 from datetime import timedelta
@@ -27,7 +28,6 @@ import time #For sleeping during execution
 import csv
 import sys #For command line args
 import logging
-import sqlite3
 
 
 #-------- Logger Initialization and Setup ------
@@ -64,6 +64,7 @@ class DataLogger:
         self.sel.register(self.udpsocket,selectors.EVENT_READ)
         self.listen = False
         self.messages = []
+        self.db = databearDB.DataBearDB(config)
 
         #Determine what input is
         if (isinstance(config,dict)) or (config[-4:]=='yaml'):
