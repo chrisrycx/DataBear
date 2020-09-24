@@ -21,42 +21,20 @@ class DataBearDB:
     '''
     The sqlite database for databear
     '''
-    #Error logging format
-    errorfmt = '%(asctime)s %(levelname)s %(lineno)s %(message)s'
 
-    def __init__(self,config):
+    def __init__(self):
         '''
         Initialize the database manager
-        - Ensure database exists and create if needed
-        - Import config values from given config into config tables
-          if config is given
+        - Check if databear.db already exists in CWD
+            -- Create if needed
+        - Create connection to database
         '''
-        #Initialize database sqlite conneciton object
+        #Check if database exists
+        #  **To Do
 
-
-        #Determine what input is
-        if (isinstance(config,dict)) or (config[-4:]=='yaml'):
-            #Pass dictionary to loadconfig
-            self.loadconfig(config)
-
-    def loadconfig(self,config):
-        '''
-        Load configuration file
-        Input options
-        - path to yaml
-        - dictionary with configuration
-
-        - In either option inject values into config database tables
-        '''
-
-        if isinstance(config,str):
-            #Import configuration from yaml
-            with open(config,'rt') as yin:
-                configyaml = yin.read()
-
-            config = yaml.safe_load(configyaml)
-
-        # Inject data from config into config tables
+        #Initialize database sqlite connection object
+        self.conn = sqlite3.connect('databear.db')
+        self.curs = self.conn.cursor()
 
     def ensureExists(self):
         # Check if the database file exists
@@ -85,14 +63,6 @@ class DataBearDB:
         # Set a logging configuration by its id and values
         pass
 
-    def getHardwareConfig(self, hardware_configid):
-        # Get a hardware configuration by its id
-        pass
-
-    def setHardwareConfig(self, hardware_configid, sensorid, comm_type, port, address):
-        # Set a hardware configuration by its id and values
-        pass
-
     def getDataForLoggingConfig(self, logging_configid):
         # Get all data for a given logging configuration id
         # May add some date range parameters later if it makes sense to do so
@@ -102,9 +72,23 @@ class DataBearDB:
         # Same as above but for a given sensor only
         pass
 
-    def setData(self, datetime, value, sensor_configid, logging_configid, qc_flag):
-        # Add data to the database data table
-        pass
+    def storeData(self, datetime, value, sensor_configid, logging_configid, qc_flag):
+        '''
+        Store data value in database
+        Inputs:
+            - datetime [string]
+        Returns new rowid
+        '''
+        storeqry = ('INSERT INTO data '
+                    '(dtstamp,value,sensor_configid,logging_configid,qc_flag) '
+                    'VALUES (?,?,?,?,?)')
+        qryparams = (datetime, value, sensor_configid, logging_configid, qc_flag)
+
+        self.curs.execute(storeqry,qryparams)
+        self.conn.commit()
+
+        return self.curs.lastrowid
+
 
 
 
