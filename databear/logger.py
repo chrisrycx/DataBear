@@ -20,6 +20,9 @@ import csv
 import sys #For command line args
 import logging
 
+#Testing
+from databear.sensors import databearSim
+
 
 #-------- Logger Initialization and Setup ------
 class DataLogger:
@@ -56,7 +59,7 @@ class DataLogger:
         #Set up error logging
         logging.basicConfig(
                 format=DataLogger.errorfmt,
-                filename=self.name+'_error.log')
+                filename='databear_error.log')
 
     def loadconfig(self):
         '''
@@ -64,8 +67,53 @@ class DataLogger:
         start sensors
         '''
         #Code for getting settings from database
+        '''
         sensors = self.db.getSensorConfig()
         loggersettings = self.db.setLoggingConfig()
+        '''
+        #Pseudo database config for testing
+        sensorfactory.factory.register_sensor('dbSim',databearSim.databearSim)
+        sensorstbl = [{
+            'sensor_id':1,
+            'name':'sim1',
+            'serial_number':'99',
+            'address':0,
+            'virtualport':'port0',
+            'sensor_type':'dbSim'
+            }]
+        sensorconfigstbl = [{
+            'sensor_configid':1,
+            'sensorid':1,
+            'measure_interval':5,
+            'status':0
+        }]
+        loggingconfigstbl = [{
+            'logging_configid':1,
+            'measurementid':1,
+            'storage_interval':10,
+            'processid':1,
+            'status':0
+        },
+        {
+            'logging_configid':1,
+            'measurementid':1,
+            'storage_interval':20,
+            'processid':2,
+            'status':0
+        }]
+
+        #Prep database config for loading
+        # **Do this in databearDB probably
+        sensors = [{
+            'sensor_configid':1,
+            'name':'sim1',
+            'serial_number':'99',
+            'address':0,
+            'virtualport':'port0',
+            'sensor_type':'dbSim',
+            'measure_interval':5
+        }]
+
         
         #Configure logger **Need to output errors to error log...
         for sensor in sensors:

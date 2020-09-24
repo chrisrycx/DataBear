@@ -36,8 +36,8 @@ class databearSim(sensor.Sensor):
             raise MeasureError(self.name,['measure1'],{'measure1':'Test failure'})
 
         #Measurements are simply integers from the dt
-        self.data['second'].append((dt,dt.second))
-        self.data['second2'].append((dt,dt.second))
+        self.data['simsecond'].append((dt,dt.second))
+        self.data['simsecond2'].append((dt,dt.second))
         self.data['counter'].append((dt,self.counter))
 
         #Pause to simulate a measurement time
