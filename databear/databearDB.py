@@ -47,17 +47,54 @@ class DataBearDB:
     # Configuration getters and setters, Getters will need to be changed to return
     # either a dictionary of the configuration or some other type, skeleton for now
     def getSensorConfig(self, sensor_configid):
-        # Return the given sensor's configuration or None if id is invalid
-        pass
+        '''
+        Return the given sensor's configuration or None if id is invalid
+        '''
+        #Testing
+        sensor = {
+            'sensor_configid':1,
+            'name':'sim1',
+            'serial_number':'99',
+            'address':0,
+            'virtualport':'port0',
+            'sensor_type':'dbSim',
+            'measure_interval':5
+        }
+        return sensor
+
 
     def setSensorConfig(self, sersor_configid, sensorid, measure_interval, status):
         # Make make status separate if it needs to be able to be enabled/disabled without sending
         # all parameters, etc. but use this for now
         pass
 
+    def getActiveSensorIDs(self):
+        '''
+        Return list of active sensor IDs
+        '''
+        #Testing
+        return [1]
+
+    def getActiveLoggingIDs(self):
+        '''
+        Return active logger configuration IDs
+        '''
+        #Testing
+        return [1,2]
+
+
     def getLoggingConfig(self, logging_configid):
         # Get a logging configuration by it's id
-        pass
+
+        #Testing
+        settings = {
+            'measurement_name':'simsecond',
+            'sensor_name':'sim1',
+            'storage_interval':10,
+            'process':'dump'
+        }
+
+        return settings
 
     def setLoggingConfig(self, logging_configid, measurementid, storage_interal, processid, status):
         # Set a logging configuration by its id and values

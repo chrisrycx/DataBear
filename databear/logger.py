@@ -66,80 +66,39 @@ class DataLogger:
         Get configuration out of database and
         start sensors
         '''
-        #Code for getting settings from database
-        '''
-        sensors = self.db.getSensorConfig()
-        loggersettings = self.db.setLoggingConfig()
-        '''
-        #Pseudo database config for testing
-        sensorfactory.factory.register_sensor('dbSim',databearSim.databearSim)
-        sensorstbl = [{
-            'sensor_id':1,
-            'name':'sim1',
-            'serial_number':'99',
-            'address':0,
-            'virtualport':'port0',
-            'sensor_type':'dbSim'
-            }]
-        sensorconfigstbl = [{
-            'sensor_configid':1,
-            'sensorid':1,
-            'measure_interval':5,
-            'status':0
-        }]
-        loggingconfigstbl = [{
-            'logging_configid':1,
-            'measurementid':1,
-            'storage_interval':10,
-            'processid':1,
-            'status':0
-        },
-        {
-            'logging_configid':1,
-            'measurementid':1,
-            'storage_interval':20,
-            'processid':2,
-            'status':0
-        }]
-
-        #Prep database config for loading
-        # **Do this in databearDB probably
-        sensors = [{
-            'sensor_configid':1,
-            'name':'sim1',
-            'serial_number':'99',
-            'address':0,
-            'virtualport':'port0',
-            'sensor_type':'dbSim',
-            'measure_interval':5
-        }]
-
+        #Get list of active sensors and logging
+        sensorids = self.db.getActiveSensorIDs()
+        loggingconfigs = self.db.getActiveLoggingIDs()
         
-        #Configure logger **Need to output errors to error log...
-        for sensor in sensors:
-            try:
-                sensorsettings = sensor['settings']
-            except TypeError as tp:
-                raise DataLogConfigError(
-                'YAML configured wrong. Sensor block missing dash (-)')
-            
-            interval = sensorsettings['measure_interval']
-            self.addSensor(sensor['sensortype'],sensor['name'],sensor['settings'])
-            self.scheduleMeasurement(sensor['name'],interval)
+        #Register sensor... not sure where to do this...
+        sensorfactory.factory.register_sensor('dbSim',databearSim.databearSim)
+        
+        #Configure logger
+        for sensorid in sensorids:
+            sensorsettings = self.db.getSensorConfig(sensorid)
 
-        for setting in loggersettings:
-            try:
-                self.scheduleStorage(
-                    setting['store'],
-                    setting['sensor'],
-                    setting['storage_interval'],
-                    setting['process'])
-            except TypeError as tp:
-                raise DataLogConfigError(
-                'YAML configured wrong. Logger setting missing dash (-)')
-            except DataLogConfigError:
-                print('in config error?')
-                raise   
+            self.addSensor(
+                sensorsettings['name'],
+                sensorsettings['serial_number'],
+                sensorsettings['address'],
+                sensorsettings['virtualport'],
+                sensorsettings['sensortype']
+                )
+            self.scheduleMeasurement(
+                sensorsettings['sensor_configid'],
+                sensorsettings['name'],
+                sensorsettings['measure_interval']
+                )
+
+        for loggingid in loggingconfigs:
+            storagesetting = self.db.setLoggingConfig(loggingid)
+                
+            self.scheduleStorage(
+                setting['measurement_name'],
+                setting['sensor_name'],
+                setting['storage_interval'],
+                setting['process'])
+               
       
     def addSensor(self,sensortype,name,settings):
         '''
