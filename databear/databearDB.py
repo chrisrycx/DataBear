@@ -11,8 +11,8 @@ DataBear database manager class
 
 '''
 
-import yaml
 import json
+import os
 import sqlite3
 
 
@@ -36,13 +36,10 @@ class DataBearDB:
         self.conn = sqlite3.connect('databear.db')
         self.curs = self.conn.cursor()
 
-    def ensureExists(self):
-        # Check if the database file exists
-        # If it exists create sqlite object and open it
+        with open(self.path + '/databearDB.sql', 'r') as sql_init_file:
+            sql_script = sql_init_file.read()
 
-        # If it doesn't exist use database creation script to
-        # initialize the database then create sqlite object and open it.
-        pass
+        self.dbcursor.executescript(sql_script)
 
     # Configuration getters and setters, Getters will need to be changed to return
     # either a dictionary of the configuration or some other type, skeleton for now

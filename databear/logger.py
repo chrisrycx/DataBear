@@ -6,6 +6,7 @@ The DataBear data logger
 
 import databear.schedule as schedule
 import databear.process as processdata
+import databear.databearDB as databearDB
 from databear import sensorfactory
 from databear.errors import DataLogConfigError, MeasureError
 from databear.databearDB import DataBearDB
@@ -55,6 +56,7 @@ class DataLogger:
         self.sel.register(self.udpsocket,selectors.EVENT_READ)
         self.listen = False
         self.messages = []
+        self.db = databearDB.DataBearDB(config)
 
         #Set up error logging
         logging.basicConfig(
