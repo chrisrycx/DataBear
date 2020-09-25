@@ -6,13 +6,6 @@ General Algorithm
 1. Store data following process type
 2. Clear data associated with storage from memory
 
-Types
-- dump: store all data in memory
-- sample: store more recent measurement
-- average: average all data since last measurement
-
-Assumes
-- Measurement scheduled at same time as storage takes place first(?)
 '''
 
 from datetime import datetime
@@ -52,7 +45,7 @@ def dump(data):
     '''
     outdata = []
     for value in data:
-        dt = value[0].strftime('%Y-%m-%d %H:%M:%S:%f')
+        dt = value[0]
         outdata.append((dt,value[1]))
 
     return outdata
@@ -62,7 +55,7 @@ def sample(data):
     Retrieve the first value from current data
     Change datetime to string
     '''
-    dt = data[0][0].strftime('%Y-%m-%d %H:%M:%S')
+    dt = data[0][0]
     outdata = [(dt,data[0][1])]
 
     return outdata
@@ -80,7 +73,7 @@ def average(data,storetime):
     dAve = np.average(datanp)
 
     #Convert storetime to string
-    dt = storetime.strftime('%Y-%m-%d %H:%M:%S')
+    dt = storetime
 
     return [(dt,dAve)]
 
@@ -96,7 +89,7 @@ def datamax(data,storetime):
     dAve = np.max(datanp)
 
     #Convert storetime to string
-    dt = storetime.strftime('%Y-%m-%d %H:%M:%S')
+    dt = storetime
 
     return [(dt,dAve)]
 
@@ -112,48 +105,13 @@ def datamin(data,storetime):
     dAve = np.min(datanp)
 
     #Convert storetime to string
-    dt = storetime.strftime('%Y-%m-%d %H:%M:%S')
+    dt = storetime
 
     return [(dt,dAve)]
 
 
-#------------- Testing -------------
-if __name__ == "__main__":
-    #Test parameters
-    simtime = datetime(2020,2,27,12,20)
 
-    testdata = [
-        ('2020-02-27 11:00',1),
-        ('2020-02-27 11:10',2),
-        ('2020-02-27 11:20',3),
-        ('2020-02-27 11:30',4),
-        ('2020-02-27 11:40',5),
-        ('2020-02-27 11:50',6),
-        ('2020-02-27 12:00',7),
-        ('2020-02-27 12:10',8)
-    ]
-
-    #Convert testdata to form (<datetime>,val)
-    data = []
-    for row in testdata:
-        timestr = row[0]
-        dt = datetime.strptime(timestr,'%Y-%m-%d %H:%M')
-        data.append((dt,row[1]))
-
-    #Test functions
-    test1 = calculate('dump',data,simtime)
-    test2 = calculate('sample',data,simtime)
-    test3 = calculate('average',data,simtime)
-    test4 = calculate('max',data,simtime)
-    test5 = calculate('min',data,simtime)
-
-    print(test1)
-    print(test2)
-    print(test3)
-    print(test4)
-    print(test5)
-
-
+   
 
 
 

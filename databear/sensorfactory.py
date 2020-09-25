@@ -25,14 +25,14 @@ class sensorFactory:
     def register_sensor(self,sensortype,sensorobject):
         self.sensortypes[sensortype] = sensorobject
 
-    def get_sensor(self,sensortype,name,sn,address,interval):
+    def get_sensor(self,sensortype,name,sn,address):
         #Note: .get method on dictionary will return none if not found
         sensorobject = self.sensortypes.get(sensortype)
         if not sensorobject:
             #Evaluates true if sensorobject is none
             raise ValueError(sensorobject)
         
-        return sensorobject(name,sn,address,interval)
+        return sensorobject(name,sn,address)
 
 #Create sensor factory and register Dyacon
 factory = sensorFactory()

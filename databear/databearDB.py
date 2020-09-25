@@ -49,7 +49,6 @@ class DataBearDB:
         '''
         #Testing
         sensor = {
-            'sensor_configid':1,
             'name':'sim1',
             'serial_number':'99',
             'address':0,
@@ -122,6 +121,13 @@ class DataBearDB:
         self.conn.commit()
 
         return self.curs.lastrowid
+
+    def close(self):
+        '''
+        Close all connections
+        '''
+        self.curs.close()
+        self.conn.close()
 
 
 

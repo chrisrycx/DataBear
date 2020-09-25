@@ -56,7 +56,6 @@ class DataLogger:
         self.sel.register(self.udpsocket,selectors.EVENT_READ)
         self.listen = False
         self.messages = []
-        self.db = databearDB.DataBearDB(config)
 
         #Set up error logging
         logging.basicConfig(
@@ -87,22 +86,23 @@ class DataLogger:
                 sensorsettings['sensortype']
                 )
             self.scheduleMeasurement(
-                sensorsettings['sensor_configid'],
+                sensorid,
                 sensorsettings['name'],
                 sensorsettings['measure_interval']
                 )
 
         for loggingid in loggingconfigs:
-            storagesetting = self.db.setLoggingConfig(loggingid)
+            storagesetting = self.db.getLoggingConfig(loggingid)
                 
             self.scheduleStorage(
-                setting['measurement_name'],
-                setting['sensor_name'],
-                setting['storage_interval'],
-                setting['process'])
+                loggingid,
+                storagesetting['measurement_name'],
+                storagesetting['sensor_name'],
+                storagesetting['storage_interval'],
+                storagesetting['process'])
                
       
-    def addSensor(self,sensortype,name,settings):
+    def addSensor(self,name,sn,address,virtualport,sensortype):
         '''
         Add a sensor to the logger
         '''
@@ -110,16 +110,17 @@ class DataLogger:
         sensor = sensorfactory.factory.get_sensor(
             sensortype,
             name,
-            settings['serialnumber'],
-            settings['address'],
-            settings['measure_interval']
+            sn,
+            address
             )
 
         #"Connect" virtual port to hardware using driver
         #Ignore if port0 (simulated sensors)
-        if settings['virtualport']!='port0':
+        if virtualport!='port0':
             hardware_port = self.driver.connect(
-                settings['virtualport'],sensor.hardware_settings)
+                virtualport,
+                sensor.hardware_settings
+                )
         else:
             hardware_port = ''
 
@@ -151,11 +152,13 @@ class DataLogger:
 
         return successflag
     
-    def scheduleMeasurement(self,sensorname,interval):
+    def scheduleMeasurement(self,sensorid,sensorname,interval):
         '''
-        Schedule a measurement
+        Schedule a measurement:
         Interval is seconds
         '''
+        self.sensors[sensorname].configid = sensorid
+
         #Check interval to ensure it isn't too small
         if interval < self.sensors[sensorname].min_interval:
             raise DataLogConfigError('Logger frequency exceeds sensor max')
@@ -195,7 +198,7 @@ class DataLogger:
                         m,
                         merrors.messages[m]))
 
-    def scheduleStorage(self,name,sensor,interval,process):
+    def scheduleStorage(self,configid,name,sensor,interval,process):
         '''
         Schedule when storage takes place
         '''
@@ -205,9 +208,9 @@ class DataLogger:
 
         s = self.storeMeasurement
         #Note: Some parameters for function supplied by Job class in Schedule
-        self.logschedule.every(interval).do(s,name,sensor,process)
+        self.logschedule.every(interval).do(s,configid,name,sensor,process)
 
-    def storeMeasurement(self,name,sensor,process,storetime,lasttime):
+    def storeMeasurement(self,logconfigid,name,sensor,process,storetime,lasttime):
         '''
         Store measurement data according to process.
         Inputs
@@ -236,16 +239,17 @@ class DataLogger:
         #Process data
         storedata = processdata.calculate(process,data,storetime)
 
-        #Write to CSV
+        #Write data to database
         for row in storedata:
-            datadict = {
-                    'dt': row[0],
-                    'measurement':name,
-                    'value': row[1],
-                    'sensor':sensor}
+            dtstr = row[0].strftime('%Y-%m-%d %H:%M:%S')
+            value = row[0]
 
-            #Output row to CSV
-            self.csvwrite.writerow(datadict)
+            self.db.storeData(
+                dtstr,
+                value,
+                self.sensors[sensor].configid,
+                logconfigid,
+                0)
             
     def listenUDP(self):
         '''

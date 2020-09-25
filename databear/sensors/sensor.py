@@ -6,7 +6,7 @@ from databear.errors import SensorConfigError
 class Sensor:
     interface_version = '1.0'
     hardware_settings = {}
-    def __init__(self,name,sn,address,interval):
+    def __init__(self,name,sn,address):
         '''
         Create a new sensor
         Inputs
@@ -19,11 +19,11 @@ class Sensor:
             self.name = name
             self.sn = sn
             self.address = address
-            self.interval = interval
         except KeyError as ke:
             raise SensorConfigError('YAML missing required sensor setting')
 
         #Define characteristics of this sensor
+        self.configid = None
         self.min_interval = 0  #Minimum interval that sensor can be polled
 
         #Initialize data structure
