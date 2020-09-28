@@ -1,7 +1,7 @@
 '''
 Base class for DataBear sensors
 '''
-from databear.errors import SensorConfigError
+from databear.errors import SensorConfigError, MeasureError
 
 class Sensor:
     interface_version = '1.0'
@@ -79,11 +79,15 @@ class Sensor:
         - Inputs: datetime objects
         '''
         output = []
-        data = self.data[name]
-        for val in data:
-            if (val[0]>=startdt) and (val[0]<enddt):
-                output.append(val)
-        return output
+        try:
+            data = self.data[name]
+            for val in data:
+                if (val[0]>=startdt) and (val[0]<enddt):
+                    output.append(val)
+            return output
+        except KeyError as ke:
+            print(name + " missing from " + data)
+            raise MeasureError(name, [], "name missing from dictionary")
 
     def cleardata(self,name,startdt,enddt):
         '''
