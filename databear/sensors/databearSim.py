@@ -10,13 +10,13 @@ from databear.errors import MeasureError, SensorConfigError
 from databear.sensors import sensor
 
 class databearSim(sensor.Sensor):
-    def __init__(self,name,sn,address,interval):
+    def __init__(self,name,sn,address):
         '''
         Create a new simulator
         - Call base class init
         - Override base data structure
         '''
-        super().__init__(name,sn,address,interval)
+        super().__init__(name,sn,address)
 
         #Initialize data structure
         self.counter = 0 #measure 3 will simply be a measurement count
