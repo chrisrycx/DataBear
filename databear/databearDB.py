@@ -35,11 +35,12 @@ class DataBearDB:
         #Initialize database sqlite connection object
         self.conn = sqlite3.connect('databear.db')
         self.curs = self.conn.cursor()
+        self.path = os.path.dirname(__file__)
 
         with open(self.path + '/databearDB.sql', 'r') as sql_init_file:
             sql_script = sql_init_file.read()
 
-        self.dbcursor.executescript(sql_script)
+        self.curs.executescript(sql_script)
 
     # Configuration getters and setters, Getters will need to be changed to return
     # either a dictionary of the configuration or some other type, skeleton for now
