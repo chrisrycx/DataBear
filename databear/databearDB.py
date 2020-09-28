@@ -51,7 +51,7 @@ class DataBearDB:
         '''
         Return the given sensor's configuration or None if id is invalid
         '''
-        #Testing
+        #Testing - This is target output... requires a join of two tables
         sensor = {
             'name':'sim1',
             'serial_number':'99',
@@ -86,15 +86,22 @@ class DataBearDB:
     def getLoggingConfig(self, logging_configid):
         # Get a logging configuration by it's id
 
-        #Testing
-        settings = {
+        #Testing - This is target output... requires a join of two tables
+        settings1 = {
             'measurement_name':'simsecond',
             'sensor_name':'sim1',
             'storage_interval':10,
             'process':'dump'
         }
+        settings2 = {
+            'measurement_name':'counter',
+            'sensor_name':'sim1',
+            'storage_interval':10,
+            'process':'average'
+        }
+        setlist = [None,settings1,settings2]
 
-        return settings
+        return setlist[logging_configid]
 
     def setLoggingConfig(self, logging_configid, measurementid, storage_interal, processid, status):
         # Set a logging configuration by its id and values

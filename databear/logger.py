@@ -242,7 +242,7 @@ class DataLogger:
         #Write data to database
         for row in storedata:
             dtstr = row[0].strftime('%Y-%m-%d %H:%M:%S')
-            value = row[0]
+            value = row[1]
 
             self.db.storeData(
                 dtstr,
