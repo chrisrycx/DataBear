@@ -47,33 +47,90 @@ class DataBearDB:
 
     # Configuration getters and setters, Getters will need to be changed to return
     # either a dictionary of the configuration or some other type, skeleton for now
-    def getSensorConfig(self, sensor_configid):
+    def getSensor(self, sensorid):
         '''
-        Return the given sensor's configuration or None if id is invalid
+        Return the given sensor's object as a sensor object (name, serial_number, etc.) or None if id is invalid
         '''
-        #Testing - This is target output... requires a join of two tables
-        sensor = {
-            'name':'sim1',
-            'serial_number':'99',
-            'address':0,
-            'virtualport':'port0',
-            'sensor_type':'dbSim',
-            'measure_interval':5
-        }
+        sensor = {}
+        id = (sensorid,)
+        self.curs.execute("Select * from sensor s inner join sensor_configuration sc on s.sensor_id = sc.sensor_id "
+                          "where s.sensor_id = ? "
+                          " and sc.status = 1", id)
+        row = self.curs.fetchone()
+
+        if not row:
+            return None
+
+        sensor["name"] = row["name"]
+        sensor["serial_number"] = row["serial_number"]
+        sensor["address"] = row["address"]
+        sensor["virtualport"] = row["virutalport"]
+        sensor["measure_interval"] = row["measure_interval"]
         return sensor
+        
+    def sanitizeSensorValues(self, sensor):
+        '''
+        Helper to sanitize the values from sensor to use in update and insert sqlite statements
+        '''
+        values = []
+        values[0] = sensor["name"]
+        values[1] = sensor["serial_number"]
+        values[2] = sensor["address"]
+        values[3] = sensor["virtualport"]
+        values[4] = sensor["sensor_type"]
+        return values
 
+    def setSensor(self, sensorid, sensor):
+        '''
+        Set a given sensor
+        sensorid is the id from the table
+        sensor is a dict containing the sensor details
+        '''
+        values = self.sanitizeSensorValues(sensor)
+        values[6] = sensorid
 
-    def setSensorConfig(self, sersor_configid, sensorid, measure_interval, status):
-        # May make status separate if it needs to be able to be enabled/disabled without sending
-        # all parameters, etc. but use this for now
-        pass
+        self.curs.execute("Update sensor set name = ?, serial_number = ?, address = ?, virtualport = ?, sensor_type = ? "
+                          " where sensor_id = ?", values)
+        # TODO: Check for errors, etc.
+
+    def addSensor(self, sensor):
+        '''
+        Add a new sensor with the values specified in the sensor dict
+        '''
+        values = self.sanitizeSensorValues(sensor)
+        self.curs.execute("INSERT into sensor set (name, serial_number, address, virtualport, sensor_type) "
+                          "values (?, ?, ?, ?, ?)")
+        # TODO: Check for errors, etc.
+
+    def setSensorConfig(self, sensor_configid, sensorid, measure_interval):
+        '''
+        Set a sensor config and return the new sensor_configid
+        Since sensor configuration changes mean new measurements will use the new configuration
+        we need to leave the existing configuration in place and generate a new one setting
+        the old one's status to disabled (0)
+        '''
+        # First add the new config
+        # marking it as enabled (1)
+        values = [sensorid, measure_interval, 1];
+        self.curs.execute("Insert into sensor_configuration set (sensor_id, measure_interval, status) (?,?,?)", values)
+        # TODO: Check for errors, etc.
+        new_configid = self.curs.lastrowid
+
+        # Set old configid entry to inactive
+        values = (sensor_configid,)
+        self.curs.execute("Update sensor_configuration set status = 0 where sensor_configid = ?", values)
+        
+        return new_configid
 
     def getActiveSensorIDs(self):
         '''
         Return list of active sensor IDs
         '''
-        #Testing
-        return [1]
+        ids = []
+        for row in self.curs.execute("Select sensor_configid from sensor_configuration where status = 1"):
+            ids.append(row["sensor_configid"])
+
+        return ids
 
     def getActiveLoggingIDs(self):
         '''
@@ -86,22 +143,15 @@ class DataBearDB:
     def getLoggingConfig(self, logging_configid):
         # Get a logging configuration by it's id
 
-        #Testing - This is target output... requires a join of two tables
-        settings1 = {
+        #Testing
+        settings = {
             'measurement_name':'simsecond',
             'sensor_name':'sim1',
             'storage_interval':10,
             'process':'dump'
         }
-        settings2 = {
-            'measurement_name':'counter',
-            'sensor_name':'sim1',
-            'storage_interval':10,
-            'process':'average'
-        }
-        setlist = [None,settings1,settings2]
 
-        return setlist[logging_configid]
+        return settings
 
     def setLoggingConfig(self, logging_configid, measurementid, storage_interal, processid, status):
         # Set a logging configuration by its id and values
