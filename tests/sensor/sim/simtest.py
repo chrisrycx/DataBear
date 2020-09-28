@@ -18,8 +18,7 @@ driver = driver_module.dbdriver()
 sensorfactory.factory.register_sensor('simulator',databearSim.databearSim)
 
 #------ Create a logger ------
-config = 'simtest.yaml'
-datalogger = logger.DataLogger(config,driver)
+datalogger = logger.DataLogger(driver)
 
 #------- Run databear ------
 #  ctrl-c to stop
