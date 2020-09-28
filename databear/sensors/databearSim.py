@@ -20,7 +20,8 @@ class databearSim(sensor.Sensor):
 
         #Initialize data structure
         self.counter = 0 #measure 3 will simply be a measurement count
-        self.data = {'second':[],'second2':[],'counter':[]}
+        self.keys = ['simsecond', 'simsecond2', 'counter']
+        self.data = {self.keys[0]:[],self.keys[1]:[],self.keys[2]:[]}
 
     def measure(self):
         '''
@@ -36,9 +37,9 @@ class databearSim(sensor.Sensor):
             raise MeasureError(self.name,['measure1'],{'measure1':'Test failure'})
 
         #Measurements are simply integers from the dt
-        self.data['simsecond'].append((dt,dt.second))
-        self.data['simsecond2'].append((dt,dt.second))
-        self.data['counter'].append((dt,self.counter))
+        self.data[self.keys[0]].append((dt,dt.second))
+        self.data[self.keys[1]].append((dt,dt.second))
+        self.data[self.keys[2]].append((dt,self.counter))
 
         #Pause to simulate a measurement time
         time.sleep(0.5)
