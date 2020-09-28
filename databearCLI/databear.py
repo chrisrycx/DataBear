@@ -1,14 +1,20 @@
+#!/bin/env python
 '''
-Eventual DataBear Command Line Utility...
+DataBear command line utility
 
 Use:
-python databear.py <cmd> <option>
+databear <cmd> <option>
+
+Commands:
+run <config.yaml>
+shutdown
+other... WIP
 
 '''
 import socket
 import json
 import sys
-import databear
+from databear import logger, databearDB
 import sqlite3
 import yaml
 import subprocess
@@ -25,12 +31,28 @@ else:
     option = ''
 
 #------------- Functions --------------
-def runDataBear():
+def runDataBear(yamlfile=None):
     '''
-    Check if instance of DataBear exists
-    If not start...
+    Run databear with optional yaml configuration
+    file
     '''
-    pass
+    #Parse YAML file
+    if yamlfile:
+        config = parseYAML(yamlfile)
+
+        #Connect to database
+        db = databearDB.DataBearDB()
+
+        #Load configuration
+        db.addSensor()
+        db.setSensorConfig()
+        db.setLoggingConfig()
+
+    #Run logger
+    # *** subprocess ***
+    dblogger = logger.DataLogger()
+    dblogger.loadconfig()
+    dblogger.run()
 
 def sendCommand(command,argument):
     '''
@@ -57,13 +79,11 @@ def parseYAML(yamlfile):
     parse a YAML configuration file and input
     in database
     '''
-    with open(config,'rt') as yin:
-                configyaml = yin.read()
+    with open(yamlfile,'rt') as yin:
+        configyaml = yin.read()
 
     config = yaml.safe_load(configyaml)
 
-    datalogger = config['datalogger']
-    loggersettings = datalogger['settings']
-    sensors = config['sensors']
+    return config
 
 
