@@ -83,7 +83,7 @@ class DataLogger:
                 sensorsettings['serial_number'],
                 sensorsettings['address'],
                 sensorsettings['virtualport'],
-                sensorsettings['sensortype']
+                sensorsettings['sensor_type']
                 )
             self.scheduleMeasurement(
                 sensorid,
@@ -203,7 +203,7 @@ class DataLogger:
         Schedule when storage takes place
         '''
         #Check storage frequency doesn't exceed measurement frequency
-        if interval < self.sensors[sensor].interval:
+        if interval < self.sensors[sensor].min_interval:
             raise DataLogConfigError('Storage frequency exceeds sensor measurement frequency')
 
         s = self.storeMeasurement
