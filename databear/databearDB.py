@@ -47,18 +47,69 @@ class DataBearDB:
 
     # Configuration getters and setters, Getters will need to be changed to return
     # either a dictionary of the configuration or some other type, skeleton for now
+    def getSensor(self, sensorid):
+        '''
+        Return the given sensor's object as a sensor object (name, serial_number, etc.) or None if id is invalid
+        '''
+        sensor = {}
+        id = (sensorid,)
+        self.curs.execute("Select * from sensor where sensor_id = ?", id)
+        row = self.curs.fetchone()
+
+        if not row:
+            return None
+
+        sensor["name"] = row["name"]
+        sensor["serial_number"] = row["serial_number"]
+        sensor["address"] = row["address"]
+        sensor["virtualport"] = row["virutalport"]
+        sensor["measure_interval"] = row["measure_interval"]
+        return sensor
+        
+    def sanitizeSensorValues(self, sensor):
+        '''
+        Helper to sanitize the values from sensor to use in update and insert sqlite statements
+        '''
+        values = []
+        values[0] = sensor["name"]
+        values[1] = sensor["serial_number"]
+        values[2] = sensor["address"]
+        values[3] = sensor["virtualport"]
+        values[4] = sensor["sensor_type"]
+        values[5] = sensor["measure_interval"]
+        return values
+
+    def setSensor(self, sensorid, sensor):
+        '''
+        Set a given sensor
+        sensorid is the id from the table
+        sensor is a dict containing the sensor details
+        '''
+        values = self.sanitizeSensorValues(sensor)
+        values[6] = sensorid
+
+        self.curs.execute("Update sensor set name = ?, serial_number = ?, address = ?, virtualport = ?, sensor_type = ?, measure_interval = ?"
+                          " where sensor_id = ?", values)
+        # TODO: Check for errors, etc.
+
+    def addSensor(self, sensor):
+        '''
+        Add a new sensor with the values specified in the sensor dict
+        '''
+        values = self.sanitizeSensorValues(sensor)
+        self.curs.execute("INSERT into sensor set (name, serial_number, address, virtualport, sensor_type, measure_interval) "
+                          "values (?, ?, ?, ?, ?, ?)")
+        # TODO: Check for errors, etc.
+
     def getSensorConfig(self, sensor_configid):
         '''
         Return the given sensor's configuration or None if id is invalid
         '''
         #Testing
-        sensor = {
-            'name':'sim1',
-            'serial_number':'99',
-            'address':0,
-            'virtualport':'port0',
-            'sensor_type':'dbSim',
-            'measure_interval':5
+        sensorconfig = {
+            "sensorid": "1"
+            "measure_interval": 5
+            "status": 1
         }
         return sensor
 
