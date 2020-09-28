@@ -29,18 +29,21 @@ class DataBearDB:
             -- Create if needed
         - Create connection to database
         '''
-        #Check if database exists
-        #  **To Do
+        # Check if database exists
+        exists = os.path.isfile('databear.db')
 
-        #Initialize database sqlite connection object
+        # Initialize database sqlite connection object
+        # This will create the file if it doesn't exist, hence the check first
         self.conn = sqlite3.connect('databear.db')
         self.curs = self.conn.cursor()
         self.path = os.path.dirname(__file__)
 
-        with open(self.path + '/databearDB.sql', 'r') as sql_init_file:
-            sql_script = sql_init_file.read()
+        # Only initialize if the database didn't already exist
+        if not exists:
+            with open(self.path + '/databearDB.sql', 'r') as sql_init_file:
+                sql_script = sql_init_file.read()
 
-        self.curs.executescript(sql_script)
+            self.curs.executescript(sql_script)
 
     # Configuration getters and setters, Getters will need to be changed to return
     # either a dictionary of the configuration or some other type, skeleton for now
@@ -61,7 +64,7 @@ class DataBearDB:
 
 
     def setSensorConfig(self, sersor_configid, sensorid, measure_interval, status):
-        # Make make status separate if it needs to be able to be enabled/disabled without sending
+        # May make status separate if it needs to be able to be enabled/disabled without sending
         # all parameters, etc. but use this for now
         pass
 
