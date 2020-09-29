@@ -8,7 +8,7 @@ databear <cmd> <option>
 Commands:
 run <config.yaml>
 shutdown
-other... WIP
+others under development
 
 '''
 import socket
@@ -30,14 +30,22 @@ if len(sys.argv) > 2:
 else:
     option = ''
 
+#Setup socket for communication with databear
+ipaddress = 'localhost'
+udp_port = 62000
+sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+sock.settimeout(5)
+
+
 #------------- Functions --------------
 def runDataBear(yamlfile=None):
     '''
     Run databear with optional yaml configuration
     file
     '''
-    #Parse YAML file
+    #Parse YAML file and load to database
     if yamlfile:
+        '''
         config = parseYAML(yamlfile)
 
         #Connect to database
@@ -47,31 +55,39 @@ def runDataBear(yamlfile=None):
         db.addSensor()
         db.setSensorConfig()
         db.setLoggingConfig()
+        '''
+        pass
 
+    #Check to see if logger is already running
+    #If so, shutdown for restart
+    statusrsp = sendCommand('status')
+    print(statusrsp)
+    if statusrsp:
+        shtdwnrsp = sendCommand('shutdown')
+        print(shtdwnrsp)
+    
     #Run logger
     # *** subprocess ***
     dblogger = logger.DataLogger()
     dblogger.loadconfig()
     dblogger.run()
 
-def sendCommand(command,argument):
+def sendCommand(command,argument=None):
     '''
     Send a command to DataBear
     '''
-    msg = {'command':cmd,'arg':option}
-
-    #Set up connection
-    ipaddress = 'localhost'
-    udp_port = 62000
-
-    sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-    sock.settimeout(5)
+    msg = {'command':command}
+    if argument: msg['arg'] = argument
 
     #Send and receive message
     print('Sending message: {}'.format(msg))
-    sock.sendto(json.dumps(msg).encode('utf-8'),(ipaddress,udp_port))
-    response = sock.recv(1024)
-    print(response)
+
+    try:
+        sock.sendto(json.dumps(msg).encode('utf-8'),(ipaddress,udp_port))
+        response = sock.recv(1024)
+    except:
+        response = None
+
     return response
 
 def parseYAML(yamlfile):
@@ -85,5 +101,14 @@ def parseYAML(yamlfile):
     config = yaml.safe_load(configyaml)
 
     return config
+
+
+#---------------  Main ----------------
+if cmd=='run':
+    runDataBear()
+else:
+    rsp = sendCommand(cmd)
+    print(rsp)
+
 
 

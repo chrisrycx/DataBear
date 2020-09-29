@@ -20,6 +20,8 @@ import time #For sleeping during execution
 import csv
 import sys #For command line args
 import logging
+import os
+import importlib
 
 #Testing
 from databear.sensors import databearSim
@@ -33,7 +35,7 @@ class DataLogger:
     #Error logging format
     errorfmt = '%(asctime)s %(levelname)s %(lineno)s %(message)s'
 
-    def __init__(self,dbdriver):
+    def __init__(self):
         '''
         Initialize a new data logger
         Input (various options)
@@ -45,7 +47,13 @@ class DataLogger:
         self.sensors = {}
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
-        self.driver = dbdriver
+
+        #Load hardware driver
+        drivername = os.environ['DBDRIVER']
+        driver_module = importlib.import_module(drivername)
+        self.driver = driver_module.dbdriver()
+
+        #Set up database connection
         self.db = DataBearDB()
 
         #Configure UDP socket for API
