@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="databear",
-    version="1.5.0",
+    version="2.0",
     author="Chris Cox",
     author_email="chrisrycx@gmail.com",
     description="A Python based data logger",
@@ -23,5 +23,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=['pyyaml'],
-    python_requires='>=3.6'
+    python_requires='>=3.6',
+    entry_points='''
+        [console_scripts]
+        databear=databear.databearCLI:main_cli
+    '''
 )

@@ -1,4 +1,3 @@
-#!/bin/env python
 '''
 DataBear command line utility
 
@@ -19,23 +18,11 @@ import sqlite3
 import yaml
 import subprocess
 
-#Read in command line args
-if len(sys.argv) < 2:
-        print('Arguments: <cmd> <options>')
-        exit(0)
-
-cmd = sys.argv[1]
-if len(sys.argv) > 2:
-    option = sys.argv[2]
-else:
-    option = ''
-
 #Setup socket for communication with databear
 ipaddress = 'localhost'
 udp_port = 62000
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 sock.settimeout(5)
-
 
 #------------- Functions --------------
 def runDataBear(yamlfile=None):
@@ -104,11 +91,33 @@ def parseYAML(yamlfile):
 
 
 #---------------  Main ----------------
-if cmd=='run':
-    runDataBear()
-else:
-    rsp = sendCommand(cmd)
-    print(rsp)
+def main_cli():
+    '''
+    Entry point for command line execution
+    '''
+    #Read in command line args
+    if len(sys.argv) < 2:
+            print('Arguments: <cmd> <options>')
+            return
+
+    cmd = sys.argv[1]
+    if len(sys.argv) > 2:
+        option = sys.argv[2]
+    else:
+        option = ''
+
+    if cmd=='run':
+        runDataBear()
+    else:
+        rsp = sendCommand(cmd)
+        print(rsp)
+
+
+
+
+
+    
+
 
 
 
