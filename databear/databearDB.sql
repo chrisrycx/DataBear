@@ -20,21 +20,19 @@ CREATE TABLE IF NOT EXISTS "data" (
 	FOREIGN KEY("sensor_configid") REFERENCES "sensor_configuration"("sensor_configid") ON DELETE RESTRICT
 );
 CREATE TABLE IF NOT EXISTS "logging_configuration" (
-	"logging_configid"	INTEGER,
+	"logging_configid"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	"measurementid"	INTEGER NOT NULL,
 	"storage_interval"	INTEGER NOT NULL,
 	"processid"	INTEGER NOT NULL,
 	"status"	INTEGER,
-	PRIMARY KEY("logging_configid"),
 	FOREIGN KEY("measurementid") REFERENCES "measurements"("measurement_id") ON DELETE CASCADE,
 	FOREIGN KEY("processid") REFERENCES "processes"("process_id") ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "sensor_configuration" (
-	"sensor_configid"	INTEGER,
+	"sensor_configid"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	"sensorid"	INTEGER NOT NULL,
 	"measure_interval"	REAL NOT NULL,
 	"status"	INTEGER,
-	PRIMARY KEY("sensor_configid"),
 	FOREIGN KEY("sensorid") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
 	UNIQUE("sensorid","status")
 );
