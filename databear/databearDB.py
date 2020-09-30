@@ -136,22 +136,31 @@ class DataBearDB:
         '''
         Return active logger configuration IDs
         '''
-        #Testing
-        return [1,2]
+        ids = []
+        for row in self.curs.execute("Select logging_configid from logging_configuration where status = 1"):
+            ids.append(row["logging_configid"])
 
+        return ids
 
     def getLoggingConfig(self, logging_configid):
         # Get a logging configuration by it's id
+        # Logging configurations join with measurements, processes, and sensors to get all their details
 
-        #Testing
-        settings = {
-            'measurement_name':'simsecond',
-            'sensor_name':'sim1',
-            'storage_interval':10,
-            'process':'dump'
-        }
+        config = {}
+        id = (logging_configid,)
+        self.curs.execute("Select * from logging_configuration l inner join measurements m on l.measurementid = m.measurement_id "
+                          "inner join processes p on l.process_id = p.processid inner join sensor s on m.sensor_id = s.sensor_id "
+                          "where l.logging_configid = ?", id)
+        row = self.curs.fetchone()
 
-        return settings
+        if not row:
+            return None
+
+        config["measurement_name"] = row["measurements.name"]
+        config["sensor_name"] = row["s.name"]
+        config["storage_interval"] = row["l.storage_interval"]
+        config["process"] = row["p.name"]
+        return config
 
     def setLoggingConfig(self, logging_configid, measurementid, storage_interal, processid, status):
         # Set a logging configuration by its id and values
