@@ -23,9 +23,6 @@ import logging
 import os
 import importlib
 
-#Testing
-from databear.sensors import databearSim
-
 
 #-------- Logger Initialization and Setup ------
 class DataLogger:
@@ -56,6 +53,9 @@ class DataLogger:
         #Set up database connection
         self.db = DataBearDB()
 
+        #Search for available sensors
+        #** To Do
+
         #Configure UDP socket for API
         self.udpsocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         self.udpsocket.bind(('localhost',62000))
@@ -75,12 +75,26 @@ class DataLogger:
         Get configuration out of database and
         start sensors
         '''
+        #Get list of enabled sensors and register with factory
+        enabledsensors = self.db.getEnabledSensors()
+        
+        for enabled_sensor in enabledsensors:
+            #Import class
+            if enabled_sensor['customsensor']==1:
+                #This is a custom sensor (DBSENSORS path)
+                pass
+            else:
+                #Built in sensor (sensors folder)
+                sensor_class = importlib.import_module()
+
+            sensorfactory.factory.register_sensor(
+                enabled_sensor['class_name'],
+                sensor_class)
+
+        
         #Get list of active sensors and logging
         sensorids = self.db.getActiveSensorIDs()
         loggingconfigs = self.db.getActiveLoggingIDs()
-        
-        #Register sensor... not sure where to do this...
-        sensorfactory.factory.register_sensor('dbSim',databearSim.databearSim)
         
         #Configure logger
         for sensorid in sensorids:

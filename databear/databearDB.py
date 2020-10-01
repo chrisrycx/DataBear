@@ -47,6 +47,17 @@ class DataBearDB:
 
     # Configuration getters and setters, Getters will need to be changed to return
     # either a dictionary of the configuration or some other type, skeleton for now
+    def getEnabledSensor(self):
+        '''
+        Return a list of sensor classes that are available and enabled
+        '''
+        #** Testing
+        enabledsensors = [{
+            'class_name':'databearSim',
+            'customsensor':0
+        }]
+        return enabledsensors
+    
     def getSensor(self, sensorid):
         '''
         Return the given sensor's object as a sensor object (name, serial_number, etc.) or None if id is invalid
