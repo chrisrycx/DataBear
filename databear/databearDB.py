@@ -35,6 +35,7 @@ class DataBearDB:
         # Initialize database sqlite connection object
         # This will create the file if it doesn't exist, hence the check first
         self.conn = sqlite3.connect('databear.db')
+        self.conn.row_factory = sqlite3.Row
         self.curs = self.conn.cursor()
         self.path = os.path.dirname(__file__)
 
@@ -47,7 +48,7 @@ class DataBearDB:
 
     # Configuration getters and setters, Getters will need to be changed to return
     # either a dictionary of the configuration or some other type, skeleton for now
-    def getEnabledSensor(self):
+    def getEnabledSensors(self):
         '''
         Return a list of sensor classes that are available and enabled
         '''
@@ -58,15 +59,16 @@ class DataBearDB:
         }]
         return enabledsensors
     
-    def getSensor(self, sensor_id):
+    def getSensorConfig(self, sensor_id):
         '''
-        Return the given sensor's object as a sensor object (name, serial_number, etc.) or None if id is invalid
+        Return the given sensor's object as a sensor object (name, serial_number, etc.) 
+        or None if id is invalid
         '''
         sensor = {}
-        id = (sensor_id,)
-        self.curs.execute("Select * from sensor s inner join sensor_configuration sc on s.sensor_id = sc.sensor_id "
-                          "where s.sensor_id = ? "
-                          " and sc.status = 1", id)
+        sensor_id = (sensor_id,)
+        self.curs.execute("Select * from sensors s inner join "
+                          "sensor_configuration sc on s.sensor_id = sc.sensor_id "
+                          "where s.sensor_id = ? and sc.status = 1", sensor_id)
         row = self.curs.fetchone()
 
         if not row:
@@ -75,8 +77,10 @@ class DataBearDB:
         sensor["name"] = row["name"]
         sensor["serial_number"] = row["serial_number"]
         sensor["address"] = row["address"]
-        sensor["virtualport"] = row["virutalport"]
+        sensor["virtualport"] = row["virtualport"]
         sensor["measure_interval"] = row["measure_interval"]
+        sensor["class_name"] = row["class_name"]
+
         return sensor
         
     def sanitizeSensorValues(self, sensor):
@@ -122,7 +126,7 @@ class DataBearDB:
         '''
         # First add the new config
         # marking it as enabled (1)
-        values = [sensor_id, measure_interval, 1];
+        values = [sensor_id, measure_interval, 1]
         self.curs.execute("Insert into sensor_configuration set (sensor_id, measure_interval, status) (?,?,?)", values)
         # TODO: Check for errors, etc.
         new_config_id = self.curs.lastrowid
@@ -137,11 +141,13 @@ class DataBearDB:
         '''
         Return list of active sensor IDs
         '''
-        ids = []
-        for row in self.curs.execute("Select sensor_config_id from sensor_configuration where status = 1"):
-            ids.append(row["sensor_config_id"])
+        sensor_ids = []
+        self.curs.execute("SELECT sensor_config_id FROM sensor_configuration WHERE status = 1")
+            
+        for row in self.curs.fetchall():
+            sensor_ids.append(row["sensor_config_id"])
 
-        return ids
+        return sensor_ids
 
     def getActiveLoggingIDs(self):
         '''
@@ -158,10 +164,12 @@ class DataBearDB:
         # Logging configurations join with measurements, processes, and sensors to get all their details
 
         config = {}
-        id = (logging_config_id,)
-        self.curs.execute("Select * from logging_configuration l inner join measurements m on l.measurement_id = m.measurement_id "
-                          "inner join processes p on l.process_id = p.process_id inner join sensor s on m.sensor_id = s.sensor_id "
-                          "where l.logging_config_id = ?", id)
+        self.curs.execute(
+            "Select * from logging_configuration l inner join "
+            "measurements m on l.measurement_id = m.measurement_id "
+            "inner join processes p on l.process_id = p.process_id inner join sensor s on m.sensor_id = s.sensor_id "
+            "where l.logging_config_id = ?", (logging_config_id,))
+        
         row = self.curs.fetchone()
 
         if not row:

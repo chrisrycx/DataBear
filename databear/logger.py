@@ -77,20 +77,27 @@ class DataLogger:
         '''
         #Get list of enabled sensors and register with factory
         enabledsensors = self.db.getEnabledSensors()
-        
-        for enabled_sensor in enabledsensors:
-            #Import class
-            if enabled_sensor['customsensor']==1:
-                #This is a custom sensor (DBSENSORS path)
-                pass
-            else:
-                #Built in sensor (sensors folder)
-                sensor_class = importlib.import_module()
 
+        for enabled_sensor in enabledsensors:
+            '''
+            Assumes class name and module name the same
+            Path to custom sensor classes must be added to PYTHONPATH
+            '''
+            #Import string
+            impstr = enabled_sensor['class_name']
+
+            #Import class
+            if enabled_sensor['customsensor']==0:
+                #Built in sensor (sensors folder)
+                impstr = 'databear.sensors.'+impstr 
+
+            sensor_module = importlib.import_module(impstr)
+            sensor_class = getattr(sensor_module,enabled_sensor['class_name'])
+
+            #Register with factory
             sensorfactory.factory.register_sensor(
                 enabled_sensor['class_name'],
                 sensor_class)
-
         
         #Get list of active sensors and logging
         sensorids = self.db.getActiveSensorIDs()
@@ -105,7 +112,7 @@ class DataLogger:
                 sensorsettings['serial_number'],
                 sensorsettings['address'],
                 sensorsettings['virtualport'],
-                sensorsettings['sensor_type']
+                sensorsettings['class_name']
                 )
             self.scheduleMeasurement(
                 sensorid,
