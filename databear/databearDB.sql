@@ -1,6 +1,6 @@
 BEGIN TRANSACTION;
 CREATE TABLE IF NOT EXISTS "data" (
-	"dataid"	INTEGER NOT NULL,
+	"data_id"	INTEGER NOT NULL,
 	"dtstamp"	TEXT NOT NULL,
 	"value"	REAL NOT NULL,
 	"sensor_configid"	INTEGER NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS "data" (
 	"qc_flag"	INTEGER,
 	FOREIGN KEY("logging_configid") REFERENCES "logging_configuration"("logging_configid") ON DELETE RESTRICT,
 	FOREIGN KEY("sensor_configid") REFERENCES "sensor_configuration"("sensor_configid") ON DELETE RESTRICT,
-	PRIMARY KEY("dataid" AUTOINCREMENT)
+	PRIMARY KEY("data_id" AUTOINCREMENT)
 );
 CREATE TABLE IF NOT EXISTS "processes" (
 	"process_id"	INTEGER NOT NULL,
@@ -22,19 +22,19 @@ CREATE TABLE IF NOT EXISTS "sensors_available" (
 	"class_enabled"	INTEGER NOT NULL DEFAULT 0,
 	"customsensor" INTEGER NOT NULL DEFAULT 0,
 	UNIQUE("class_name"),
-	PRIMARY KEY("sensorclass_id")
+	PRIMARY KEY("sensorclass_id" AUTOINCREMENT)
 );
 CREATE TABLE IF NOT EXISTS "sensor_configuration" (
-	"sensor_configid"	INTEGER NOT NULL,
+	"sensor_config_id"	INTEGER NOT NULL,
 	"sensor_id"	INTEGER NOT NULL,
 	"measure_interval"	REAL NOT NULL,
 	"status"	INTEGER,
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
 	UNIQUE("sensor_id","status"),
-	PRIMARY KEY("sensor_configid" AUTOINCREMENT)
+	PRIMARY KEY("sensor_config_id" AUTOINCREMENT)
 );
 CREATE TABLE IF NOT EXISTS "logging_configuration" (
-	"logging_configid"	INTEGER NOT NULL,
+	"logging_config_id"	INTEGER NOT NULL,
 	"measurement_id"	INTEGER NOT NULL,
 	"sensor_id"	INTEGER NOT NULL,
 	"storage_interval"	INTEGER NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS "logging_configuration" (
 	FOREIGN KEY("measurement_id") REFERENCES "measurements"("measurement_id") ON DELETE CASCADE,
 	FOREIGN KEY("process_id") REFERENCES "processes"("process_id") ON UPDATE CASCADE,
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
-	PRIMARY KEY("logging_configid" AUTOINCREMENT)
+	PRIMARY KEY("logging_config_id" AUTOINCREMENT)
 );
 CREATE TABLE IF NOT EXISTS "sensors" (
 	"sensor_id"	INTEGER NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS "measurements" (
 	"description"	TEXT,
 	"class_name"	TEXT,
 	FOREIGN KEY("class_name") REFERENCES "sensors_available"("class_name") ON DELETE CASCADE,
-	PRIMARY KEY("measurement_id")
+	PRIMARY KEY("measurement_id" AUTOINCREMENT)
 );
 INSERT INTO "processes" VALUES (1,'Sample','Select the first measurement from storage interval for storage');
 INSERT INTO "processes" VALUES (2,'Average','Calculate the average value of measurements from storage interval');

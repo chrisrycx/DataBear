@@ -58,12 +58,12 @@ class DataBearDB:
         }]
         return enabledsensors
     
-    def getSensor(self, sensorid):
+    def getSensor(self, sensor_id):
         '''
         Return the given sensor's object as a sensor object (name, serial_number, etc.) or None if id is invalid
         '''
         sensor = {}
-        id = (sensorid,)
+        id = (sensor_id,)
         self.curs.execute("Select * from sensor s inner join sensor_configuration sc on s.sensor_id = sc.sensor_id "
                           "where s.sensor_id = ? "
                           " and sc.status = 1", id)
@@ -91,14 +91,14 @@ class DataBearDB:
         values[4] = sensor["sensor_type"]
         return values
 
-    def setSensor(self, sensorid, sensor):
+    def setSensor(self, sensor_id, sensor):
         '''
         Set a given sensor
-        sensorid is the id from the table
+        sensor_id is the id from the table
         sensor is a dict containing the sensor details
         '''
         values = self.sanitizeSensorValues(sensor)
-        values[6] = sensorid
+        values[6] = sensor_id
 
         self.curs.execute("Update sensor set name = ?, serial_number = ?, address = ?, virtualport = ?, sensor_type = ? "
                           " where sensor_id = ?", values)
@@ -113,33 +113,33 @@ class DataBearDB:
                           "values (?, ?, ?, ?, ?)")
         # TODO: Check for errors, etc.
 
-    def setSensorConfig(self, sensor_configid, sensorid, measure_interval):
+    def setSensorConfig(self, sensor_config_id, sensor_id, measure_interval):
         '''
-        Set a sensor config and return the new sensor_configid
+        Set a sensor config and return the new sensor_config_id
         Since sensor configuration changes mean new measurements will use the new configuration
         we need to leave the existing configuration in place and generate a new one setting
         the old one's status to disabled (0)
         '''
         # First add the new config
         # marking it as enabled (1)
-        values = [sensorid, measure_interval, 1];
+        values = [sensor_id, measure_interval, 1];
         self.curs.execute("Insert into sensor_configuration set (sensor_id, measure_interval, status) (?,?,?)", values)
         # TODO: Check for errors, etc.
-        new_configid = self.curs.lastrowid
+        new_config_id = self.curs.lastrowid
 
-        # Set old configid entry to inactive
-        values = (sensor_configid,)
-        self.curs.execute("Update sensor_configuration set status = 0 where sensor_configid = ?", values)
+        # Set old sensor_config_id entry to inactive
+        values = (sensor_config_id,)
+        self.curs.execute("Update sensor_configuration set status = 0 where sensor_config_id = ?", values)
         
-        return new_configid
+        return new_config_id
 
     def getActiveSensorIDs(self):
         '''
         Return list of active sensor IDs
         '''
         ids = []
-        for row in self.curs.execute("Select sensor_configid from sensor_configuration where status = 1"):
-            ids.append(row["sensor_configid"])
+        for row in self.curs.execute("Select sensor_config_id from sensor_configuration where status = 1"):
+            ids.append(row["sensor_config_id"])
 
         return ids
 
@@ -148,20 +148,20 @@ class DataBearDB:
         Return active logger configuration IDs
         '''
         ids = []
-        for row in self.curs.execute("Select logging_configid from logging_configuration where status = 1"):
-            ids.append(row["logging_configid"])
+        for row in self.curs.execute("Select logging_config_id from logging_configuration where status = 1"):
+            ids.append(row["logging_config_id"])
 
         return ids
 
-    def getLoggingConfig(self, logging_configid):
+    def getLoggingConfig(self, logging_config_id):
         # Get a logging configuration by it's id
         # Logging configurations join with measurements, processes, and sensors to get all their details
 
         config = {}
-        id = (logging_configid,)
-        self.curs.execute("Select * from logging_configuration l inner join measurements m on l.measurementid = m.measurement_id "
-                          "inner join processes p on l.process_id = p.processid inner join sensor s on m.sensor_id = s.sensor_id "
-                          "where l.logging_configid = ?", id)
+        id = (logging_config_id,)
+        self.curs.execute("Select * from logging_configuration l inner join measurements m on l.measurement_id = m.measurement_id "
+                          "inner join processes p on l.process_id = p.process_id inner join sensor s on m.sensor_id = s.sensor_id "
+                          "where l.logging_config_id = ?", id)
         row = self.curs.fetchone()
 
         if not row:
@@ -173,20 +173,20 @@ class DataBearDB:
         config["process"] = row["p.name"]
         return config
 
-    def setLoggingConfig(self, logging_configid, measurementid, storage_interal, processid, status):
+    def setLoggingConfig(self, logging_config_id, measurement_id, storage_interal, process_id, status):
         # Set a logging configuration by its id and values
         pass
 
-    def getDataForLoggingConfig(self, logging_configid):
+    def getDataForLoggingConfig(self, logging_config_id):
         # Get all data for a given logging configuration id
         # May add some date range parameters later if it makes sense to do so
         pass
 
-    def getDataForSensorConfig(self, sensor_configid):
+    def getDataForSensorConfig(self, sensor_config_id):
         # Same as above but for a given sensor only
         pass
 
-    def storeData(self, datetime, value, sensor_configid, logging_configid, qc_flag):
+    def storeData(self, datetime, value, sensor_config_id, logging_config_id, qc_flag):
         '''
         Store data value in database
         Inputs:
@@ -194,9 +194,9 @@ class DataBearDB:
         Returns new rowid
         '''
         storeqry = ('INSERT INTO data '
-                    '(dtstamp,value,sensor_configid,logging_configid,qc_flag) '
+                    '(dtstamp,value,sensor_config_id,logging_config_id,qc_flag) '
                     'VALUES (?,?,?,?,?)')
-        qryparams = (datetime, value, sensor_configid, logging_configid, qc_flag)
+        qryparams = (datetime, value, sensor_config_id, logging_config_id, qc_flag)
 
         self.curs.execute(storeqry,qryparams)
         self.conn.commit()
