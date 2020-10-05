@@ -53,11 +53,12 @@ def runDataBear(yamlfile=None):
         shtdwnrsp = sendCommand('shutdown')
         print(shtdwnrsp)
     
-    #Run logger
-    # *** subprocess ***
-    dblogger = logger.DataLogger()
-    dblogger.loadconfig()
-    dblogger.run()
+    #Run logger in the background
+    print("Running databear with " + sys.executable + " databear/logger.py")
+    subprocess.Popen([sys.executable, './databear/logger.py'],
+                     cwd="./",
+                     stdout=subprocess.PIPE,
+                     stderr=subprocess.STDOUT)
 
 def sendCommand(command,argument=None):
     '''
@@ -112,12 +113,5 @@ def main_cli():
         rsp = sendCommand(cmd)
         print(rsp)
 
-
-
-
-
-    
-
-
-
-
+if __name__ == "__main__":
+    main_cli()
