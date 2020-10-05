@@ -396,6 +396,14 @@ class DataLogger:
         self.db.close()
       
             
+def main():
+    logger = DataLogger()
+    logger.loadconfig()
+    logger.run()
+
+if __name__ == "__main__":
+    main()
+
 
 
 
