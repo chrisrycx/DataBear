@@ -354,7 +354,8 @@ class DataLogger:
 
         #Create threadpool for concurrent sensor measurement
         self.workerpool = concurrent.futures.ThreadPoolExecutor(
-            max_workers=len(self.sensors))
+            # use at least 1 worker
+            max_workers=max(len(self.sensors),1))
 
         while True:
             try:
