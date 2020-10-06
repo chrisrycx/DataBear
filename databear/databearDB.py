@@ -82,7 +82,18 @@ class DataBearDB:
         sensor["class_name"] = row["class_name"]
 
         return sensor
-        
+
+    def addAvailableSensor(self, classname, customsensor):
+        values = (classname, 0, customsensor)
+        self.curs.execute("Insert into sensors_available (class_name, class_enabled, customsensor) values(?, ?, ?);")
+        # TODO: Check for errors, etc.
+        return self.curs.lastrowid
+
+    def enableSensorClass(self, classname):
+        values = (classname,)
+        self.curs.execute("Update sensors_available set class_enabled = 1 where classname = ?;")
+        # TODO: Check for errors, etc.
+
     def sanitizeSensorValues(self, sensor):
         '''
         Helper to sanitize the values from sensor to use in update and insert sqlite statements
