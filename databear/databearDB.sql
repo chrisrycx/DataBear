@@ -66,9 +66,14 @@ CREATE TABLE IF NOT EXISTS "measurements" (
 	FOREIGN KEY("class_name") REFERENCES "sensors_available"("class_name") ON DELETE CASCADE,
 	PRIMARY KEY("measurement_id" AUTOINCREMENT)
 );
+CREATE TABLE IF NOT EXISTS "variables" (
+    "name" TEXT NOT NULL PRIMARY KEY,
+    "value" INTEGER NOT NULL
+);
 INSERT INTO "processes" VALUES (1,'Sample','Select the first measurement from storage interval for storage');
 INSERT INTO "processes" VALUES (2,'Average','Calculate the average value of measurements from storage interval');
 INSERT INTO "processes" VALUES (3,'Max','Select the maximum value from measurement in the storage interval');
 INSERT INTO "processes" VALUES (4,'Min','Select the minimum value from measurement in the storage interval');
 INSERT INTO "processes" VALUES (5,'Dump','Select all measurements from the storage interval for storage');
+INSERT INTO "variables" VALUES("schemaversion", 1);
 COMMIT;
