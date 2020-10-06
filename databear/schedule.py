@@ -64,7 +64,10 @@ class Scheduler:
         :return: Number of seconds until
                  :meth:`next_run <Scheduler.next_run>`.
         """
-        return (self.next_run - datetime.datetime.now()).total_seconds()
+        if (self.next_run):
+            return (self.next_run - datetime.datetime.now()).total_seconds()
+        # There's no jobs, so just wait for 1 second
+        return 1
 
     def _run_job(self, job):
         ret = job.run()
