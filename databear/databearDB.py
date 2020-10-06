@@ -52,11 +52,12 @@ class DataBearDB:
         '''
         Return a list of sensor classes that are available and enabled
         '''
-        #** Testing
-        enabledsensors = [{
-            'class_name':'databearSim',
-            'customsensor':0
-        }]
+        enabledsensors = []
+        self.curs.execute("Select * from sensors_available where class_enabled = 1")
+        
+        for row in self.curs.fetchall():
+            enabledsensors.append({"class_name": row["class_name"], "customsensor": row["customsensor"]})
+
         return enabledsensors
     
     def getSensorConfig(self, sensor_id):
