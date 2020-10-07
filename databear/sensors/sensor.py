@@ -4,8 +4,10 @@ Base class for DataBear sensors
 from databear.errors import SensorConfigError, MeasureError
 
 class Sensor:
-    interface_version = '1.0'
+    interface_version = '1.1'
     hardware_settings = {}
+    measurements = [] #List of measurement names
+    units = {} #List of units associated with measurement names
     def __init__(self,name,sn,address):
         '''
         Create a new sensor
@@ -28,6 +30,9 @@ class Sensor:
 
         #Initialize data structure
         self.data = {}
+        for measure_name in Sensor.measurements:
+            self.data[measure_name] = []
+        
         self.connected = False
     
     def __str__(self):

@@ -60,6 +60,12 @@ def runDataBear(yamlfile=None):
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT)
 
+def updateAvailableSensors():
+    '''
+    Return a list of available sensor classes from
+    databear.sensors
+    '''
+
 def sendCommand(command,argument=None):
     '''
     Send a command to DataBear

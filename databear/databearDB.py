@@ -45,21 +45,37 @@ class DataBearDB:
                 sql_script = sql_init_file.read()
 
             self.curs.executescript(sql_script)
-
-    # Configuration getters and setters, Getters will need to be changed to return
-    # either a dictionary of the configuration or some other type, skeleton for now
-    def getEnabledSensors(self):
+  
+    def addMeasurement(self,classname,measurename,units,description=None):
         '''
-        Return a list of sensor classes that are available and enabled
+        Add a measurement to the database
+        Returns new rowid
         '''
-        enabledsensors = []
-        self.curs.execute("Select * from sensors_available where class_enabled = 1")
-        
-        for row in self.curs.fetchall():
-            enabledsensors.append({"class_name": row["class_name"], "customsensor": row["customsensor"]})
+        addqry = ('INSERT INTO measurements '
+                  '(name,units,description,class_name) '
+                  'VALUES (?,?,?,?)')
+        qryparams = (measurename,units,description,classname)
 
-        return enabledsensors
-    
+        self.curs.execute(addqry,qryparams)
+        self.conn.commit()
+
+        return self.curs.lastrowid
+
+
+    def addSensor(self,classname,sensorname,serialnumber,address,virtualport,description=None):
+        '''
+        Add a new sensor to the database
+        '''
+        addqry = ('INSERT INTO sensors '
+                  '(name,serial_number,address,virtualport,class_name,description) '
+                  'VALUES (?,?,?,?,?,?)')
+        qryparams = (sensorname,serialnumber,address,virtualport,classname,description)
+
+        self.curs.execute(addqry,qryparams)
+        self.conn.commit()
+
+        return self.curs.lastrowid
+
     def getSensorConfig(self, sensor_id):
         '''
         Return the given sensor's object as a sensor object (name, serial_number, etc.) 
@@ -120,14 +136,7 @@ class DataBearDB:
                           " where sensor_id = ?", values)
         # TODO: Check for errors, etc.
 
-    def addSensor(self, sensor):
-        '''
-        Add a new sensor with the values specified in the sensor dict
-        '''
-        values = self.sanitizeSensorValues(sensor)
-        self.curs.execute("INSERT into sensor set (name, serial_number, address, virtualport, sensor_type) "
-                          "values (?, ?, ?, ?, ?)")
-        # TODO: Check for errors, etc.
+    
 
     def setSensorConfig(self, sensor_config_id, sensor_id, measure_interval):
         '''

@@ -16,14 +16,7 @@ CREATE TABLE IF NOT EXISTS "processes" (
 	"description"	TEXT NOT NULL,
 	PRIMARY KEY("process_id" AUTOINCREMENT)
 );
-CREATE TABLE IF NOT EXISTS "sensors_available" (
-	"sensorclass_id"	INTEGER,
-	"class_name"	TEXT NOT NULL,
-	"class_enabled"	INTEGER NOT NULL DEFAULT 0,
-	"customsensor" INTEGER NOT NULL DEFAULT 0,
-	UNIQUE("class_name"),
-	PRIMARY KEY("sensorclass_id" AUTOINCREMENT)
-);
+
 CREATE TABLE IF NOT EXISTS "sensor_configuration" (
 	"sensor_config_id"	INTEGER NOT NULL,
 	"sensor_id"	INTEGER NOT NULL,

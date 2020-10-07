@@ -70,34 +70,47 @@ class DataLogger:
                 format=DataLogger.errorfmt,
                 filename='databear_error.log')
 
+    def register_sensors(self,classnames):
+        '''
+        Register sensor classs and load measurements
+        to the measurements table
+        classnames - a list of classnames (which should match module names)
+        '''
+        #Append sys.path with path in DB sensors
+        sensorpath = os.getenv('DBSENSORS')
+        if(sensorpath): sys.path.append(sensorpath)
+
+        #Import all sensor classes
+        for sensorcls in classnames:
+            #Try to import from databear.sensors folder
+            try:
+                impstr = 'databear.sensors.'+sensorcls
+                sensor_module = importlib.import_module(impstr) 
+            except ModuleNotFoundError as mnf:
+                #Check custom sensors folder
+                sensor_module = importlib.import_module(sensorcls)
+
+            sensor_class = getattr(sensor_module,sensorcls)
+
+            #Load sensor measurements to database
+            for measurement_name in sensor_class.measurements:
+                self.db.addMeasurement(
+                    sensorcls,
+                    measurement_name,
+                    sensor_class.units[measurement_name],
+                    sensor_class.measurement_description[measurement_name]
+                )
+
+            #Register sensor with factory
+            sensorfactory.factory.register_sensor(
+                sensorcls,
+                sensor_class)
+
     def loadconfig(self):
         '''
         Get configuration out of database and
         start sensors
         '''
-        #Get list of enabled sensors and register with factory
-        enabledsensors = self.db.getEnabledSensors()
-
-        for enabled_sensor in enabledsensors:
-            '''
-            Assumes class name and module name the same
-            Path to custom sensor classes must be added to PYTHONPATH
-            '''
-            #Import string
-            impstr = enabled_sensor['class_name']
-
-            #Import class
-            if enabled_sensor['customsensor']==0:
-                #Built in sensor (sensors folder)
-                impstr = 'databear.sensors.'+impstr 
-
-            sensor_module = importlib.import_module(impstr)
-            sensor_class = getattr(sensor_module,enabled_sensor['class_name'])
-
-            #Register with factory
-            sensorfactory.factory.register_sensor(
-                enabled_sensor['class_name'],
-                sensor_class)
         
         #Get list of active sensors and logging
         sensorids = self.db.getActiveSensorIDs()
@@ -129,8 +142,7 @@ class DataLogger:
                 storagesetting['sensor_name'],
                 storagesetting['storage_interval'],
                 storagesetting['process'])
-               
-      
+                  
     def addSensor(self,name,sn,address,virtualport,sensortype):
         '''
         Add a sensor to the logger
