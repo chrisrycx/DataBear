@@ -38,9 +38,16 @@ def runDataBear(yamlfile=None):
         #Connect to database
         db = databearDB.DataBearDB()
 
+        #Load all sensors
+        sensorclasses = sensortypes
+        db.load_sensor(sensor['sensortype'])
+        
         #Load configuration
-        db.addSensor()
-        db.setSensorConfig()
+        for sensor in sensors:
+            db.addSensor()
+            db.setSensorConfig()
+
+        for setting in config['settings']:
         db.setLoggingConfig()
         '''
         pass

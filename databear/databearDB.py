@@ -46,6 +46,33 @@ class DataBearDB:
 
             self.curs.executescript(sql_script)
   
+    def load_sensor(self,classname):
+        '''
+        '''
+        #Append sys.path with path in DB sensors
+        sensorpath = os.getenv('DBSENSORS')
+        if(sensorpath): sys.path.append(sensorpath)
+        
+        #Try to import from databear.sensors folder
+            try:
+                impstr = 'databear.sensors.'+sensorcls
+                sensor_module = importlib.import_module(impstr) 
+            except ModuleNotFoundError as mnf:
+                #Check custom sensors folder
+                sensor_module = importlib.import_module(sensorcls)
+
+                sensor_class = getattr(sensor_module,sensorcls)
+
+            #Load sensor measurements to database
+            for measurement_name in sensor_class.measurements:
+                self.db.addMeasurement(
+                    sensorcls,
+                    measurement_name,
+                    sensor_class.units[measurement_name],
+                    sensor_class.measurement_description[measurement_name]
+                )
+
+
     def addMeasurement(self,classname,measurename,units,description=None):
         '''
         Add a measurement to the database
