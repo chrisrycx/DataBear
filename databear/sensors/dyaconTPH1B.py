@@ -9,12 +9,18 @@ import minimalmodbus as mm
 from databear.errors import MeasureError, SensorConfigError
 from databear.sensors import sensor
 
-class dyaconTPH(sensor.Sensor):
+class dyaconTPH1B(sensor.Sensor):
     hardware_settings = {
         'serial':'RS485',
         'duplex':'half',
         'resistors':1,
         'bias':1
+    }
+    measurements = ['air_temperature','relative_humidity','barometric_pressure']
+    units = {
+        'air_temperature':'C',
+        'relative_humidity':'%',
+        'barometric_pressure':'mb'
     }
     def __init__(self,name,sn,address,interval):
         '''
@@ -24,16 +30,11 @@ class dyaconTPH(sensor.Sensor):
 
         #Define characteristics of this sensor
         self.min_interval = 1  #Minimum interval that sensor can be polled
-
-        #Define measurements
-        airT = {'name':'airT','register':201}
-        rh = {'name':'rh','register':202}
-        bp = {'name':'bp','register':203}
-        self.measurements = [airT,rh,bp]
-
-        #Initialize data structure
-        self.data = {'airT':[],'rh':[],'bp':[]} #Empty data dictionary
-        self.connected = False
+        self.registers = {
+            'air_temperature':201,
+            'relative_humidity':202,
+            'barometric_pressure':203
+        }
 
     def connect(self,port):
         if not self.connected:
@@ -49,16 +50,16 @@ class dyaconTPH(sensor.Sensor):
         fails = {} #keep track of measurement failures
         for measure in self.measurements:
             dt = datetime.datetime.now()
-            timestamp = dt.strftime('%Y-%m-%d %H:%M:%S %f')
             
             try:
-                val = self.comm.read_register(measure['register'],signed=True)
+                val = self.comm.read_register(self.registers[measure],signed=True)
                 val = val/10
 
-                self.data[measure['name']].append((dt,val))
+                self.data[measure].append((dt,val))
                 
             except mm.NoResponseError as norsp:
                 fails[measure['name']] = 'No response from sensor'
+        
         #Raise a measurement error if a fail is detected
         if len(fails)>0:
             failnames = list(fails.keys())

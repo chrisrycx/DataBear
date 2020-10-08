@@ -8,7 +8,7 @@ class Sensor:
     hardware_settings = {}
     measurements = [] #List of measurement names
     units = {} #List of units associated with measurement names
-    measurement_description = {} 
+    measurement_description = {}
     def __init__(self,name,sn,address):
         '''
         Create a new sensor

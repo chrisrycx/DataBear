@@ -1,20 +1,16 @@
 '''
 DataBear database manager class
 
- - Components:
-    -- Ensure database exists
-    -- Store and retrieve configuration
-        - Get and set methods for whole configuration and individual values
-        - Get and set methods for measurements
-
-** Need more documentation here...
+- init: Connect to database (databear.db) or create if none
+- load_sensor: Loads measurements to database from sensor_class
+- Various get/set methods
 
 '''
 
-import json
 import os
+import sys
 import sqlite3
-
+import importlib
 
 #-------- Database Initialization and Setup ------
 class DataBearDB:
@@ -45,33 +41,51 @@ class DataBearDB:
                 sql_script = sql_init_file.read()
 
             self.curs.executescript(sql_script)
-  
-    def load_sensor(self,classname):
-        '''
-        '''
-        #Append sys.path with path in DB sensors
+
+        # Keep track of what sensors are available
+        self.sensors_available = []
+        self.curs.execute('SELECT * FROM sensors_available')
+        for row in self.curs.fetchall():
+            self.sensors_available.append(row['class_name'])
+        
+        #Append sys.path with path in DB sensors for loading sensors
         sensorpath = os.getenv('DBSENSORS')
         if(sensorpath): sys.path.append(sensorpath)
         
-        #Try to import from databear.sensors folder
-            try:
-                impstr = 'databear.sensors.'+sensorcls
-                sensor_module = importlib.import_module(impstr) 
-            except ModuleNotFoundError as mnf:
-                #Check custom sensors folder
-                sensor_module = importlib.import_module(sensorcls)
+  
+    def load_sensor(self,classname):
+        '''
+        Loads sensor measurements into database if not already there.
+        Adds sensor class name to sensors_available table
+        '''
+        #Check if sensor is already in sensors_available
+        if classname in self.sensors_available:
+            return
 
-                sensor_class = getattr(sensor_module,sensorcls)
+        # Import sensor from either databear.sensors or
+        # from sensor in folder specified by DBSENSORS
+        try:
+            impstr = 'databear.sensors.' + classname
+            sensor_module = importlib.import_module(impstr) 
+        except ModuleNotFoundError as mnf:
+            #Check custom sensors folder
+            sensor_module = importlib.import_module(classname)
 
-            #Load sensor measurements to database
-            for measurement_name in sensor_class.measurements:
-                self.db.addMeasurement(
-                    sensorcls,
-                    measurement_name,
-                    sensor_class.units[measurement_name],
-                    sensor_class.measurement_description[measurement_name]
-                )
+        sensor_class = getattr(sensor_module,classname)
 
+        #Update sensors_available table
+        self.curs.execute('INSERT INTO sensors_available '
+                          '(class_name) VALUES (?)',(classname,))
+        self.conn.commit()
+
+        #Load sensor measurements to database
+        for measurement_name in sensor_class.measurements:
+            self.addMeasurement(
+                classname,
+                measurement_name,
+                sensor_class.units[measurement_name],
+                sensor_class.measurement_description.get(measurement_name,None)
+            )
 
     def addMeasurement(self,classname,measurename,units,description=None):
         '''
@@ -102,6 +116,17 @@ class DataBearDB:
 
         return self.curs.lastrowid
 
+    def addSensorConfig(self, sensor_id, measure_interval):
+        '''
+        Add a new sensor configuration to the system
+        '''
+        self.curs.execute('INSERT INTO sensor_configuration '
+                  '(sensor_id,measure_interval,status) '
+                  'VALUES (?,?,?)',(sensor_id,measure_interval,'Active'))
+        self.conn.commit()
+
+        return self.curs.lastrowid
+
     def getSensorConfig(self, sensor_id):
         '''
         Return the given sensor's object as a sensor object (name, serial_number, etc.) 
@@ -125,13 +150,6 @@ class DataBearDB:
         sensor["class_name"] = row["class_name"]
 
         return sensor
-
-    def addAvailableSensor(self, classname, customsensor):
-        values = (classname, 0, customsensor)
-        self.curs.execute("Insert into sensors_available (class_name, class_enabled, customsensor) values(?, ?, ?);", values)
-        self.conn.commit()
-        # TODO: Check for errors, etc.
-        return self.curs.lastrowid
 
     def enableSensorClass(self, classname, enabled):
         '''
@@ -165,8 +183,6 @@ class DataBearDB:
         self.curs.execute("Update sensor set name = ?, serial_number = ?, address = ?, virtualport = ?, sensor_type = ? "
                           " where sensor_id = ?", values)
         # TODO: Check for errors, etc.
-
-    
 
     def setSensorConfig(self, sensor_config_id, sensor_id, measure_interval):
         '''

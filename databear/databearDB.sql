@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS "sensors" (
 	"virtualport"	INTEGER NOT NULL,
 	"class_name"	TEXT NOT NULL,
 	"description"	TEXT,
-	FOREIGN KEY("class_name") REFERENCES "sensors_available"("class_name") ON DELETE CASCADE,
+	FOREIGN KEY("class_name") REFERENCES "sensors_available"("class_name"),
 	UNIQUE("serial_number","class_name"),
 	PRIMARY KEY("sensor_id" AUTOINCREMENT)
 );

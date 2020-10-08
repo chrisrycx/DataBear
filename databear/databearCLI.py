@@ -32,25 +32,36 @@ def runDataBear(yamlfile=None):
     '''
     #Parse YAML file and load to database
     if yamlfile:
-        '''
         config = parseYAML(yamlfile)
 
         #Connect to database
         db = databearDB.DataBearDB()
 
-        #Load all sensors
-        sensorclasses = sensortypes
-        db.load_sensor(sensor['sensortype'])
+        #Set all current configurations inactive??
         
-        #Load configuration
-        for sensor in sensors:
-            db.addSensor()
-            db.setSensorConfig()
+        #Load sensor configuration to database
+        for sensorconfig in config['sensors']:
+            #Load to sensors available
+            db.load_sensor(sensorconfig['sensortype'])
 
+            #Add sensor config to database
+            sensorid = db.addSensor(
+                    sensorconfig['sensortype'],
+                    sensorconfig['name'],
+                    sensorconfig['serialnumber'],
+                    sensorconfig['address'],
+                    sensorconfig['virtualport']
+                )
+            db.addSensorConfig(
+                sensorid, sensorconfig['measure_interval'])
+                
+
+        #Load logging configuration
+        '''
         for setting in config['settings']:
         db.setLoggingConfig()
         '''
-        pass
+        
 
     #Check to see if logger is already running
     #If so, shutdown for restart
@@ -61,11 +72,13 @@ def runDataBear(yamlfile=None):
         print(shtdwnrsp)
     
     #Run logger in the background
+    '''
     print("Running databear with " + sys.executable + " databear/logger.py")
     subprocess.Popen([sys.executable, './databear/logger.py'],
                      cwd="./",
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT)
+    '''
 
 def updateAvailableSensors():
     '''
@@ -118,10 +131,10 @@ def main_cli():
     if len(sys.argv) > 2:
         option = sys.argv[2]
     else:
-        option = ''
+        option = None
 
     if cmd=='run':
-        runDataBear()
+        runDataBear(option)
     else:
         rsp = sendCommand(cmd)
         print(rsp)
