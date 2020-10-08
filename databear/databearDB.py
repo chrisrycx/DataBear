@@ -88,7 +88,6 @@ class DataBearDB:
 
         return self.curs.lastrowid
 
-
     def addSensor(self,classname,sensorname,serialnumber,address,virtualport,description=None):
         '''
         Add a new sensor to the database
@@ -129,13 +128,17 @@ class DataBearDB:
 
     def addAvailableSensor(self, classname, customsensor):
         values = (classname, 0, customsensor)
-        self.curs.execute("Insert into sensors_available (class_name, class_enabled, customsensor) values(?, ?, ?);")
+        self.curs.execute("Insert into sensors_available (class_name, class_enabled, customsensor) values(?, ?, ?);", values)
+        self.conn.commit()
         # TODO: Check for errors, etc.
         return self.curs.lastrowid
 
-    def enableSensorClass(self, classname):
-        values = (classname,)
-        self.curs.execute("Update sensors_available set class_enabled = 1 where classname = ?;")
+    def enableSensorClass(self, classname, enabled):
+        '''
+        Enables or disables the given sensor class depending on enabled parameter
+        '''
+        values = (enabled, classname,)
+        self.curs.execute("Update sensors_available set class_enabled = ? where class_name = ?;", values)
         # TODO: Check for errors, etc.
 
     def sanitizeSensorValues(self, sensor):
