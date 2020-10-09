@@ -17,11 +17,11 @@ datalogger:
   settings:
   - store: second1  
     sensor: sim1      
-    process: dump         
+    process: Dump         
     storage_interval: 10           
   - store: air_temperature                 
     sensor: tph1          
-    process: average           
+    process: Average           
     storage_interval: 30
     
 #-----------------------------------------------------------#

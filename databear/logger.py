@@ -70,7 +70,6 @@ class DataLogger:
                 format=DataLogger.errorfmt,
                 filename='databear_error.log')
 
-    
     def register_sensors(self):
         '''
         Register sensor classs and load measurements
@@ -78,6 +77,7 @@ class DataLogger:
         classnames - a list of classnames (which should match module names)
         '''
         #Get sensors from database
+        classnames = self.db.sensors_available
 
         #Append sys.path with path in DB sensors
         sensorpath = os.getenv('DBSENSORS')
@@ -105,7 +105,7 @@ class DataLogger:
         Get configuration out of database and
         start sensors
         '''
-        #Register active sensors...
+        #Register available sensors
         self.register_sensors()
         
         #Get list of active sensors and logging

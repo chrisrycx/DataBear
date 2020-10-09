@@ -3,8 +3,6 @@ BEGIN TRANSACTION;
 CREATE TABLE IF NOT EXISTS "sensors_available" (
 	"sensorclass_id"	INTEGER,
 	"class_name"	TEXT NOT NULL,
-	"class_enabled"	INTEGER NOT NULL DEFAULT 0,
-	"customsensor" INTEGER NOT NULL DEFAULT 0,
 	UNIQUE("class_name"),
 	PRIMARY KEY("sensorclass_id" AUTOINCREMENT)
 );

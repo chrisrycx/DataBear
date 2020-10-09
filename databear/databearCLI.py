@@ -54,15 +54,25 @@ def runDataBear(yamlfile=None):
                 )
             db.addSensorConfig(
                 sensorid, sensorconfig['measure_interval'])
-                
-
+            
         #Load logging configuration
-        '''
-        for setting in config['settings']:
-        db.setLoggingConfig()
-        '''
+        sensor_ids = db.sensor_ids
+        process_ids = db.process_ids
+        sensor_classes = db.sensor_classes
+        for logsetting in config['datalogger']['settings']:
+            measureid = db.getMeasurementID(
+                logsetting['store'],
+                sensor_classes[logsetting['sensor']])
+            
+            db.addLoggingConfig(
+                measureid,
+                sensor_ids[logsetting['sensor']],
+                logsetting['storage_interval'],
+                process_ids[logsetting['process']],
+                'Active'
+            )
         
-
+        
     #Check to see if logger is already running
     #If so, shutdown for restart
     statusrsp = sendCommand('status')
@@ -72,13 +82,11 @@ def runDataBear(yamlfile=None):
         print(shtdwnrsp)
     
     #Run logger in the background
-    '''
     print("Running databear with " + sys.executable + " databear/logger.py")
     subprocess.Popen([sys.executable, './databear/logger.py'],
                      cwd="./",
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT)
-    '''
 
 def updateAvailableSensors():
     '''

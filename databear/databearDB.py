@@ -41,18 +41,57 @@ class DataBearDB:
                 sql_script = sql_init_file.read()
 
             self.curs.executescript(sql_script)
-
-        # Keep track of what sensors are available
-        self.sensors_available = []
-        self.curs.execute('SELECT * FROM sensors_available')
-        for row in self.curs.fetchall():
-            self.sensors_available.append(row['class_name'])
         
         #Append sys.path with path in DB sensors for loading sensors
         sensorpath = os.getenv('DBSENSORS')
         if(sensorpath): sys.path.append(sensorpath)
         
   
+    @property
+    def sensors_available(self):
+        '''
+        A list of sensors from the sensors table
+        '''
+        sensorlist = []
+        self.curs.execute('SELECT * FROM sensors_available')
+        for row in self.curs.fetchall():
+            sensorlist.append(row['class_name'])
+        return sensorlist
+
+    @property
+    def sensor_ids(self):
+        '''
+        Return a dictionary mapping sensor name to id
+        '''
+        sensorids = {}
+        self.curs.execute('SELECT sensor_id, name FROM sensors')
+        for row in self.curs.fetchall():
+            sensorids[row['name']] = row['sensor_id']
+        return sensorids
+
+    @property
+    def sensor_classes(self):
+        '''
+        Return a dictionary mapping sensor names to classes
+        '''
+        sensorclasses = {}
+        self.curs.execute('SELECT name, class_name FROM sensors')
+        for row in self.curs.fetchall():
+            sensorclasses[row['name']] = row['class_name']
+        return sensorclasses
+
+    @property
+    def process_ids(self):
+        '''
+        A dictionary mapping process names to ids
+        '''
+        processids = {}
+        self.curs.execute('SELECT process_id, name FROM processes')
+        for row in self.curs.fetchall():
+            processids[row['name']] = row['process_id']
+        return processids
+
+
     def load_sensor(self,classname):
         '''
         Loads sensor measurements into database if not already there.
@@ -127,6 +166,33 @@ class DataBearDB:
 
         return self.curs.lastrowid
 
+    def addLoggingConfig(self, measurement_id, sensor_id, storage_interval, process_id, status):
+        '''
+        Add a new logger configuration
+        '''
+        params = (measurement_id, sensor_id, storage_interval, process_id, status)
+        self.curs.execute('INSERT INTO logging_configuration '
+                  '(measurement_id, sensor_id, storage_interval, process_id, status) '
+                  'VALUES (?,?,?,?,?)',params)
+        self.conn.commit()
+
+        return self.curs.lastrowid
+    
+    def getMeasurementID(self,measurement_name, class_name):
+        '''
+        Get the measurement id for a given name and sensor class
+        '''
+        params = (measurement_name,class_name)
+        self.curs.execute('SELECT measurement_id FROM measurements '
+                          'WHERE name=? and class_name=?',params)
+        
+        row = self.curs.fetchone()
+
+        if not row:
+            return None
+
+        return row['measurement_id']
+
     def getSensorConfig(self, sensor_id):
         '''
         Return the given sensor's object as a sensor object (name, serial_number, etc.) 
@@ -150,14 +216,6 @@ class DataBearDB:
         sensor["class_name"] = row["class_name"]
 
         return sensor
-
-    def enableSensorClass(self, classname, enabled):
-        '''
-        Enables or disables the given sensor class depending on enabled parameter
-        '''
-        values = (enabled, classname,)
-        self.curs.execute("Update sensors_available set class_enabled = ? where class_name = ?;", values)
-        # TODO: Check for errors, etc.
 
     def sanitizeSensorValues(self, sensor):
         '''
