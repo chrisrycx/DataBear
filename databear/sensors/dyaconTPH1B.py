@@ -22,11 +22,11 @@ class dyaconTPH1B(sensor.Sensor):
         'relative_humidity':'%',
         'barometric_pressure':'mb'
     }
-    def __init__(self,name,sn,address,interval):
+    def __init__(self,name,sn,address):
         '''
         Override base class
         '''
-        super().__init__(name,sn,address,interval)
+        super().__init__(name,sn,address)
 
         #Define characteristics of this sensor
         self.min_interval = 1  #Minimum interval that sensor can be polled

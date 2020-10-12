@@ -69,7 +69,7 @@ def runDataBear(yamlfile=None):
                 sensor_ids[logsetting['sensor']],
                 logsetting['storage_interval'],
                 process_ids[logsetting['process']],
-                'Active'
+                1
             )
         
         
@@ -149,7 +149,7 @@ def main_cli():
     if cmd=='run':
         runDataBear(option)
     else:
-        rsp = sendCommand(cmd)
+        rsp = sendCommand(cmd,option)
         print(rsp)
 
 if __name__ == "__main__":

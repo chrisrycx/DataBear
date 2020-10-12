@@ -159,7 +159,7 @@ class DataBearDB:
         '''
         self.curs.execute('INSERT INTO sensor_configuration '
                   '(sensor_id,measure_interval,status) '
-                  'VALUES (?,?,?)',(sensor_id,measure_interval,'Active'))
+                  'VALUES (?,?,?)',(sensor_id,measure_interval,1))
         self.conn.commit()
 
         return self.curs.lastrowid
@@ -288,20 +288,22 @@ class DataBearDB:
 
         config = {}
         self.curs.execute(
-            "Select * from logging_configuration l inner join "
-            "measurements m on l.measurement_id = m.measurement_id "
-            "inner join processes p on l.process_id = p.process_id inner join sensor s on m.sensor_id = s.sensor_id "
-            "where l.logging_config_id = ?", (logging_config_id,))
+            'SELECT m.name AS measurement_name, s.name AS sensor_name, '
+            'p.name AS process_name, storage_interval FROM logging_configuration l '
+            'INNER JOIN measurements m ON l.measurement_id = m.measurement_id '
+            'INNER JOIN processes p ON l.process_id = p.process_id '
+            'INNER JOIN sensors s on l.sensor_id = s.sensor_id '
+            'WHERE l.logging_config_id = ?', (logging_config_id,))
         
         row = self.curs.fetchone()
 
         if not row:
             return None
 
-        config["measurement_name"] = row["measurements.name"]
-        config["sensor_name"] = row["s.name"]
-        config["storage_interval"] = row["l.storage_interval"]
-        config["process"] = row["p.name"]
+        config["measurement_name"] = row["measurement_name"]
+        config["sensor_name"] = row["sensor_name"]
+        config["storage_interval"] = row["storage_interval"]
+        config["process"] = row["process_name"]
         return config
 
     def setLoggingConfig(self, logging_config_id, measurement_id, storage_interal, process_id, status):

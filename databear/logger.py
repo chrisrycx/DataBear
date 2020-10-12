@@ -53,9 +53,6 @@ class DataLogger:
         #Set up database connection
         self.db = DataBearDB()
 
-        #Search for available sensors
-        #** To Do
-
         #Configure UDP socket for API
         self.udpsocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         self.udpsocket.bind(('localhost',62000))
