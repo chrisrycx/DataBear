@@ -12,6 +12,7 @@ others under development
 '''
 import socket
 import json
+import os
 import sys
 from databear import logger, databearDB
 import sqlite3
@@ -81,17 +82,15 @@ def runDataBear(yamlfile=None):
         shtdwnrsp = sendCommand('shutdown')
         print(shtdwnrsp)
     
+    databearpath = os.path.dirname(__file__)
+    loggerpath = os.path.join(databearpath, "logger.py")
     #Run logger in the background
-    '''
-    print("Running databear with " + sys.executable + " databear/logger.py")
-    subprocess.Popen([sys.executable, './databear/logger.py'],
+    print("Running databear with " + sys.executable + " " + loggerpath)
+    subprocess.Popen([sys.executable, loggerpath],
                      cwd="./",
                      stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE)
-    '''
-    print('Running databear')
-    subprocess.run(['python','-m','databear.logger'],stdout=subprocess.PIPE)
-    
+        
 
 def updateAvailableSensors():
     '''
