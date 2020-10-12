@@ -46,7 +46,6 @@ class DataBearDB:
         sensorpath = os.getenv('DBSENSORS')
         if(sensorpath): sys.path.append(sensorpath)
         
-  
     @property
     def sensors_available(self):
         '''
@@ -90,7 +89,6 @@ class DataBearDB:
         for row in self.curs.fetchall():
             processids[row['name']] = row['process_id']
         return processids
-
 
     def load_sensor(self,classname):
         '''
