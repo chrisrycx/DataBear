@@ -82,15 +82,11 @@ def runDataBear(yamlfile=None):
         print(shtdwnrsp)
     
     #Run logger in the background
-    '''
-    print("Running databear with " + sys.executable + " databear/logger.py")
-    subprocess.Popen([sys.executable, './databear/logger.py'],
-                     cwd="./",
-                     stdout=subprocess.PIPE,
-                     stderr=subprocess.PIPE)
-    '''
-    print('Running databear')
-    subprocess.run(['python','-m','databear.logger'],stdout=subprocess.PIPE)
+    print('Running databear with python -m databear.logger')
+    subprocess.Popen([sys.executable,'-m','databear.logger'],
+            cwd="./",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
     
 
 def updateAvailableSensors():
