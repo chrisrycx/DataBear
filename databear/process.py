@@ -22,18 +22,18 @@ def calculate(processtype,data,storetime):
     Output:
         - list of data to be stored [('YYYY-MM-DD HH:MM',val),...]
     '''
-    if processtype=='dump':
+    if processtype=='Dump':
         output = dump(data)
-    elif processtype=='sample':
+    elif processtype=='Sample':
         output = sample(data)
-    elif processtype=='average':
+    elif processtype=='Average':
         output = average(data,storetime)
-    elif processtype=='max':
+    elif processtype=='Max':
         output = datamax(data,storetime)
-    elif processtype=='min':
+    elif processtype=='Min':
         output = datamin(data,storetime)
     else:
-        print('error')
+        raise KeyError(processtype)
 
     return output
     

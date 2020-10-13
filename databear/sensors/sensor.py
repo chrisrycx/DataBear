@@ -31,7 +31,7 @@ class Sensor:
 
         #Initialize data structure
         self.data = {}
-        for measure_name in Sensor.measurements:
+        for measure_name in self.measurements:
             self.data[measure_name] = []
         
         self.connected = False

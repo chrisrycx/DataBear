@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS "data" (
 	"sensor_configid"	INTEGER NOT NULL,
 	"logging_configid"	INTEGER NOT NULL,
 	"qc_flag"	INTEGER,
-	FOREIGN KEY("logging_configid") REFERENCES "logging_configuration"("logging_configid") ON DELETE RESTRICT,
-	FOREIGN KEY("sensor_configid") REFERENCES "sensor_configuration"("sensor_configid") ON DELETE RESTRICT,
+	FOREIGN KEY("logging_configid") REFERENCES "logging_configuration"("logging_configid"),
+	FOREIGN KEY("sensor_configid") REFERENCES "sensor_configuration"("sensor_configid"),
 	PRIMARY KEY("data_id" AUTOINCREMENT)
 );
 CREATE TABLE IF NOT EXISTS "processes" (

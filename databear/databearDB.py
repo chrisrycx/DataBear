@@ -327,7 +327,7 @@ class DataBearDB:
         Returns new rowid
         '''
         storeqry = ('INSERT INTO data '
-                    '(dtstamp,value,sensor_config_id,logging_config_id,qc_flag) '
+                    '(dtstamp,value,sensor_configid,logging_configid,qc_flag) '
                     'VALUES (?,?,?,?,?)')
         qryparams = (datetime, value, sensor_config_id, logging_config_id, qc_flag)
 
