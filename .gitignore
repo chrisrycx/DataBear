@@ -7,3 +7,4 @@ dist
 *.pyc
 *.csv
 *.log
+*.db
