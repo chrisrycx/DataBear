@@ -404,7 +404,6 @@ class DataLogger:
             
 def main():
     logger = DataLogger()
-    logger.loadconfig()
     logger.run()
 
 if __name__ == "__main__":
