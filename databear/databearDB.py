@@ -329,7 +329,7 @@ class DataBearDB:
         storeqry = ('INSERT INTO data '
                     '(dtstamp,value,sensor_configid,logging_configid,qc_flag) '
                     'VALUES (?,?,?,?,?)')
-        qryparams = (datetime, value, sensor_config_id, logging_config_id, qc_flag)
+        qryparams = (datetime, float(value), sensor_config_id, logging_config_id, qc_flag)
 
         self.curs.execute(storeqry,qryparams)
         self.conn.commit()
