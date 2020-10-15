@@ -1,55 +1,75 @@
-#Example configuration file for DataBear
-#Create a new file with specific settings
-#Must include datalogger and sensors keys 
-
-#Defines data logger settings
-#Settings key must have at least one set of storage settings
+#-----------------------------------------------------------#
+# Test 2 sensors
+# - TPH1B
+# - DyaconSim
+#
+# Datalogger definition
+# The measurements specified here are defined in the sensor
+# section further down in the config file.
+#
+# Example:
+# datalogger:
+#    name: 'mylogger'    This will be the name of the output CSV
+#    settings:
+#    - store: 'mymeasurement'  The measurement to be stored
+#      sensor: 'mysensor'      Sensor that measurement is associated with
+#      process: 'dump'         Available options: 'dump','sample','min',
+#                                                 'max','average'
+#      storage_interval: 60    Storage interval in seconds  
 datalogger:
   name: test2sensors
   settings:
-  - store: airT  
+  - store: air_temperature 
     sensor: tph1     
-    process: sample          
-    frequency: 20          
-  - store: rh 
+    process: Sample          
+    storage_interval: 20          
+  - store: relative_humidity 
     sensor: tph1     
-    process: min         
-    frequency: 60          
-  - store: bp  
+    process: Min         
+    storage_interval: 60          
+  - store: barometric_pressure 
     sensor: tph1    
-    process: average          
-    frequency: 10
-  - store: measure1  
+    process: Average          
+    storage_interval: 10
+  - store: second1  
     sensor: sim     
-    process: min          
-    frequency: 60          
-  - store: measure2 
+    process: Min          
+    storage_interval: 60          
+  - store: second2 
     sensor: sim    
-    process: max         
-    frequency: 60          
-  - store: measure3  
+    process: Max         
+    storage_interval: 60          
+  - store: counter  
     sensor: sim    
-    process: average          
-    frequency: 60            
+    process: Average          
+    storage_interval: 60            
           
   
-#Must have at least one set of measurement settings per sensor.
-#Key value pairs in settings vary by method but must include
-#serial number and measurement frequency.
+#-----------------------------------------------------------#
+# Sensor definition
+#
+# Example:
+# sensors: 
+#  - name: 'mysensor'
+#    sensortype: 'mymethod'  This must match sensor factory registry
+#    settings:   
+#      serialnumber: 'xxxx'
+#      address: 0            Required even for sensors without address (use 0)
+#      virtualport: 'port1'  'port0' is reserved for simulated sensors
+#      measure_interval: 1   Measurement interval in seconds. Can be < 1 
 sensors: 
   - name: tph1
-    sensortype: dyTPH
-    settings:     #Serial number and measurement are mandatory
-      serialnumber: '6166'
-      measurement: 5   #MEASUREMENT interval
-      port: 'COM3'
-      address: 2
-      baud: 19200
+    sensortype: dyaconTPH1B  
+    serialnumber: '6166'
+    measure_interval: 5
+    virtualport: 'port1'
+    address: 2
   - name: sim
-    sensortype: sim
-    settings:     #Serial number and measurement are mandatory
-      serialnumber: 'X'
-      measurement: 20   #MEASUREMENT interval
+    sensortype: databearSim
+    serialnumber: 'X'
+    measure_interval: 10
+    virtualport: 'port0'
+    address: 0
    
    
 
