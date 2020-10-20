@@ -291,7 +291,7 @@ class DataLogger:
         '''
         while self.listen:
             #Check for UDP comm
-            event = self.sel.select(timeout=0)
+            event = self.sel.select(timeout=None)
             if event:
                 self.readUDP()
 
