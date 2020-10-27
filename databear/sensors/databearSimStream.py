@@ -2,6 +2,13 @@
 A DataBear simulated streaming sensor
 Utilizes simDataStream.py to generate data.
 
+Expected incoming data format:
+'X<minute>:<second>:<ms>,target=<ms>,frames=<number>,currentloops=<number>Z'
+-- minute, second, and ms are the time when data is sent
+-- target is the millisecond that data is scheduled to be sent
+-- frames is the number of data frames sent
+-- loops is the number of loops the simulator has performed
+
 Setup:
 - Windows: loopback USB-RS485 and run both simDataStream and DataBear
 - Other: Connect PC to device and run simDataStream
@@ -21,6 +28,17 @@ class databearSimStream(sensor.Sensor):
         'resistors':1,
         'bias':1
     }
+    measurements = ['sent_s','sent_ms','frames']
+    measurement_description = {
+        'sent_s':'seconds when data was sent',
+        'sentms':'milliseconds when data was sent',
+        'frames':'number of frames sent'
+    } 
+    units = {
+        'sent_s':'s',
+        'sent_ms':'ms',
+        'frames':'count'
+    }
     def __init__(self,name,sn,address,interval):
         '''
         Create a new sensor
@@ -30,9 +48,6 @@ class databearSimStream(sensor.Sensor):
         #Define characteristics of this sensor
         self.min_interval = 0
         self.connected = False
-
-        #Initialize data structure
-        self.data = {'raw':[]}
     
     def connect(self,port):
         if not self.connected:
@@ -51,7 +66,10 @@ class databearSimStream(sensor.Sensor):
         dbytes = self.comm.in_waiting
 
         if dbytes > 0:
-            rawdata = self.comm.read(dbytes).decode('utf-8')
+            rawdata = self.comm.read_until().decode('utf-8')
+
+            #Parse measurements
+            
             self.data['raw'].append((dt,rawdata))
 
     

@@ -9,7 +9,7 @@ class dbdriver:
         '''
         #Map DataBear ports to Windows
         self.ports = {
-            'port1':'COM23',
+            'port1':'COM6',
             'port2':'COM21'
         }
 

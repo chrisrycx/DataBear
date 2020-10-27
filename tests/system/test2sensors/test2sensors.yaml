@@ -60,7 +60,7 @@ datalogger:
 sensors: 
   - name: tph1
     sensortype: dyaconTPH1B  
-    serialnumber: '6166'
+    serialnumber: '6636'
     measure_interval: 5
     virtualport: 'port1'
     address: 2
