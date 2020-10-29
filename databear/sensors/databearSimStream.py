@@ -48,6 +48,10 @@ class databearSimStream(sensor.Sensor):
         #Define characteristics of this sensor
         self.min_interval = 0
         self.connected = False
+
+        #Set up regular expression
+        self.time_re = re.compile(r'X(\d+):(\d+):(\d+),')
+        self.frames_re = re.compile(r'frames=(\d+),')
     
     def connect(self,port):
         if not self.connected:
@@ -59,6 +63,7 @@ class databearSimStream(sensor.Sensor):
     def measure(self):
         '''
         Read in data from port and parse to measurements
+        'X<minute>:<second>:<ms>,target=<ms>,frames=<number>,currentloops=<number>Z'
         '''
         dt = datetime.datetime.now()
 
@@ -66,10 +71,32 @@ class databearSimStream(sensor.Sensor):
         dbytes = self.comm.in_waiting
 
         if dbytes > 0:
-            rawdata = self.comm.read_until().decode('utf-8')
+            rawdata = self.comm.read_until().decode('utf-8') 
+            fails = {}
 
             #Parse measurements
-            
-            self.data['raw'].append((dt,rawdata))
+            timeparse = re.findall(self.time_re,rawdata)
+            framesparse = re.findall(self.frames_re,rawdata)
+
+            if timeparse:
+                self.data['sent_s'].append((dt,int(timeparse[0][1])))
+                self.data['sent_ms'].append((dt,int(framesparse[0][2])))
+            else:
+                fails['sent_s'] = 'No data found'
+                fails['sent_ms'] = 'No data found'
+
+            if framesparse:
+                self.data['frames'].append((dt,int(framesparse[0])))
+            else:
+                fails['frames'] = 'No data found'
+
+            if fails:
+                raise MeasureError(
+                    self.name,
+                    list(fails.keys()),
+                    fails)
+
+
+
 
     

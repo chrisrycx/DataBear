@@ -11,11 +11,10 @@ teststrings = [
 ]
 
 #Target: 'X{}:{}:{},target={},frames={},currentloops={}Z\r\n'
-time_re = re.compile(r'X(\d+:\d+:\d+),')
+time_re = re.compile(r'X(\d+):(\d+):(\d+),')
 target_re = re.compile(r'target=(\d+),')
 loops_re = re.compile(r'currentloops=(\d+)Z')
 
-'''
 for tstring in teststrings:
     timeparse = re.findall(time_re,tstring)
     targetparse = re.findall(target_re,tstring)
@@ -24,8 +23,18 @@ for tstring in teststrings:
     #Print out results
     print('Test string: {}'.format(tstring))
 
-    print('Minute: {}'.format(timeparse[0][0]))
-'''
+    if timeparse:
+        print('Minute: {}'.format(timeparse[0][0]))
+        print('Second: {}'.format(timeparse[0][1]))
+        print('ms: {}'.format(timeparse[0][2]))
+    
+    if targetparse:
+        print('Target: {}'.format(targetparse[0]))
+
+    if loopsparse:
+        print('Loops: {}'.format(loopsparse[0]))
+
+
 
 
 

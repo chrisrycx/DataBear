@@ -25,13 +25,3 @@ class DataLogConfigError(Exception):
     pass
 
 
-#Testing
-if __name__ == "__main__":
-    x = 1
-    y = 2
-
-    if x<y:
-        msg = {'x':'Testing','y':'Testing'}
-        raise MeasureError(['x','y'],msg)
-
-    print('hello')
