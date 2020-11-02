@@ -22,15 +22,15 @@ datalogger:
   - store: air_temperature 
     sensor: tph1     
     process: Sample          
-    storage_interval: 20          
+    storage_interval: 10          
   - store: relative_humidity 
     sensor: tph1     
-    process: Min         
-    storage_interval: 60          
+    process: Dump         
+    storage_interval: 20          
   - store: barometric_pressure 
     sensor: tph1    
     process: Average          
-    storage_interval: 10
+    storage_interval: 30
   - store: second1  
     sensor: sim     
     process: Min          
@@ -67,7 +67,7 @@ sensors:
   - name: sim
     sensortype: databearSim
     serialnumber: 'X'
-    measure_interval: 10
+    measure_interval: 5
     virtualport: 'port0'
     address: 0
    
