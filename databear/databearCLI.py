@@ -184,5 +184,5 @@ def main_cli():
         print(rsp)
 
 if __name__ == "__main__":
-    #main_cli()
-    loadYAML('test2sensors.yaml')
+    main_cli()
+    

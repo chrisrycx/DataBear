@@ -106,8 +106,8 @@ class DataLogger:
         self.register_sensors()
         
         #Get list of active sensors and logging
-        sensorids = self.db.getActiveSensorIDs()
-        loggingconfigs = self.db.getActiveLoggingIDs()
+        sensorids = self.db.getSensorIDs(activeonly=True)
+        loggingconfigs = self.db.getConfigIDs('logging',activeonly=True)
         
         #Configure logger
         for sensorid in sensorids:
