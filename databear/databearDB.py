@@ -25,6 +25,12 @@ class DataBearDB:
             -- Create if needed
         - Create connection to database
         '''
+        #Set an attribute for config_id related functions
+        self.configtables = {
+            'sensor':['sensor_config_id','sensor_configuration'],
+            'logging':['logging_config_id','logging_configuration']
+            }
+
         # Check if database exists
         exists = os.path.isfile('databear.db')
 
@@ -58,12 +64,16 @@ class DataBearDB:
         return sensorlist
 
     @property
-    def sensor_ids(self):
+    def active_sensor_ids(self):
         '''
-        Return a dictionary mapping sensor name to id
+        Return a dictionary mapping sensor name to id for active sensors
         '''
         sensorids = {}
-        self.curs.execute('SELECT sensor_id, name FROM sensors')
+        self.curs.execute('SELECT sensors.sensor_id AS sensor_id, name '
+                          'FROM sensors JOIN '
+                          'sensor_configuration ON '
+                          'sensors.sensor_id = sensor_configuration.sensor_id '
+                          'WHERE status=1')
         for row in self.curs.fetchall():
             sensorids[row['name']] = row['sensor_id']
         return sensorids
@@ -176,7 +186,44 @@ class DataBearDB:
 
         return self.curs.lastrowid
     
-    def getMeasurementID(self,measurement_name, class_name):
+    def getSensorIDs(self,activeonly=False):
+        '''
+        Return list of sensor ids.
+        activeonly: true/false, to return only active sensorids
+        '''
+        sensor_ids = []
+        if activeonly:
+            qry = 'SELECT sensor_id FROM sensors'
+        else:
+            qry = ('SELECT sensor_id FROM sensor_configuration '
+                   'WHERE status=1')
+        
+        self.curs.execute(qry)
+            
+        for row in self.curs.fetchall():
+            sensor_ids.append(row["sensor_id"])
+
+        return sensor_ids
+
+    def getConfigIDs(self,configtype,activeonly=False):
+        '''
+        Return list of configuration IDs from either sensor config or logging config.
+        configtype = 'sensor' or 'logging'
+        activeonly = True/False, when true only active configs returned
+        '''
+        ids = []
+        qry = 'SELECT {} from {}'.format(
+                self.configtables[configtype][0],
+                self.configtables[configtype][1])
+        if activeonly:
+            qry = qry + ' WHERE status=1'
+        
+        for row in self.curs.execute(qry):
+            ids.append(row[self.configtables[configtype][0]])
+
+        return ids
+        
+    def getMeasurementID(self,measurement_name,class_name):
         '''
         Get the measurement id for a given name and sensor class
         '''
@@ -191,6 +238,57 @@ class DataBearDB:
 
         return row['measurement_id']
 
+    def getSensorID(self,sensorname,serialnumber,address,virtualport,classname):
+        '''
+        Get sensor id associated with parameters
+        Return sensor_id or none
+        '''
+        params = (sensorname,serialnumber,address,virtualport,classname)
+        self.curs.execute('SELECT sensor_id FROM sensors '
+                          'WHERE name=? AND serial_number=? '
+                          'AND address=? AND virtualport=? '
+                          'AND class_name=?',params)
+        
+        row = self.curs.fetchone()
+
+        if not row:
+            return None
+
+        return row['sensor_id']
+
+    def getSensorConfigID(self,sensor_id,measure_interval):
+        '''
+        Get sensor configuration id associated with parameters
+        Return sensor_config_id or none
+        '''
+        params = (sensor_id,measure_interval)
+        self.curs.execute('SELECT sensor_config_id FROM sensor_configuration '
+                          'WHERE sensor_id=? AND measure_interval=?',params)
+        
+        row = self.curs.fetchone()
+
+        if not row:
+            return None
+
+        return row['sensor_config_id']
+
+    def getLoggingConfigID(self,measurement_id,sensor_id,storage_interval,process_id):
+        '''
+        Get logging configuration id associated with parameters
+        Return sensor_config_id or none
+        '''
+        params = (measurement_id,sensor_id,storage_interval,process_id)
+        self.curs.execute('SELECT logging_config_id FROM logging_configuration '
+                          'WHERE measurement_id=? AND sensor_id=? '
+                          'AND storage_interval=? AND process_id=?',params)
+        
+        row = self.curs.fetchone()
+
+        if not row:
+            return None
+
+        return row['logging_config_id']
+    
     def getSensorConfig(self, sensor_id):
         '''
         Return the given sensor's object as a sensor object (name, serial_number, etc.) 
@@ -214,73 +312,6 @@ class DataBearDB:
         sensor["class_name"] = row["class_name"]
 
         return sensor
-
-    def sanitizeSensorValues(self, sensor):
-        '''
-        Helper to sanitize the values from sensor to use in update and insert sqlite statements
-        '''
-        values = []
-        values[0] = sensor["name"]
-        values[1] = sensor["serial_number"]
-        values[2] = sensor["address"]
-        values[3] = sensor["virtualport"]
-        values[4] = sensor["sensor_type"]
-        return values
-
-    def setSensor(self, sensor_id, sensor):
-        '''
-        Set a given sensor
-        sensor_id is the id from the table
-        sensor is a dict containing the sensor details
-        '''
-        values = self.sanitizeSensorValues(sensor)
-        values[6] = sensor_id
-
-        self.curs.execute("Update sensor set name = ?, serial_number = ?, address = ?, virtualport = ?, sensor_type = ? "
-                          " where sensor_id = ?", values)
-        # TODO: Check for errors, etc.
-
-    def setSensorConfig(self, sensor_config_id, sensor_id, measure_interval):
-        '''
-        Set a sensor config and return the new sensor_config_id
-        Since sensor configuration changes mean new measurements will use the new configuration
-        we need to leave the existing configuration in place and generate a new one setting
-        the old one's status to disabled (0)
-        '''
-        # First add the new config
-        # marking it as enabled (1)
-        values = [sensor_id, measure_interval, 1]
-        self.curs.execute("Insert into sensor_configuration set (sensor_id, measure_interval, status) (?,?,?)", values)
-        # TODO: Check for errors, etc.
-        new_config_id = self.curs.lastrowid
-
-        # Set old sensor_config_id entry to inactive
-        values = (sensor_config_id,)
-        self.curs.execute("Update sensor_configuration set status = 0 where sensor_config_id = ?", values)
-        
-        return new_config_id
-
-    def getActiveSensorIDs(self):
-        '''
-        Return list of active sensor IDs
-        '''
-        sensor_ids = []
-        self.curs.execute("SELECT sensor_config_id FROM sensor_configuration WHERE status = 1")
-            
-        for row in self.curs.fetchall():
-            sensor_ids.append(row["sensor_config_id"])
-
-        return sensor_ids
-
-    def getActiveLoggingIDs(self):
-        '''
-        Return active logger configuration IDs
-        '''
-        ids = []
-        for row in self.curs.execute("Select logging_config_id from logging_configuration where status = 1"):
-            ids.append(row["logging_config_id"])
-
-        return ids
 
     def getLoggingConfig(self, logging_config_id):
         # Get a logging configuration by it's id
@@ -306,19 +337,22 @@ class DataBearDB:
         config["process"] = row["process_name"]
         return config
 
-    def setLoggingConfig(self, logging_config_id, measurement_id, storage_interal, process_id, status):
-        # Set a logging configuration by its id and values
-        pass
-
-    def getDataForLoggingConfig(self, logging_config_id):
-        # Get all data for a given logging configuration id
-        # May add some date range parameters later if it makes sense to do so
-        pass
-
-    def getDataForSensorConfig(self, sensor_config_id):
-        # Same as above but for a given sensor only
-        pass
-
+    def setConfigStatus(self,configtype,config_id,status='activate'):
+        '''
+        Set a configuration to active or not active
+        configtype = 'sensor' or 'logging'
+        config_id
+        toggle = 'activate' or 'deactivate'
+        '''
+        togglecode = {'activate':1,'deactivate':0}
+        qry = 'UPDATE {} SET status={} WHERE {}=?'.format(
+            self.configtables[configtype][1],
+            togglecode[status],
+            self.configtables[configtype][0]
+        )
+        self.curs.execute(qry,(config_id,))
+        self.conn.commit()
+    
     def storeData(self, datetime, value, sensor_config_id, logging_config_id, qc_flag):
         '''
         Store data value in database

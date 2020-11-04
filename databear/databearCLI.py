@@ -32,46 +32,7 @@ def runDataBear(yamlfile=None):
     '''
     #Parse YAML file and load to database
     if yamlfile:
-        config = parseYAML(yamlfile)
-
-        #Connect to database
-        db = databearDB.DataBearDB()
-
-        #Set all current configurations inactive??
-        
-        #Load sensor configuration to database
-        for sensorconfig in config['sensors']:
-            #Load to sensors available
-            db.load_sensor(sensorconfig['sensortype'])
-
-            #Add sensor config to database
-            sensorid = db.addSensor(
-                    sensorconfig['sensortype'],
-                    sensorconfig['name'],
-                    sensorconfig['serialnumber'],
-                    sensorconfig['address'],
-                    sensorconfig['virtualport']
-                )
-            db.addSensorConfig(
-                sensorid, sensorconfig['measure_interval'])
-            
-        #Load logging configuration
-        sensor_ids = db.sensor_ids
-        process_ids = db.process_ids
-        sensor_classes = db.sensor_classes
-        for logsetting in config['datalogger']['settings']:
-            measureid = db.getMeasurementID(
-                logsetting['store'],
-                sensor_classes[logsetting['sensor']])
-            
-            db.addLoggingConfig(
-                measureid,
-                sensor_ids[logsetting['sensor']],
-                logsetting['storage_interval'],
-                process_ids[logsetting['process']],
-                1
-            )
-        
+        loadYAML(yamlfile)
         
     #Check to see if logger is already running
     #If so, shutdown for restart
@@ -88,7 +49,6 @@ def runDataBear(yamlfile=None):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
     
-
 def updateAvailableSensors():
     '''
     Return a list of available sensor classes from
@@ -113,7 +73,7 @@ def sendCommand(command,argument=None):
 
     return response
 
-def parseYAML(yamlfile):
+def loadYAML(yamlfile):
     '''
     parse a YAML configuration file and input
     in database
@@ -123,7 +83,82 @@ def parseYAML(yamlfile):
 
     config = yaml.safe_load(configyaml)
 
-    return config
+    #Connect to database
+    db = databearDB.DataBearDB()
+
+    #Set all prior configurations as in-active
+    for activeConfig in db.getConfigIDs('sensor',activeonly=True):
+        db.setConfigStatus('sensor',activeConfig,'deactivate')
+    for activeConfig in db.getConfigIDs('logging',activeonly=True):
+        db.setConfigStatus('logging',activeConfig,'deactivate')
+        
+    #Load sensor configuration to database
+    for sensorconfig in config['sensors']:
+        #Check if sensor already in database
+        oldsensorid = db.getSensorID(
+            sensorconfig['name'],
+            sensorconfig['serialnumber'],
+            sensorconfig['address'],
+            sensorconfig['virtualport'],
+            sensorconfig['sensortype']
+        )
+        
+        if not oldsensorid:
+            #Load to sensors available
+            db.load_sensor(sensorconfig['sensortype'])
+
+            #Add sensor config to database
+            sensorid = db.addSensor(
+                    sensorconfig['sensortype'],
+                    sensorconfig['name'],
+                    sensorconfig['serialnumber'],
+                    sensorconfig['address'],
+                    sensorconfig['virtualport']
+                )
+        else:
+            sensorid = oldsensorid
+
+        #Check if configuration already in database
+        oldsensorconfig = db.getSensorConfigID(
+            sensorid,
+            sensorconfig['measure_interval']
+        )
+
+        if not oldsensorconfig:
+            db.addSensorConfig(
+                sensorid,
+                sensorconfig['measure_interval']
+            )
+        else:
+            db.setConfigStatus('sensor',oldsensorconfig,'activate')
+            
+    #Load logging configuration
+    active_sensor_ids = db.active_sensor_ids
+    process_ids = db.process_ids
+    sensor_classes = db.sensor_classes
+    for logsetting in config['datalogger']['settings']:
+            measureid = db.getMeasurementID(
+                logsetting['store'],
+                sensor_classes[logsetting['sensor']])
+            
+            #Check for existing logging config
+            oldloggingconfig = db.getLoggingConfigID(
+                measureid,
+                active_sensor_ids[logsetting['sensor']],
+                logsetting['storage_interval'],
+                process_ids[logsetting['process']]
+            )
+
+            if not oldloggingconfig:
+                db.addLoggingConfig(
+                    measureid,
+                    active_sensor_ids[logsetting['sensor']],
+                    logsetting['storage_interval'],
+                    process_ids[logsetting['process']],
+                    1
+                )
+            else:
+                db.setConfigStatus('logging',oldloggingconfig,'activate')
 
 
 #---------------  Main ----------------
@@ -149,4 +184,5 @@ def main_cli():
         print(rsp)
 
 if __name__ == "__main__":
-    main_cli()
+    #main_cli()
+    loadYAML('test2sensors.yaml')
