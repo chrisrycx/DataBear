@@ -37,11 +37,11 @@ datalogger:
   settings:
   - store: sentdiff 
     sensor: simStream  
-    process: dump        
+    process: Dump        
     storage_interval: 1          
   - store: targetdiff 
     sensor: simStream     
-    process: max     
+    process: Max     
     storage_interval: 1 
   
    

@@ -35,11 +35,11 @@ class databearSimStream(sensor.Sensor):
         'sentdiff':'ms',
         'targetdiff':'ms'
     }
-    def __init__(self,name,sn,address,interval):
+    def __init__(self,name,sn,address):
         '''
         Create a new sensor
         '''
-        super().__init__(name,sn,address,interval)
+        super().__init__(name,sn,address)
        
         #Define characteristics of this sensor
         self.min_interval = 0
