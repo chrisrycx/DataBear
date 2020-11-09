@@ -3,11 +3,9 @@ A DataBear simulated streaming sensor
 Utilizes simDataStream.py to generate data.
 
 Expected incoming data format:
-'X<minute>:<second>:<ms>,target=<ms>,frames=<number>,currentloops=<number>Z'
+'X<minute>:<second>:<ms>,targetdiffms=<ms>Z'
 -- minute, second, and ms are the time when data is sent
--- target is the millisecond that data is scheduled to be sent
--- frames is the number of data frames sent
--- loops is the number of loops the simulator has performed
+-- targetdiffms is the millisecond diff between schedule and send
 
 Setup:
 - Windows: loopback USB-RS485 and run both simDataStream and DataBear
@@ -28,16 +26,14 @@ class databearSimStream(sensor.Sensor):
         'resistors':1,
         'bias':1
     }
-    measurements = ['sent_s','sent_ms','frames']
+    measurements = ['sentdiff','targetdiff']
     measurement_description = {
-        'sent_s':'seconds when data was sent',
-        'sentms':'milliseconds when data was sent',
-        'frames':'number of frames sent'
+        'sentdiff':'millisecond difference between send and receive',
+        'targetdiff':'millisecond difference between schedule and send',
     } 
     units = {
-        'sent_s':'s',
-        'sent_ms':'ms',
-        'frames':'count'
+        'sentdiff':'ms',
+        'targetdiff':'ms'
     }
     def __init__(self,name,sn,address,interval):
         '''
@@ -51,7 +47,7 @@ class databearSimStream(sensor.Sensor):
 
         #Set up regular expression
         self.time_re = re.compile(r'X(\d+):(\d+):(\d+),')
-        self.frames_re = re.compile(r'frames=(\d+),')
+        self.frames_re = re.compile(r'targetdiffms=(\d+),')
     
     def connect(self,port):
         if not self.connected:
@@ -63,7 +59,6 @@ class databearSimStream(sensor.Sensor):
     def measure(self):
         '''
         Read in data from port and parse to measurements
-        'X<minute>:<second>:<ms>,target=<ms>,frames=<number>,currentloops=<number>Z'
         '''
         dt = datetime.datetime.now()
 
@@ -76,19 +71,34 @@ class databearSimStream(sensor.Sensor):
 
             #Parse measurements
             timeparse = re.findall(self.time_re,rawdata)
-            framesparse = re.findall(self.frames_re,rawdata)
+            targetparse = re.findall(self.frames_re,rawdata)
 
             if timeparse:
-                self.data['sent_s'].append((dt,int(timeparse[0][1])))
-                self.data['sent_ms'].append((dt,int(framesparse[0][2])))
-            else:
-                fails['sent_s'] = 'No data found'
-                fails['sent_ms'] = 'No data found'
+                #Extract time sent
+                sent_m = int(timeparse[0][0])
+                sent_s = int(timeparse[0][1])
+                sent_mcs = int(timeparse[0][2])
 
-            if framesparse:
-                self.data['frames'].append((dt,int(framesparse[0])))
+                #Convert to datetime
+                sent_dt = datetime.datetime(
+                    dt.year,
+                    dt.month,
+                    dt.day,
+                    dt.hour,
+                    sent_m,
+                    sent_s,
+                    sent_mcs
+                )
+
+                delay_ms = int((dt - sent_dt)/datetime.timedelta(milliseconds=1))
+                self.data['sentdiff'].append((dt,delay_ms))
             else:
-                fails['frames'] = 'No data found'
+                fails['sentdiff'] = 'No data found'
+
+            if targetparse:
+                self.data['targetdiff'].append((dt,int(targetparse[0])))
+            else:
+                fails['targetdiff'] = 'No data found'
 
             if fails:
                 raise MeasureError(
