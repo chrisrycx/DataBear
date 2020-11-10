@@ -47,12 +47,12 @@ class databearSimStream(sensor.Sensor):
 
         #Set up regular expression
         self.time_re = re.compile(r'X(\d+):(\d+):(\d+),')
-        self.frames_re = re.compile(r'targetdiffms=(\d+),')
+        self.frames_re = re.compile(r'targetdiffms=(\d+)Z')
     
     def connect(self,port):
         if not self.connected:
             self.port = port
-            self.comm = serial.Serial(self.port,19200,timeout=0)
+            self.comm = serial.Serial(self.port,19200,timeout=0.5)
             self.comm.reset_input_buffer()
             self.connected = True
         
