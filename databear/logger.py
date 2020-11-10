@@ -219,7 +219,7 @@ class DataLogger:
         Use to log any exceptions that occurred
         input: mfuture - a futures object that gets passed when complete
         '''
-        print(self.sensors[mfuture.sname])
+        #print(self.sensors[mfuture.sname])
 
         #Retrieve exception. Returns none is no exceptions
         merrors = mfuture.exception()

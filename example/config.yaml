@@ -3,7 +3,6 @@
 # Example Logger using databearSim simulated sensor
 #
  
-
 #-----------------------------------------------------------#
 # Datalogger definition
 # The measurements specified here are defined in the sensor
@@ -15,19 +14,19 @@
 #    settings:
 #    - store: 'mymeasurement'  The measurement to be stored
 #      sensor: 'mysensor'      Sensor that measurement is associated with
-#      process: 'dump'         Available options: 'dump','sample','min',
-#                                                 'max','average'
+#      process: 'Dump'         Available options: 'Dump','Sample','Min',
+#                                                 'Max','Average'
 #      storage_interval: 60    Storage interval in seconds       
 datalogger:
   name: examplelog
   settings:
   - store: second2  
     sensor: sim1      
-    process: dump         
+    process: Dump         
     storage_interval: 10           
   - store: counter                 
     sensor: sim2          
-    process: dump           
+    process: Average           
     storage_interval: 10
     
 #-----------------------------------------------------------#
@@ -44,14 +43,14 @@ datalogger:
 #      measure_interval: 1   Measurement interval in seconds. Can be < 1 
 sensors: 
   - name: sim1
-    sensortype: simulator
+    sensortype: databearSim
     settings:     #Serial number and measurement are mandatory
       serialnumber: '1'
       address: 0
       virtualport: 'port0'
       measure_interval: 5   #MEASUREMENT frequency in seconds
   - name: sim2
-    sensortype: simulator
+    sensortype: databearSim
     settings:     
       serialnumber: '2'
       address: 0

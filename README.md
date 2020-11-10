@@ -10,19 +10,29 @@ in Python. DataBear is hardware independent, but is meant to be easily integrate
 * Extendible
     * User can integrate platform with new sensor and methods.
 
+### V2.0 Changes
+Databear now uses a SQLite database for both configuration and data storage.
+However, direct interaction with the database is optional and configuration
+can still be completed using YAML. 
+
+DataBear now runs in the background and can be managed via the commandline or
+through socket communication.
+
 ### Some potential usage scenarios:
 Here are some random ideas to give a sense for DataBear capabilities (some capabilities under development).
 * Run DataBear on a Raspberry Pi (https://www.raspberrypi.org/) to read a Modbus temperature sensor.  The sensor could be connected to a USB port on the Pi via an RS485 to USB converter and data could be read every second, averaged, and stored to CSV.
 * Integrate DataBear into an existing Linux based measurement platform, such as the Dyacon MDL-700 (https://dyacon.com).
 
-### Ideal Datalogger Features vs Data Bear 1.2
+### Ideal Datalogger Features vs Data Bear 2.0
 | Ideal Feature                                  | Data Bear       |
 | -------------                                  | ---------       |
 | Adjustable sampling rates for all measurements | &#9745;         |
 | Concurrent measurement of all sensors          | &#9745;         |
 | Adjustable rates of data storage               | &#9745;         |
-| Store metadata associated with data values     | &#9745;         |
+| Complete storage of metadata                   | &#9745;         |
 | Supports polled or continuously streaming sensors    | &#9745;         |
+| Ability to change settings on the fly          | Coming soon     |
+| Support for sensors on a bus                   | Coming soon     |
 
 ### Installation
 * pip install databear
@@ -38,10 +48,18 @@ Create a driver following the "Driver Interface" below.
 2. Create a class for your sensor(s) following the interface defined below.
 Use existing classes as examples or templates. Share your sensor class
 with the DataBear project so others can use it.
-3. Create a new configuration file following the approach used in the examples folder.
-4. Create a short script to initialize and run DataBear. This script will 
-register your sensor(s) class with DataBear and load the configuration file.
-See example.py for details. 
+3. Create a driver for your platform (See Driver Interface)
+4. Create a new configuration file (YAML) following the approach used in the example folder. This file should be stored in your project directory.
+5. Set two environmental variables:
+
+    ```bash
+    : export DBDRIVER=<my driver>
+    : export DBSENSORS=<folder name with sensors>
+    ```
+6. Run/Stop DataBear
+    ```
+    : databear run <myconfig>.yaml
+    : databear shutdown 
 
 ### DataBear API
 DataBear now features a rudimentary API for use with interprocess communication. Commands and responses are exchanged in JSON via UDP.
@@ -54,38 +72,68 @@ DataBear now features a rudimentary API for use with interprocess communication.
     * shutdown - Stop logger.
 
 
-### Sensor Interface (V1.0)
-Class Name: (Format optional but recommended)
-* \<manufacturer>\<Model>	
-* Use databear.sensors.Sensor as a base class
-* Example - class dyaconWSD(sensors.Sensor):
+### Sensor Interface (V1.1)
+- Recommended class naming convention 'manufacturerModel'
+- Inherit sensor base class
 
-Methods
-* __init__(self,name,sn,address,interval)
-    * Inputs
-        * name - name of sensor
-        * sn - serial number of sensor
-        * address - sensor address, set to 0 if none
-        * interval - measurement interval (may be removed in future release)
-    * Define a data dictionary for the sensor after calling the base class
-      __init__.
-        * data = {"measure1":[],"measure2":[],...}
-* connect(self,port)
-    * Use to initialize a connection to actual hardware port.
-* measure(self)
-    * Performs sensor measurement. No inputs.
-    * Data for each measurement is added to the ‘data’ attribute.
-    * Data should consist of a tuple of the form (\<timestamp>,\<datavalue>)
-        * data[\<measurement name>] = (\<timestamp>,\<datavalue>)
+```python
+class dyaconWSD(sensors.Sensor):
+    '''
+    Overwrite base class attributes to make
+    sensor specific. Overwriting measurements
+    is mandatory, others are optional.
+    '''
+    measurements = ['measure1','measure2']
+    def __init__(self,name,sn,address):
+        '''
+        Create a new simulator
+        - Call base class init
+        - Override base data structure
+        '''
+        super().__init__(name,sn,address)
 
+        #Initialize a counter
+        self.counter = 0 
+
+    def connect(self,port):
+        '''
+        Set up connection to hardware
+        port - port returned by driver
+        '''
+    
+    def measure(self):
+        '''
+        Override base method and define
+        how sensor makes a measurement.
+        Store measurement in 
+            self.data[<measurement name>].append(datetime,value)
+        '''
+        pass
+```
 ### Driver Interface (V0)
-Class definition:
-* dbdriver
-    * No base class to inherit from
-Methods
-* __init__
-    * Use to map virtual ports to real hardware ports
-* connect(self,virtualport,hardware_settings)
-    * Use to configure hardware and return hardware port name from mapping
+- A class that maps Databear virtual ports to hardware ports
+
+```python
+class dbdriver:
+    def __init__(self):
+        '''
+        Map virtual ports to hardware ports
+        '''
+        #A windows example
+        self.ports = {
+            'port1':'COM6',
+            'port2':'COM21'
+        }
+
+    def connect(self,databearport,hardware_settings):
+        '''
+        Perform any hardware configuration and return
+        hardware port for use by sensor.connect method
+        '''
+        #A windows example
+        return self.ports[databearport]
+```
+
+
 
 
