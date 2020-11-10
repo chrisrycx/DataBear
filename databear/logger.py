@@ -274,8 +274,9 @@ class DataLogger:
         storedata = processdata.calculate(process,data,storetime)
 
         #Write data to database
+        tresolution = self.sensors[sensor].temporal_resolution
         for row in storedata:
-            dtstr = row[0].strftime('%Y-%m-%d %H:%M:%S')
+            dtstr = row[0].isoformat(sep=' ',timespec=tresolution)
             value = row[1]
 
             self.db.storeData(

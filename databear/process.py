@@ -20,7 +20,7 @@ def calculate(processtype,data,storetime):
         - data - list of data to store [(datetime,val),...]
         - storetime - datetime of the storage operation
     Output:
-        - list of data to be stored [('YYYY-MM-DD HH:MM',val),...]
+        - list of data to be stored [(datetime,val),...]
     '''
     if processtype=='Dump':
         output = dump(data)

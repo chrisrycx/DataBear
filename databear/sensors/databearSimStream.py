@@ -35,6 +35,7 @@ class databearSimStream(sensor.Sensor):
         'sentdiff':'ms',
         'targetdiff':'ms'
     }
+    temporal_resolution = 'microseconds'
     def __init__(self,name,sn,address):
         '''
         Create a new sensor

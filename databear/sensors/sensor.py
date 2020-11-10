@@ -9,6 +9,7 @@ class Sensor:
     measurements = [] #List of measurement names
     units = {} #List of units associated with measurement names
     measurement_description = {}
+    temporal_resolution = 'minutes' #Options: minutes, seconds, microseconds
     def __init__(self,name,sn,address):
         '''
         Create a new sensor
