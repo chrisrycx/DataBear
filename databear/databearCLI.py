@@ -33,6 +33,9 @@ def runDataBear(yamlfile=None):
     #Parse YAML file and load to database
     if yamlfile:
         loadYAML(yamlfile)
+    else:
+        # Initialize the database if needed
+        db = databearDB.DataBearDB()
         
     #Check to see if logger is already running
     #If so, shutdown for restart
