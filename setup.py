@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="databear",
-    version="2.0",
+    version="2.0.1",
     author="Chris Cox",
     author_email="chrisrycx@gmail.com",
     description="A Python based data logger",
@@ -22,7 +22,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['pyyaml'],
+    install_requires=['pyyaml','numpy'],
     include_package_data=True,
     python_requires='>=3.6',
     entry_points='''
