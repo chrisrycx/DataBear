@@ -13,10 +13,7 @@ others under development
 import socket
 import json
 import sys
-from databear import logger, databearDB
-import sqlite3
 import yaml
-import subprocess
 
 #Setup socket for communication with databear
 ipaddress = 'localhost'
@@ -30,6 +27,8 @@ def runDataBear(yamlfile=None):
     Run databear with optional yaml configuration
     file
     '''
+    import subprocess
+
     #Parse YAML file and load to database
     if yamlfile:
         loadYAML(yamlfile)
@@ -54,6 +53,7 @@ def updateAvailableSensors():
     Return a list of available sensor classes from
     databear.sensors
     '''
+    pass
 
 def sendCommand(command,argument=None):
     '''
@@ -78,12 +78,14 @@ def loadYAML(yamlfile):
     parse a YAML configuration file and input
     in database
     '''
+    from databear import databearDB
+
     with open(yamlfile,'rt') as yin:
         configyaml = yin.read()
 
     config = yaml.safe_load(configyaml)
 
-    #Connect to database
+    #Connect or create database
     db = databearDB.DataBearDB()
 
     #Set all prior configurations as in-active
