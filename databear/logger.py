@@ -42,6 +42,7 @@ class DataLogger:
         '''
         #Initialize attributes
         self.sensors = {}
+        self.portlocks = {}
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
 
@@ -69,7 +70,7 @@ class DataLogger:
 
     def register_sensors(self):
         '''
-        Register sensor classs and load measurements
+        Register sensor class and load measurements
         to the measurements table
         classnames - a list of classnames (which should match module names)
         '''
@@ -149,17 +150,18 @@ class DataLogger:
             )
 
         #"Connect" virtual port to hardware using driver
-        #Ignore if port0 (simulated sensors)
-        if virtualport!='port0':
-            hardware_port = self.driver.connect(
-                virtualport,
-                sensor.hardware_settings
-                )
-        else:
-            hardware_port = ''
+        hardware_port = self.driver.connect(virtualport,sensor.hardware_settings)
 
         #"Connect" sensor to hardware
-        sensor.connect(hardware_port)
+        #bus type ports are given thread locks
+        if virtualport[0:3] == 'bus':
+            plock = self.portlocks.get(virtualport)
+            if not plock:
+                plock = threading.Lock()
+                self.portlocks[virtualport] = plock 
+            sensor.connect(hardware_port,plock)
+        else:
+            sensor.connect(hardware_port)
 
         #Add sensor to collection
         self.sensors[name] = sensor

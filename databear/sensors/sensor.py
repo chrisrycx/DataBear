@@ -2,6 +2,8 @@
 Base class for DataBear sensors
 '''
 from databear.errors import SensorConfigError, MeasureError
+import datetime
+import time
 
 class Sensor:
     interface_version = '1.1'
@@ -109,3 +111,51 @@ class Sensor:
                 savedata.append(val)
 
         self.data[name] = savedata
+
+
+class BusSensor(Sensor):
+    '''
+    A base class for a sensor that can be part of
+    a bus network architecture.
+    '''
+    def __init__(self,name,sn,address):
+        '''
+        Override base class to add port lock
+        '''
+        super().__init__(name,sn,address)
+        self.portlock = None
+    
+    def connect(self,port,portlock):
+        '''
+        Set up portlock and connection
+        '''
+        self.portlock = portlock
+    
+    def startMeasure(self):
+        '''
+        Begin a concurrent measurement
+        Return the wait time between start and read
+        '''
+        return 0
+
+    def readMeasure(self,starttime):
+        '''
+        Read measurement from sensor
+        '''
+        pass
+
+    def measure(self):
+        '''
+        Coordinate start and read measure with
+        port locks on the bus
+        '''
+        dt = datetime.datetime.now()
+        self.portlock.acquire()
+        s = self.startMeasure()
+        self.portlock.release()
+        time.sleep(s)
+        self.portlock.acquire()
+        self.readMeasure(dt)
+        self.portlock.release()
+        
+    
