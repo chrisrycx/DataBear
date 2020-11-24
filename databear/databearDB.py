@@ -25,6 +25,10 @@ class DataBearDB:
             -- Create if needed
         - Create connection to database
         '''
+        # Add SENSORSPATH to pythonpath for importing alternative sensors
+        if 'DBSENSORPATH' in os.environ:
+            sys.path.append(os.environ['DBSENSORPATH'])
+
         #Set an attribute for config_id related functions
         self.configtables = {
             'sensor':['sensor_config_id','sensor_configuration'],
