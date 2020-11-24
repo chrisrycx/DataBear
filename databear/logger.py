@@ -40,6 +40,10 @@ class DataLogger:
         dbdriver:
             - An instance of a DB hardware driver
         '''
+        # Add SENSORSPATH to pythonpath for importing alternative sensors
+        if 'DBSENSORPATH' in os.environ:
+            sys.path.append(os.environ['DBSENSORPATH'])
+
         #Initialize attributes
         self.sensors = {}
         self.portlocks = {}
