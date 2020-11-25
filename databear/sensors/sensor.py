@@ -6,12 +6,11 @@ import datetime
 import time
 
 class Sensor:
-    interface_version = '1.1'
+    interface_version = '1.2'
     hardware_settings = {}
     measurements = [] #List of measurement names
     units = {} #List of units associated with measurement names
     measurement_description = {}
-    temporal_resolution = 'minutes' #Options: minutes, seconds, microseconds
     def __init__(self,name,sn,address):
         '''
         Create a new sensor
@@ -150,12 +149,23 @@ class BusSensor(Sensor):
         port locks on the bus
         '''
         dt = datetime.datetime.now()
-        self.portlock.acquire()
-        s = self.startMeasure()
-        self.portlock.release()
-        time.sleep(s)
-        self.portlock.acquire()
-        self.readMeasure(dt)
-        self.portlock.release()
+        try:
+            #The start measurement sequence
+            self.portlock.acquire()
+            s = self.startMeasure()
+            self.portlock.release()
+
+            #Wait s then read
+            time.sleep(s)
+            self.portlock.acquire()
+            self.readMeasure(dt)
+            self.portlock.release()
+            
+        except:
+            #Unlock the port if any exception
+            self.portlock.release()
+        
+        
+        
         
     

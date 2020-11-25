@@ -251,18 +251,20 @@ class DataLogger:
 
         s = self.storeMeasurement
         #Note: Some parameters for function supplied by Job class in Schedule
-        self.logschedule.every(interval).do(s,configid,name,sensor,process)
+        self.logschedule.every(interval).do(s,configid,name,sensor,process,interval)
 
-    def storeMeasurement(self,logconfigid,name,sensor,process,storetime,lasttime):
+    def storeMeasurement(self,logconfigid,name,sensor,process,interval,storetime,lasttime):
         '''
         Store measurement data according to process.
         Inputs
-        - name, sensor
+        - logconfigid for database
+        - name: measurement name
+        - sensor: sensor name
         - process: A valid process type
+        - interval: storage interval (used to determine temporal resolution)
         - storetime: datetime of the scheduled storage
         - lasttime: datetime of last storage event
         - Process = 'average','min','max','dump','sample'
-        - Deletes any data associated with storage after saving
         '''
 
         #Deal with missing last time on start-up
@@ -283,7 +285,13 @@ class DataLogger:
         storedata = processdata.calculate(process,data,storetime)
 
         #Write data to database
-        tresolution = self.sensors[sensor].temporal_resolution
+        if interval < 1:
+            tresolution = 'microseconds'
+        elif interval < 60:
+            tresolution = 'seconds'
+        else:
+            tresolution = 'minutes'
+
         for row in storedata:
             dtstr = row[0].isoformat(sep=' ',timespec=tresolution)
             value = row[1]
