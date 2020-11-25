@@ -232,11 +232,14 @@ class DataLogger:
 
         #Log exceptions
         if merrors:
-            for m in merrors.measurements:
-                logging.error('{}:{} - {}'.format(
-                        merrors.sensor,
-                        m,
-                        merrors.messages[m]))
+            try:
+                for m in merrors.measurements:
+                    logging.error('{}:{} - {}'.format(
+                            merrors.sensor,
+                            m,
+                            merrors.messages[m]))
+            except:
+                raise RuntimeError(merrors)
 
     def scheduleStorage(self,configid,name,sensor,interval,process):
         '''

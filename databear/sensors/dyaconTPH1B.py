@@ -50,10 +50,14 @@ class dyaconTPH1B(sensor.BusSensor):
                 
             except mm.NoResponseError as norsp:
                 fails[measure] = 'No response from sensor'
+            except:
+                self.portlock.release()
+                raise 
         
         #Raise a measurement error if a fail is detected
         if len(fails)>0:
             failnames = list(fails.keys())
+            self.portlock.release()
             raise MeasureError(self.name,failnames,fails)
     
    

@@ -45,15 +45,20 @@ class dyaconTPH1C(sensor.BusSensor):
             dt = datetime.datetime.now()
             
             try:
-                val = self.comm.read_float(measure['register'])
-                self.data[measure['name']].append((starttime,val))
+                val = self.comm.read_float(self.registers[measure])
+                self.data[measure].append((starttime,val))
 
             except mm.NoResponseError as norsp:
-                fails[measure['name']] = 'No response from sensor'
+                fails[measure] = 'No response from sensor'
+
+            except:
+                self.portlock.release()
+                raise
                 
         #Raise a measurement error if a fail is detected
         if len(fails)>0:
             failnames = list(fails.keys())
+            self.portlock.release()
             raise MeasureError(self.name,failnames,fails)
     
     
