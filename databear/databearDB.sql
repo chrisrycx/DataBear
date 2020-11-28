@@ -71,6 +71,15 @@ CREATE TABLE IF NOT EXISTS "databear_configuration" (
     "name" TEXT NOT NULL PRIMARY KEY,
     "value" INTEGER NOT NULL
 );
+
+CREATE VIEW dataview AS
+SELECT d.dtstamp, d.value, s.name AS sensor_name, m.name AS measurement 
+FROM DATA d
+	INNER JOIN sensor_configuration sc ON d.sensor_configid=sc.sensor_config_id
+	INNER JOIN logging_configuration lc ON d.logging_configid=lc.logging_config_id
+	JOIN sensors s ON sc.sensor_id=s.sensor_id
+	JOIN measurements m ON lc.measurement_id=m.measurement_id;
+    
 INSERT INTO "processes" VALUES (1,'Sample','Select the first measurement from storage interval for storage');
 INSERT INTO "processes" VALUES (2,'Average','Calculate the average value of measurements from storage interval');
 INSERT INTO "processes" VALUES (3,'Max','Select the maximum value from measurement in the storage interval');

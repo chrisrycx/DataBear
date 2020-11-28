@@ -10,7 +10,7 @@ import databear.databearDB as databearDB
 from databear import sensorfactory
 from databear.errors import DataLogConfigError, MeasureError
 from databear.databearDB import DataBearDB
-from datetime import timedelta
+from datetime import datetime, timedelta
 import concurrent.futures
 import threading #For IPC
 import selectors #For IPC via UDP
@@ -205,9 +205,9 @@ class DataLogger:
         
         #Schedule measurement
         m = self.doMeasurement
-        self.logschedule.every(interval).do(m,sensorname)
+        self.logschedule.every(interval).do(m,sensorname,interval)
     
-    def doMeasurement(self,sensorname,storetime,lasttime):
+    def doMeasurement(self,sensorname,interval,scheduled_time,last_time):
         '''
         Perform a measurement on a sensor
         Inputs
@@ -215,9 +215,16 @@ class DataLogger:
         - storetime and lasttime are not currently used here
           but are passed by Schedule when this function is called.
         '''
-        mfuture = self.workerpool.submit(self.sensors[sensorname].measure)
-        mfuture.sname = sensorname
-        mfuture.add_done_callback(self.endMeasurement)
+        #Check to see if job is on time. Skip measurement if
+        #current time - scheduled time is more than the measurement interval
+        dtdiff = datetime.now() - scheduled_time
+        if dtdiff.total_seconds() > interval:
+            #Too late, skip measurement
+            logging.error('Skipping measurement for {}'.format(sensorname))
+        else:
+            mfuture = self.workerpool.submit(self.sensors[sensorname].measure)
+            mfuture.sname = sensorname
+            mfuture.add_done_callback(self.endMeasurement)
         
     def endMeasurement(self,mfuture):
         '''
@@ -253,7 +260,7 @@ class DataLogger:
         #Note: Some parameters for function supplied by Job class in Schedule
         self.logschedule.every(interval).do(s,configid,name,sensor,process,interval)
 
-    def storeMeasurement(self,logconfigid,name,sensor,process,interval,storetime,lasttime):
+    def storeMeasurement(self,logconfigid,name,sensor,process,interval,scheduled_time,last_time):
         '''
         Store measurement data according to process.
         Inputs
@@ -269,11 +276,11 @@ class DataLogger:
 
         #Deal with missing last time on start-up
         #Set to storetime - 1 day to ensure all data is included
-        if not lasttime:
-            lasttime = storetime - timedelta(1)
+        if not last_time:
+            last_time = scheduled_time - timedelta(1)
 
         #Get datetimes associated with current storage and prior
-        data = self.sensors[sensor].getdata(name,lasttime,storetime)
+        data = self.sensors[sensor].getdata(name,last_time,scheduled_time)
 
         if not data:
             #No data found to be stored
@@ -282,7 +289,7 @@ class DataLogger:
             return
         
         #Process data
-        storedata = processdata.calculate(process,data,storetime)
+        storedata = processdata.calculate(process,data,scheduled_time)
 
         #Write data to database
         if interval < 1:
@@ -397,9 +404,6 @@ class DataLogger:
                         t.join() #Wait for thread to end
                         print('Shutting down')
                         break
-            except AssertionError:
-                logging.error('Measurement too late, logger resetting')
-                self.logschedule.reset()
             except KeyboardInterrupt:
                 #Shut down threads
                 self.workerpool.shutdown()
