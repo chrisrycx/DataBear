@@ -299,6 +299,10 @@ class DataLogger:
         else:
             tresolution = 'minutes'
 
+        #Include microseconds if dump is used
+        if process == 'Dump':
+            tresolution = 'microseconds'
+
         for row in storedata:
             dtstr = row[0].isoformat(sep=' ',timespec=tresolution)
             value = row[1]

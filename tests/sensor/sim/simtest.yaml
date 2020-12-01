@@ -1,33 +1,5 @@
-#-----------------------------------------------------------#
-# Datalogger definition
-# The measurements specified here are defined in the sensor
-# section further down in the config file.
-#
-# Example:
-# datalogger:
-#    name: 'mylogger'    This will be the name of the output CSV
-#    settings:
-#    - store: 'mymeasurement'  The measurement to be stored
-#      sensor: 'mysensor'      Sensor that measurement is associated with
-#      process: 'dump'         Available options: 'dump','sample','min',
-#                                                 'max','average'
-#      storage_interval: 60    Storage interval in seconds       
-datalogger:
-  name: simtest
-  settings:
-  - store: second1  
-    sensor: sim1      
-    process: Min         
-    storage_interval: 10
-  - store: second2                 
-    sensor: sim1          
-    process: Sample           
-    storage_interval: 20           
-  - store: counter                 
-    sensor: sim1        
-    process: Average           
-    storage_interval: 30
-    
+#DataBear simulated sensor test
+
 #-----------------------------------------------------------#
 # Sensor definition
 #
@@ -47,6 +19,48 @@ sensors:
     address: 0
     virtualport: 'port0'
     measure_interval: 5
+  - name: sim2
+    sensortype: databearSim
+    serialnumber: '2'
+    address: 0
+    virtualport: 'port0'
+    measure_interval: 10
+
+#-----------------------------------------------------------#
+# Datalogger definition
+# The measurements specified here are defined in the sensor
+# section further down in the config file.
+#
+# Example:
+# datalogger:
+#    name: 'mylogger'    This will be the name of the output CSV
+#    settings:
+#    - store: 'mymeasurement'  The measurement to be stored
+#      sensor: 'mysensor'      Sensor that measurement is associated with
+#      process: 'dump'         Available options: 'dump','sample','min',
+#                                                 'max','average'
+#      storage_interval: 60    Storage interval in seconds       
+datalogger:
+  name: simtest
+  settings:
+  - store: seconds 
+    sensor: sim1      
+    process: Dump         
+    storage_interval: 20
+  - store: seconds                 
+    sensor: sim1          
+    process: Max           
+    storage_interval: 20           
+  - store: seconds                 
+    sensor: sim1        
+    process: Average           
+    storage_interval: 30
+  - store: seconds
+    sensor: sim2
+    process: Dump
+    storage_interval: 10
+    
+
       
     
 

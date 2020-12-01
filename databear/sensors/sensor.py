@@ -11,6 +11,7 @@ class Sensor:
     measurements = [] #List of measurement names
     units = {} #List of units associated with measurement names
     measurement_description = {}
+    min_interval = 1  #Minimum interval that sensor can be polled
     def __init__(self,name,sn,address):
         '''
         Create a new sensor
