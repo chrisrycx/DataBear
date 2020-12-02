@@ -73,7 +73,8 @@ CREATE TABLE IF NOT EXISTS "databear_configuration" (
 );
 
 CREATE VIEW dataview AS
-SELECT d.dtstamp, d.value, s.name AS sensor_name, m.name AS measurement, p.name AS process 
+SELECT d.dtstamp, d.value, s.name AS sensor_name, m.name AS measurement, 
+       p.name AS process, sc.measure_interval AS measure_interval 
 FROM DATA d
 	INNER JOIN sensor_configuration sc ON d.sensor_configid=sc.sensor_config_id
 	INNER JOIN logging_configuration lc ON d.logging_configid=lc.logging_config_id

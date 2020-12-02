@@ -13,7 +13,7 @@
 #      virtualport: 'port1'  'port0' is reserved for simulated sensors
 #      measure_interval: 1   Measurement interval in seconds. Can be < 1 
 sensors: 
-  - name: simStream
+  - name: sims1
     sensortype: databearSimStream  
     serialnumber: 'X'
     measure_interval: 0.5
@@ -35,14 +35,11 @@ sensors:
 datalogger:
   name: streamspeed
   settings:
-  - store: sentdiff 
-    sensor: simStream  
+  - store: sendtime 
+    sensor: sims1  
     process: Dump        
     storage_interval: 1          
-  - store: targetdiff 
-    sensor: simStream     
-    process: Max     
-    storage_interval: 1 
+  
   
    
 
