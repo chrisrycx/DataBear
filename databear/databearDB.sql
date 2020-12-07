@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS "sensor_configuration" (
 	"sensor_config_id"	INTEGER NOT NULL,
 	"sensor_id"	INTEGER NOT NULL,
 	"measure_interval"	REAL NOT NULL,
-	"status"	INTEGER NOT NULL DEFAULT 0,
+	"status"    INTEGER,
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
 	UNIQUE("sensor_id","status"),
 	PRIMARY KEY("sensor_config_id" AUTOINCREMENT)
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS "logging_configuration" (
 	"sensor_id"	INTEGER NOT NULL,
 	"storage_interval"	INTEGER NOT NULL,
 	"process_id"	INTEGER NOT NULL,
-	"status"	INTEGER NOT NULL DEFAULT 0,
+	"status"	INTEGER,
 	FOREIGN KEY("measurement_id") REFERENCES "measurements"("measurement_id") ON DELETE CASCADE,
 	FOREIGN KEY("process_id") REFERENCES "processes"("process_id") ON UPDATE CASCADE,
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,

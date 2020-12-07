@@ -123,10 +123,10 @@ class DataLogger:
                 sensorsettings['serial_number'],
                 sensorsettings['address'],
                 sensorsettings['virtualport'],
-                sensorsettings['class_name']
+                sensorsettings['class_name'],
+                sensorsettings['sensor_config_id']
                 )
             self.scheduleMeasurement(
-                sensorid,
                 sensorsettings['name'],
                 sensorsettings['measure_interval']
                 )
@@ -141,7 +141,7 @@ class DataLogger:
                 storagesetting['storage_interval'],
                 storagesetting['process'])
                   
-    def addSensor(self,name,sn,address,virtualport,sensortype):
+    def addSensor(self,name,sn,address,virtualport,sensortype,sensorconfigid):
         '''
         Add a sensor to the logger
         '''
@@ -152,6 +152,7 @@ class DataLogger:
             sn,
             address
             )
+        sensor.configid = sensorconfigid
 
         #"Connect" virtual port to hardware using driver
         hardware_port = self.driver.connect(virtualport,sensor.hardware_settings)
@@ -192,13 +193,12 @@ class DataLogger:
 
         return successflag
     
-    def scheduleMeasurement(self,sensorid,sensorname,interval):
+    def scheduleMeasurement(self,sensorname,interval):
         '''
         Schedule a measurement:
         Interval is seconds
         '''
-        self.sensors[sensorname].configid = sensorid
-
+        
         #Check interval to ensure it isn't too small
         if interval < self.sensors[sensorname].min_interval:
             raise DataLogConfigError('Logger frequency exceeds sensor max')
