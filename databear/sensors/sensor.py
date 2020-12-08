@@ -165,6 +165,8 @@ class BusSensor(Sensor):
         except:
             #Unlock the port if any exception
             self.portlock.release()
+            #Raise again so that the exception is logged
+            raise
         
         
         
