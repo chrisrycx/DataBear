@@ -4,32 +4,6 @@
 #
  
 #-----------------------------------------------------------#
-# Datalogger definition
-# The measurements specified here are defined in the sensor
-# section further down in the config file.
-#
-# Example:
-# datalogger:
-#    name: 'mylogger'    This will be the name of the output CSV
-#    settings:
-#    - store: 'mymeasurement'  The measurement to be stored
-#      sensor: 'mysensor'      Sensor that measurement is associated with
-#      process: 'Dump'         Available options: 'Dump','Sample','Min',
-#                                                 'Max','Average'
-#      storage_interval: 60    Storage interval in seconds       
-datalogger:
-  name: examplelog
-  settings:
-  - store: second2  
-    sensor: sim1      
-    process: Dump         
-    storage_interval: 10           
-  - store: counter                 
-    sensor: sim2          
-    process: Average           
-    storage_interval: 10
-    
-#-----------------------------------------------------------#
 # Sensor definition
 #
 # Example:
@@ -56,6 +30,34 @@ sensors:
       address: 0
       virtualport: 'port0'
       measure_interval: 5 
+
+#-----------------------------------------------------------#
+# Datalogger definition
+# The measurements specified here are defined in the sensor
+# section further down in the config file.
+#
+# Example:
+# datalogger:
+#    name: 'mylogger'    This will be the name of the output CSV
+#    settings:
+#    - store: 'mymeasurement'  The measurement to be stored
+#      sensor: 'mysensor'      Sensor that measurement is associated with
+#      process: 'Dump'         Available options: 'Dump','Sample','Min',
+#                                                 'Max','Average'
+#      storage_interval: 60    Storage interval in seconds       
+datalogger:
+  name: examplelog
+  settings:
+  - store: seconds  
+    sensor: sim1      
+    process: Dump         
+    storage_interval: 10           
+  - store: seconds                 
+    sensor: sim2          
+    process: Average           
+    storage_interval: 10
+    
+
       
     
 
