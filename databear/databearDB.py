@@ -25,6 +25,10 @@ class DataBearDB:
             -- Create if needed
         - Create connection to database
         '''
+        # Add SENSORSPATH to pythonpath for importing alternative sensors
+        if 'DBSENSORPATH' in os.environ:
+            sys.path.append(os.environ['DBSENSORPATH'])
+
         #Set an attribute for config_id related functions
         self.configtables = {
             'sensor':['sensor_config_id','sensor_configuration'],
@@ -193,10 +197,10 @@ class DataBearDB:
         '''
         sensor_ids = []
         if activeonly:
-            qry = 'SELECT sensor_id FROM sensors'
-        else:
             qry = ('SELECT sensor_id FROM sensor_configuration '
                    'WHERE status=1')
+        else:
+            qry = 'SELECT sensor_id FROM sensors'
         
         self.curs.execute(qry)
             
@@ -310,6 +314,7 @@ class DataBearDB:
         sensor["virtualport"] = row["virtualport"]
         sensor["measure_interval"] = row["measure_interval"]
         sensor["class_name"] = row["class_name"]
+        sensor["sensor_config_id"] = row["sensor_config_id"]
 
         return sensor
 
@@ -344,13 +349,12 @@ class DataBearDB:
         config_id
         toggle = 'activate' or 'deactivate'
         '''
-        togglecode = {'activate':1,'deactivate':0}
-        qry = 'UPDATE {} SET status={} WHERE {}=?'.format(
+        togglecode = {'activate':1,'deactivate':None}
+        qry = 'UPDATE {} SET status=? WHERE {}=?'.format(
             self.configtables[configtype][1],
-            togglecode[status],
             self.configtables[configtype][0]
         )
-        self.curs.execute(qry,(config_id,))
+        self.curs.execute(qry,(togglecode[status],config_id))
         self.conn.commit()
     
     def storeData(self, datetime, value, sensor_config_id, logging_config_id, qc_flag):

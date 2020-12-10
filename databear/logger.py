@@ -10,7 +10,7 @@ import databear.databearDB as databearDB
 from databear import sensorfactory
 from databear.errors import DataLogConfigError, MeasureError
 from databear.databearDB import DataBearDB
-from datetime import timedelta
+from datetime import datetime, timedelta
 import concurrent.futures
 import threading #For IPC
 import selectors #For IPC via UDP
@@ -40,8 +40,13 @@ class DataLogger:
         dbdriver:
             - An instance of a DB hardware driver
         '''
+        # Add SENSORSPATH to pythonpath for importing alternative sensors
+        if 'DBSENSORPATH' in os.environ:
+            sys.path.append(os.environ['DBSENSORPATH'])
+
         #Initialize attributes
         self.sensors = {}
+        self.portlocks = {}
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
 
@@ -69,7 +74,7 @@ class DataLogger:
 
     def register_sensors(self):
         '''
-        Register sensor classs and load measurements
+        Register sensor class and load measurements
         to the measurements table
         classnames - a list of classnames (which should match module names)
         '''
@@ -118,10 +123,10 @@ class DataLogger:
                 sensorsettings['serial_number'],
                 sensorsettings['address'],
                 sensorsettings['virtualport'],
-                sensorsettings['class_name']
+                sensorsettings['class_name'],
+                sensorsettings['sensor_config_id']
                 )
             self.scheduleMeasurement(
-                sensorid,
                 sensorsettings['name'],
                 sensorsettings['measure_interval']
                 )
@@ -136,7 +141,7 @@ class DataLogger:
                 storagesetting['storage_interval'],
                 storagesetting['process'])
                   
-    def addSensor(self,name,sn,address,virtualport,sensortype):
+    def addSensor(self,name,sn,address,virtualport,sensortype,sensorconfigid):
         '''
         Add a sensor to the logger
         '''
@@ -147,19 +152,21 @@ class DataLogger:
             sn,
             address
             )
+        sensor.configid = sensorconfigid
 
         #"Connect" virtual port to hardware using driver
-        #Ignore if port0 (simulated sensors)
-        if virtualport!='port0':
-            hardware_port = self.driver.connect(
-                virtualport,
-                sensor.hardware_settings
-                )
-        else:
-            hardware_port = ''
+        hardware_port = self.driver.connect(virtualport,sensor.hardware_settings)
 
         #"Connect" sensor to hardware
-        sensor.connect(hardware_port)
+        #bus type ports are given thread locks
+        if virtualport[0:3] == 'bus':
+            plock = self.portlocks.get(virtualport)
+            if not plock:
+                plock = threading.Lock()
+                self.portlocks[virtualport] = plock 
+            sensor.connect(hardware_port,plock)
+        else:
+            sensor.connect(hardware_port)
 
         #Add sensor to collection
         self.sensors[name] = sensor
@@ -186,22 +193,21 @@ class DataLogger:
 
         return successflag
     
-    def scheduleMeasurement(self,sensorid,sensorname,interval):
+    def scheduleMeasurement(self,sensorname,interval):
         '''
         Schedule a measurement:
         Interval is seconds
         '''
-        self.sensors[sensorname].configid = sensorid
-
+        
         #Check interval to ensure it isn't too small
         if interval < self.sensors[sensorname].min_interval:
             raise DataLogConfigError('Logger frequency exceeds sensor max')
         
         #Schedule measurement
         m = self.doMeasurement
-        self.logschedule.every(interval).do(m,sensorname)
+        self.logschedule.every(interval).do(m,sensorname,interval)
     
-    def doMeasurement(self,sensorname,storetime,lasttime):
+    def doMeasurement(self,sensorname,interval,scheduled_time,last_time):
         '''
         Perform a measurement on a sensor
         Inputs
@@ -209,9 +215,16 @@ class DataLogger:
         - storetime and lasttime are not currently used here
           but are passed by Schedule when this function is called.
         '''
-        mfuture = self.workerpool.submit(self.sensors[sensorname].measure)
-        mfuture.sname = sensorname
-        mfuture.add_done_callback(self.endMeasurement)
+        #Check to see if job is on time. Skip measurement if
+        #current time - scheduled time is more than the measurement interval
+        dtdiff = datetime.now() - scheduled_time
+        if dtdiff.total_seconds() > interval:
+            #Too late, skip measurement
+            logging.error('Skipping measurement for {}'.format(sensorname))
+        else:
+            mfuture = self.workerpool.submit(self.sensors[sensorname].measure)
+            mfuture.sname = sensorname
+            mfuture.add_done_callback(self.endMeasurement)
         
     def endMeasurement(self,mfuture):
         '''
@@ -226,11 +239,14 @@ class DataLogger:
 
         #Log exceptions
         if merrors:
-            for m in merrors.measurements:
-                logging.error('{}:{} - {}'.format(
-                        merrors.sensor,
-                        m,
-                        merrors.messages[m]))
+            try:
+                for m in merrors.measurements:
+                    logging.error('{}:{} - {}'.format(
+                            merrors.sensor,
+                            m,
+                            merrors.messages[m]))
+            except:
+                raise RuntimeError(merrors)
 
     def scheduleStorage(self,configid,name,sensor,interval,process):
         '''
@@ -242,27 +258,29 @@ class DataLogger:
 
         s = self.storeMeasurement
         #Note: Some parameters for function supplied by Job class in Schedule
-        self.logschedule.every(interval).do(s,configid,name,sensor,process)
+        self.logschedule.every(interval).do(s,configid,name,sensor,process,interval)
 
-    def storeMeasurement(self,logconfigid,name,sensor,process,storetime,lasttime):
+    def storeMeasurement(self,logconfigid,name,sensor,process,interval,scheduled_time,last_time):
         '''
         Store measurement data according to process.
         Inputs
-        - name, sensor
+        - logconfigid for database
+        - name: measurement name
+        - sensor: sensor name
         - process: A valid process type
+        - interval: storage interval (used to determine temporal resolution)
         - storetime: datetime of the scheduled storage
         - lasttime: datetime of last storage event
         - Process = 'average','min','max','dump','sample'
-        - Deletes any data associated with storage after saving
         '''
 
         #Deal with missing last time on start-up
         #Set to storetime - 1 day to ensure all data is included
-        if not lasttime:
-            lasttime = storetime - timedelta(1)
+        if not last_time:
+            last_time = scheduled_time - timedelta(1)
 
         #Get datetimes associated with current storage and prior
-        data = self.sensors[sensor].getdata(name,lasttime,storetime)
+        data = self.sensors[sensor].getdata(name,last_time,scheduled_time)
 
         if not data:
             #No data found to be stored
@@ -271,10 +289,20 @@ class DataLogger:
             return
         
         #Process data
-        storedata = processdata.calculate(process,data,storetime)
+        storedata = processdata.calculate(process,data,scheduled_time)
 
         #Write data to database
-        tresolution = self.sensors[sensor].temporal_resolution
+        if interval < 1:
+            tresolution = 'microseconds'
+        elif interval < 60:
+            tresolution = 'seconds'
+        else:
+            tresolution = 'minutes'
+
+        #Include microseconds if dump is used
+        if process == 'Dump':
+            tresolution = 'microseconds'
+
         for row in storedata:
             dtstr = row[0].isoformat(sep=' ',timespec=tresolution)
             value = row[1]
@@ -380,9 +408,6 @@ class DataLogger:
                         t.join() #Wait for thread to end
                         print('Shutting down')
                         break
-            except AssertionError:
-                logging.error('Measurement too late, logger resetting')
-                self.logschedule.reset()
             except KeyboardInterrupt:
                 #Shut down threads
                 self.workerpool.shutdown()

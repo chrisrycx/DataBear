@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS "sensor_configuration" (
 	"sensor_config_id"	INTEGER NOT NULL,
 	"sensor_id"	INTEGER NOT NULL,
 	"measure_interval"	REAL NOT NULL,
-	"status"	INTEGER NOT NULL DEFAULT 0,
+	"status"    INTEGER,
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
 	UNIQUE("sensor_id","status"),
 	PRIMARY KEY("sensor_config_id" AUTOINCREMENT)
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS "logging_configuration" (
 	"sensor_id"	INTEGER NOT NULL,
 	"storage_interval"	INTEGER NOT NULL,
 	"process_id"	INTEGER NOT NULL,
-	"status"	INTEGER NOT NULL DEFAULT 0,
+	"status"	INTEGER,
 	FOREIGN KEY("measurement_id") REFERENCES "measurements"("measurement_id") ON DELETE CASCADE,
 	FOREIGN KEY("process_id") REFERENCES "processes"("process_id") ON UPDATE CASCADE,
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
@@ -71,6 +71,17 @@ CREATE TABLE IF NOT EXISTS "databear_configuration" (
     "name" TEXT NOT NULL PRIMARY KEY,
     "value" INTEGER NOT NULL
 );
+
+CREATE VIEW dataview AS
+SELECT d.dtstamp, d.value, s.name AS sensor_name, m.name AS measurement, 
+       p.name AS process, sc.measure_interval AS measure_interval 
+FROM DATA d
+	INNER JOIN sensor_configuration sc ON d.sensor_configid=sc.sensor_config_id
+	INNER JOIN logging_configuration lc ON d.logging_configid=lc.logging_config_id
+	JOIN sensors s ON sc.sensor_id=s.sensor_id
+	JOIN measurements m ON lc.measurement_id=m.measurement_id
+    JOIN processes p ON lc.process_id=p.process_id;
+    
 INSERT INTO "processes" VALUES (1,'Sample','Select the first measurement from storage interval for storage');
 INSERT INTO "processes" VALUES (2,'Average','Calculate the average value of measurements from storage interval');
 INSERT INTO "processes" VALUES (3,'Max','Select the maximum value from measurement in the storage interval');

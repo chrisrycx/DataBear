@@ -10,6 +10,10 @@ in Python. DataBear is hardware independent, but is meant to be easily integrate
 * Extendible
     * User can integrate platform with new sensor and methods.
 
+### V2.1 Changes
+Added support for bus type sensors (Modbus, SDI12) via a new
+base class: "BusSensor" (see sensor interface below).
+
 ### V2.0 Changes
 Databear now uses a SQLite database for both configuration and data storage.
 However, direct interaction with the database is optional and configuration
@@ -23,16 +27,17 @@ Here are some random ideas to give a sense for DataBear capabilities (some capab
 * Run DataBear on a Raspberry Pi (https://www.raspberrypi.org/) to read a Modbus temperature sensor.  The sensor could be connected to a USB port on the Pi via an RS485 to USB converter and data could be read every second, averaged, and stored to CSV.
 * Integrate DataBear into an existing Linux based measurement platform, such as the Dyacon MDL-700 (https://dyacon.com).
 
-### Ideal Datalogger Features vs Data Bear 2.0
-| Ideal Feature                                  | Data Bear       |
+### Ideal Datalogger Features vs Data Bear 2.1
+| Feature                                  | Data Bear       |
 | -------------                                  | ---------       |
 | Adjustable sampling rates for all measurements | &#9745;         |
 | Concurrent measurement of all sensors          | &#9745;         |
 | Adjustable rates of data storage               | &#9745;         |
-| Complete storage of metadata                   | &#9745;         |
-| Supports polled or continuously streaming sensors    | &#9745;         |
+| Adaptive sampling                              | 
+| Data and metadata storage                      | SQLite         |
+| Supports polled or continuously streaming sensors    | &#9745;   |
+| Support for sensors on a bus                   | &#9745;    |
 | Ability to change settings on the fly          | Coming soon     |
-| Support for sensors on a bus                   | Coming soon     |
 
 ### Installation
 * pip install databear
@@ -110,8 +115,19 @@ class dyaconWSD(sensors.Sensor):
         '''
         pass
 ```
+### Bus Sensor (V0)
+- A bus sensor should inherit from the BusSensor base class.
+- Provide three methods:
+    - connect - initialize any communication objects
+    - startMeasure - process for triggering sensor to measure
+    - readMeasure - process for reading measurement after some delay
+
 ### Driver Interface (V0)
-- A class that maps Databear virtual ports to hardware ports
+- A class that maps Databear virtual ports to hardware ports.
+    -  Class initialization should create a dictionary relating virtual
+       ports to actual platform specific ports.
+    - A connect method returns the actual port given the virtual port.
+    - Add code as needed to provide any hardware specific configuration.
 
 ```python
 class dbdriver:
@@ -121,6 +137,7 @@ class dbdriver:
         '''
         #A windows example
         self.ports = {
+            'port0':'',
             'port1':'COM6',
             'port2':'COM21'
         }

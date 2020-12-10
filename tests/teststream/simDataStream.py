@@ -42,44 +42,32 @@ print('start time: {}'.format(nextdt))
 interval = datetime.timedelta(seconds=1/hz) #Seconds between running
 
 loops = 0
-dataframes = 0
-lastsec = 0
-nbytes = 0
+
 #Output loop
 while True:
     try:
         #Get datetime
         dt = datetime.datetime.now()
+        nextdiff = (dt - nextdt)/datetime.timedelta(microseconds=1)
 
-        if dt >= nextdt:
-            #Extract datetime information
-            minute = dt.minute
-            second = dt.second
-            ms = dt.microsecond
-
-            #Calculate difference between current dt and target dt
-            msdiff = int((dt - nextdt)/datetime.timedelta(milliseconds=1))
-
-            dataframes = dataframes + 1
-
+        if nextdiff > 0:
+            
             #Send data
-            data = 'X{}:{}:{},targetdiffms={}Z\r\n'.format(
-                minute,second,ms,msdiff)
+            data = 'sendtime={}Z\r\n'.format(
+                dt.strftime('%S.%f'))
 
             nbytes = comm.write(data.encode('utf-8'))
-
-            #Reset counters
-            loops = 0
             
             nextdt = nextdt + interval
-            lastsec = second
-            #time.sleep(sleeptime)
+        else:
+            time.sleep(-1*nextdiff/1000000)
             
         loops = loops + 1
 
     except KeyboardInterrupt:
         break
 
+print('Total loops: {}'.format(loops))
 comm.close()
 
     

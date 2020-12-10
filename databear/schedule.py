@@ -210,11 +210,6 @@ class Job:
         Run the job and immediately reschedule it.
         :return: The return value returned by the `job_func`
         """
-        #Check to see if job is on time raise error if
-        #time is off
-        dtdiff = datetime.datetime.now() - self.next_run
-        assert abs(dtdiff.total_seconds()) < 2*self.interval
-        
         #Execute job passing along current and prior runs
         #which are used by processing jobs
         ret = self.job_func(self.next_run,self.last_run)

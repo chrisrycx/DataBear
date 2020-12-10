@@ -1,8 +1,5 @@
-#
-# DataBear configuration file
-# Example Logger using databearSim simulated sensor
-#
- 
+#DataBear simulated sensor test
+
 #-----------------------------------------------------------#
 # Sensor definition
 #
@@ -18,18 +15,16 @@
 sensors: 
   - name: sim1
     sensortype: databearSim
-    settings:     #Serial number and measurement are mandatory
-      serialnumber: '1'
-      address: 0
-      virtualport: 'port0'
-      measure_interval: 5   #MEASUREMENT frequency in seconds
+    serialnumber: '0'
+    address: 0
+    virtualport: 'port0'
+    measure_interval: 5
   - name: sim2
     sensortype: databearSim
-    settings:     
-      serialnumber: '2'
-      address: 0
-      virtualport: 'port0'
-      measure_interval: 5 
+    serialnumber: '2'
+    address: 0
+    virtualport: 'port0'
+    measure_interval: 10
 
 #-----------------------------------------------------------#
 # Datalogger definition
@@ -42,19 +37,27 @@ sensors:
 #    settings:
 #    - store: 'mymeasurement'  The measurement to be stored
 #      sensor: 'mysensor'      Sensor that measurement is associated with
-#      process: 'Dump'         Available options: 'Dump','Sample','Min',
-#                                                 'Max','Average'
+#      process: 'dump'         Available options: 'dump','sample','min',
+#                                                 'max','average'
 #      storage_interval: 60    Storage interval in seconds       
 datalogger:
-  name: examplelog
+  name: simtest
   settings:
-  - store: seconds  
+  - store: seconds 
     sensor: sim1      
     process: Dump         
-    storage_interval: 10           
+    storage_interval: 20
   - store: seconds                 
-    sensor: sim2          
+    sensor: sim1          
+    process: Max           
+    storage_interval: 20           
+  - store: seconds                 
+    sensor: sim1        
     process: Average           
+    storage_interval: 30
+  - store: seconds
+    sensor: sim2
+    process: Dump
     storage_interval: 10
     
 

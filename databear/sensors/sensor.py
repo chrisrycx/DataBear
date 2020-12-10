@@ -2,14 +2,16 @@
 Base class for DataBear sensors
 '''
 from databear.errors import SensorConfigError, MeasureError
+import datetime
+import time
 
 class Sensor:
-    interface_version = '1.1'
+    interface_version = '1.2'
     hardware_settings = {}
     measurements = [] #List of measurement names
     units = {} #List of units associated with measurement names
     measurement_description = {}
-    temporal_resolution = 'minutes' #Options: minutes, seconds, microseconds
+    min_interval = 1  #Minimum interval that sensor can be polled
     def __init__(self,name,sn,address):
         '''
         Create a new sensor
@@ -109,3 +111,64 @@ class Sensor:
                 savedata.append(val)
 
         self.data[name] = savedata
+
+
+class BusSensor(Sensor):
+    '''
+    A base class for a sensor that can be part of
+    a bus network architecture.
+    '''
+    def __init__(self,name,sn,address):
+        '''
+        Override base class to add port lock
+        '''
+        super().__init__(name,sn,address)
+        self.portlock = None
+    
+    def connect(self,port,portlock):
+        '''
+        Set up portlock and connection
+        '''
+        self.portlock = portlock
+    
+    def startMeasure(self):
+        '''
+        Begin a concurrent measurement
+        Return the wait time between start and read
+        '''
+        return 0
+
+    def readMeasure(self,starttime):
+        '''
+        Read measurement from sensor
+        '''
+        pass
+
+    def measure(self):
+        '''
+        Coordinate start and read measure with
+        port locks on the bus
+        '''
+        dt = datetime.datetime.now()
+        try:
+            #The start measurement sequence
+            self.portlock.acquire()
+            s = self.startMeasure()
+            self.portlock.release()
+
+            #Wait s then read
+            time.sleep(s)
+            self.portlock.acquire()
+            self.readMeasure(dt)
+            self.portlock.release()
+            
+        except:
+            #Unlock the port if any exception
+            self.portlock.release()
+            #Raise again so that the exception is logged
+            raise
+        
+        
+        
+        
+    

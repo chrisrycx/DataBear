@@ -26,29 +26,21 @@ class databearSimStream(sensor.Sensor):
         'resistors':1,
         'bias':1
     }
-    measurements = ['sentdiff','targetdiff']
+    measurements = ['sendtime']
     measurement_description = {
-        'sentdiff':'millisecond difference between send and receive',
-        'targetdiff':'millisecond difference between schedule and send',
+        'sendtime':'local clock seconds when data was sent',
     } 
     units = {
-        'sentdiff':'ms',
-        'targetdiff':'ms'
+        'sendtime':'s',
     }
-    temporal_resolution = 'microseconds'
     def __init__(self,name,sn,address):
         '''
         Create a new sensor
         '''
         super().__init__(name,sn,address)
-       
-        #Define characteristics of this sensor
-        self.min_interval = 0
-        self.connected = False
 
         #Set up regular expression
-        self.time_re = re.compile(r'X(\d+):(\d+):(\d+),')
-        self.frames_re = re.compile(r'targetdiffms=(\d+)Z')
+        self.time_re = re.compile(r'=(\d+.\d+)Z')
     
     def connect(self,port):
         if not self.connected:
@@ -72,40 +64,20 @@ class databearSimStream(sensor.Sensor):
 
             #Parse measurements
             timeparse = re.findall(self.time_re,rawdata)
-            targetparse = re.findall(self.frames_re,rawdata)
 
             if timeparse:
                 #Extract time sent
-                sent_m = int(timeparse[0][0])
-                sent_s = int(timeparse[0][1])
-                sent_mcs = int(timeparse[0][2])
-
-                #Convert to datetime
-                sent_dt = datetime.datetime(
-                    dt.year,
-                    dt.month,
-                    dt.day,
-                    dt.hour,
-                    sent_m,
-                    sent_s,
-                    sent_mcs
-                )
-
-                delay_ms = int((dt - sent_dt)/datetime.timedelta(milliseconds=1))
-                self.data['sentdiff'].append((dt,delay_ms))
+                sendtime = float(timeparse[0])
+                self.data['sendtime'].append((dt,sendtime))
             else:
-                fails['sentdiff'] = 'No data found'
-
-            if targetparse:
-                self.data['targetdiff'].append((dt,int(targetparse[0])))
-            else:
-                fails['targetdiff'] = 'No data found'
+                fails['sendtime'] = 'No data found'
 
             if fails:
                 raise MeasureError(
                     self.name,
                     list(fails.keys()),
                     fails)
+        
 
 
 

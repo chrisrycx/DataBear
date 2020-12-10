@@ -1,5 +1,5 @@
 '''
-A windows driver for databear
+A default or base class hardware driver for DataBear
 '''
 
 class dbdriver:
@@ -7,10 +7,11 @@ class dbdriver:
         '''
         Create a new windows driver instance
         '''
-        #Map DataBear ports to Windows
+        #Map DataBear ports to actual hardware
+        #port0 returns nothing as it is for internal or 
+        #simulated sensors
         self.ports = {
-            'port1':'COM6',
-            'port2':'COM21'
+            'port0':'',
         }
 
     def connect(self,databearport,hardware_settings):
