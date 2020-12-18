@@ -22,7 +22,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['pyyaml','numpy'],
+    install_requires=['pyyaml','numpy', 'serial', 'minimalmodbus'],
     include_package_data=True,
     python_requires='>=3.6',
     entry_points='''
