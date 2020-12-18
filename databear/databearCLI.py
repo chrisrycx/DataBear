@@ -73,6 +73,37 @@ def sendCommand(command,argument=None):
 
     return response
 
+def findSensorClasses():
+    '''
+    Use pkgutil to get list of possible sensor class python scripts, adding each to the database if it's a sensor subclass
+    '''
+    possibleclasses = []
+    import os
+    import pkgutil
+    import databear.sensors
+    import traceback
+    databearsensorspackage = databear.sensors
+    for importer, modname, ispkg in pkgutil.iter_modules(databearsensorspackage.__path__):
+        possibleclasses.append(modname)
+
+    # Also check DBSENSORPATH if set
+    if 'DBSENSORPATH' in os.environ:
+        for importer, modname, ispkg in pkgutil.iter_modules([os.environ['DBSENSORPATH']]):
+            possibleclasses.append(modname)
+
+    #Connect or create database
+    from databear import databearDB
+    db = databearDB.DataBearDB()
+
+    for classname in possibleclasses:
+        try:
+            db.load_sensor(classname)
+        except:
+            print("Failed to load " + classname)
+            traceback.print_exc()
+            pass
+
+
 def loadYAML(yamlfile):
     '''
     parse a YAML configuration file and input
@@ -181,6 +212,8 @@ def main_cli():
 
     if cmd=='run':
         runDataBear(option)
+    if cmd=='initialize':
+        findSensorClasses()
     else:
         rsp = sendCommand(cmd,option)
         print(rsp)
