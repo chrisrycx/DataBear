@@ -22,6 +22,7 @@ class dyaconTPH1B(sensor.BusSensor):
         'barometric_pressure':'mb'
     }
     min_interval = 1  #Minimum interval that sensor can be polled
+    uses_portlock = True
     registers = {
             'air_temperature':201,
             'relative_humidity':202,

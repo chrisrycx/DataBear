@@ -159,7 +159,7 @@ class DataLogger:
 
         #"Connect" sensor to hardware
         #bus type ports are given thread locks
-        if virtualport[0:3] == 'bus':
+        if sensor.uses_portlock: 
             plock = self.portlocks.get(virtualport)
             if not plock:
                 plock = threading.Lock()
