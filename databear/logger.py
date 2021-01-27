@@ -357,7 +357,9 @@ class DataLogger:
                     
             response = {'response':'OK','data':datastr}
         elif msg['command'] == 'status':
-            response = {'response':'OK'}
+            #Get active sensor names
+            sensornames = list(self.sensors.keys())
+            response = {'status':'running','sensors':sensornames}
         elif msg['command'] == 'shutdown':
             self.messages.append(msg['command'])
             response = {'response':'OK'}
