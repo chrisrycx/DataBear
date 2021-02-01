@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS "sensor_configuration" (
 	"measure_interval"	REAL NOT NULL,
 	"status"    INTEGER,
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
-	UNIQUE("sensor_id","status"),
 	PRIMARY KEY("sensor_config_id" AUTOINCREMENT)
 );
 CREATE TABLE IF NOT EXISTS "logging_configuration" (
