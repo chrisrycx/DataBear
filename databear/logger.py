@@ -347,19 +347,32 @@ class DataLogger:
             sensorname = msg['arg']
             data = self.sensors[sensorname].getcurrentdata()
             #Convert to JSON appropriate
-            datastr = {}
+            response = {}
             for name, val in data.items():
                 if val:
                     dtstr = val[0].strftime('%Y-%m-%d %H:%M')
-                    datastr[name] = (dtstr,val[1])
+                    response[name] = (dtstr,val[1])
                 else:
-                    datastr[name] = val 
+                    response[name] = val 
                     
-            response = {'response':'OK','data':datastr}
         elif msg['command'] == 'status':
             #Get active sensor names
             sensornames = list(self.sensors.keys())
             response = {'status':'running','sensors':sensornames}
+        
+        elif msg['command'] == 'getsensor':
+            '''
+            Return {'measurements':[(measure1,units1),(...)]}
+            '''
+            sensorname = msg['arg']
+            measurelist = []
+            for measurename in self.sensors[sensorname].measurements:
+                measurelist.append(
+                    (measurename,self.sensors[sensorname].units[measurename])
+                    )
+
+            response = {'measurements':measurelist}
+
         elif msg['command'] == 'shutdown':
             self.messages.append(msg['command'])
             response = {'response':'OK'}
