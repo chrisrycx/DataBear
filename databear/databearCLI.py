@@ -12,6 +12,7 @@ others under development
 '''
 import socket
 import json
+import os
 import sys
 import yaml
 
@@ -43,10 +44,12 @@ def runDataBear(yamlfile=None):
     
     #Run logger in the background
     print('Running databear with python -m databear.logger')
+    my_env = os.environ.copy()
     subprocess.Popen([sys.executable,'-m','databear.logger'],
-            cwd="./",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+            cwd=os.getcwd(), 
+            env=my_env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
     
 def updateAvailableSensors():
     '''
@@ -212,7 +215,7 @@ def main_cli():
 
     if cmd=='run':
         runDataBear(option)
-    if cmd=='initialize':
+    elif cmd=='initialize':
         findSensorClasses()
     else:
         rsp = sendCommand(cmd,option)
