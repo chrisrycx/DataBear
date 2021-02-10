@@ -193,6 +193,26 @@ class DataLogger:
 
         return successflag
     
+    def reload(self):
+        successflag = True
+
+        # First stop all current jobs
+        for job in self.logschedule.jobs:
+            self.logschedule.cancel_job(job)
+
+        # Then stop workerpool threads
+        self.workerpool.shutdown()
+
+        # reload configuration, creating sensors as needed
+        self.loadconfig()
+
+        # lastly recreate workerpool based on new number of sensors
+        self.workerpool = concurrent.futures.ThreadPoolExecutor(
+            # use at least 1 worker
+            max_workers=max(len(self.sensors),1))
+
+        return successflag
+
     def scheduleMeasurement(self,sensorname,interval):
         '''
         Schedule a measurement:
@@ -382,6 +402,12 @@ class DataLogger:
                 response = {'response':'OK'}
             else:
                 response = {'response':'Sensor not found'}
+        elif msg['command'] == 'reload':
+            success = self.reload()
+            if success:
+                response = {'response':'OK'}
+            else:
+                response = {'response':'Reload failed'}
         else:
             response = {'response':'Invalid Command'}
             
