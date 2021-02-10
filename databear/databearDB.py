@@ -40,7 +40,7 @@ class DataBearDB:
 
         # Initialize database sqlite connection object
         # This will create the file if it doesn't exist, hence the check first
-        self.conn = sqlite3.connect('databear.db')
+        self.conn = sqlite3.connect('databear.db', check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.curs = self.conn.cursor()
         self.path = os.path.dirname(__file__)
