@@ -432,23 +432,31 @@ class DataLogger:
             # use at least 1 worker
             max_workers=max(len(self.sensors),1))
 
-        while True:
+        exiting = False
+        while not exiting:
             try:
                 self.logschedule.run_pending()
                 sleeptime = self.logschedule.idle_seconds
                 if sleeptime > 0:
-                    time.sleep(sleeptime)
+                    for seconds in range(int(sleeptime)):
+                        # Only sleep for 1 second between each check of messages
+                        # to make sure we respond to them quickly
+                        time.sleep(1)
 
-                #Check for messages
-                if self.messages:
-                    msg = self.messages.pop()
-                    if msg == 'shutdown':
-                        #Shut down threads
-                        self.workerpool.shutdown()
-                        self.listen=False
-                        t.join() #Wait for thread to end
-                        print('Shutting down')
-                        break
+                        #Check for messages
+                        if self.messages:
+                            msg = self.messages.pop()
+                            if msg == 'shutdown':
+                                #Shut down threads
+                                self.workerpool.shutdown()
+                                self.listen=False
+                                t.join() #Wait for thread to end
+                                print('Shutting down')
+                                # Set exiting to break out of the while loop
+                                exiting = True
+                                # This break only exits the for loop
+                                break
+
             except KeyboardInterrupt:
                 #Shut down threads
                 self.workerpool.shutdown()
@@ -465,7 +473,7 @@ class DataLogger:
                 raise
 
 
-        #Close CSV after stopping
+        #Close database after stopping
         self.db.close()
       
             
