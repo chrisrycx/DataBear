@@ -432,6 +432,7 @@ class DataLogger:
             # use at least 1 worker
             max_workers=max(len(self.sensors),1))
 
+        logging.info('Starting run loop')
         exiting = False
         while not exiting:
             try:
