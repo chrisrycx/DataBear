@@ -50,9 +50,22 @@ class DataLogger:
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
 
-        #Load hardware driver
-        drivername = os.environ['DBDRIVER']
-        driver_module = importlib.import_module(drivername)
+        #Load driver env var
+        try:
+            drivername = os.environ['DBDRIVER']
+        except KeyError:
+            print('DBDRIVER not set, searching for driver in CWD')
+            drivername = 'dbdriver'
+
+        #Try loading driver as a package, then path
+        try:
+            driver_module = importlib.import_module(drivername)
+        except ImportError:
+            #Try loading from path
+            spec = importlib.util.spec_from_file_location("dbdriver", drivername)
+            driver_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(driver_module)
+
         self.driver = driver_module.dbdriver()
 
         #Set up database connection
