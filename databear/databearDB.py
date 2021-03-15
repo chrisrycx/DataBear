@@ -21,13 +21,16 @@ class DataBearDB:
     def __init__(self):
         '''
         Initialize the database manager
-        - Check if databear.db already exists in CWD
-            -- Create if needed
+        - Connect to database in path DBDRIVER
+            -- If none, create
+            -- If not set check CWD or create in CWD
         - Create connection to database
         '''
-        # Add SENSORSPATH to pythonpath for importing alternative sensors
-        if 'DBSENSORPATH' in os.environ:
-            sys.path.append(os.environ['DBSENSORPATH'])
+        try:
+            dbpath = os.environ['DBDATABASE']
+        except KeyError:
+            #DBDATABASE not set, assume databear.db in CWD
+            dbpath = 'databear.db'
 
         #Set an attribute for config_id related functions
         self.configtables = {
@@ -36,11 +39,11 @@ class DataBearDB:
             }
 
         # Check if database exists
-        exists = os.path.isfile('databear.db')
+        exists = os.path.isfile(dbpath)
 
         # Initialize database sqlite connection object
         # This will create the file if it doesn't exist, hence the check first
-        self.conn = sqlite3.connect('databear.db', check_same_thread=False)
+        self.conn = sqlite3.connect(dbpath, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.curs = self.conn.cursor()
         self.path = os.path.dirname(__file__)
