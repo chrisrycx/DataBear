@@ -40,10 +40,6 @@ class DataLogger:
         dbdriver:
             - An instance of a DB hardware driver
         '''
-        # Add SENSORSPATH to pythonpath for importing alternative sensors
-        if 'DBSENSORPATH' in os.environ:
-            sys.path.append(os.environ['DBSENSORPATH'])
-
         #Initialize attributes
         self.sensors = {}
         self.portlocks = {}
@@ -87,32 +83,19 @@ class DataLogger:
 
     def register_sensors(self):
         '''
-        Register sensor class and load measurements
-        to the measurements table
-        classnames - a list of classnames (which should match module names)
+        Register all sensor classes in sensors_available with the factory
         '''
         #Get sensors from database
-        classnames = self.db.sensors_available
-
-        #Append sys.path with path in DB sensors
-        sensorpath = os.getenv('DBSENSORS')
-        if(sensorpath): sys.path.append(sensorpath)
+        module_names = self.db.sensors_available
 
         #Import all sensor classes
-        for sensorcls in classnames:
-            #Try to import from databear.sensors folder
-            try:
-                impstr = 'databear.sensors.'+sensorcls
-                sensor_module = importlib.import_module(impstr) 
-            except ModuleNotFoundError as mnf:
-                #Check custom sensors folder
-                sensor_module = importlib.import_module(sensorcls)
-
-            sensor_class = getattr(sensor_module,sensorcls)
+        for module_name in module_names:
+            sensor_module = importlib.import_module(module_name)
+            sensor_class = getattr(sensor_module,'dbsensor')
 
             #Register sensor with factory
             sensorfactory.factory.register_sensor(
-                sensorcls,
+                module_name,
                 sensor_class)
 
     def loadconfig(self):
