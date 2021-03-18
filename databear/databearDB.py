@@ -32,6 +32,10 @@ class DataBearDB:
             #DBDATABASE not set, assume databear.db in CWD
             dbpath = 'databear.db'
 
+        # Add SENSORSPATH to pythonpath for importing alternative sensors
+        if 'DBSENSORPATH' in os.environ:
+            sys.path.append(os.environ['DBSENSORPATH'])
+
         #Set an attribute for config_id related functions
         self.configtables = {
             'sensor':['sensor_config_id','sensor_configuration'],
@@ -55,10 +59,6 @@ class DataBearDB:
 
             self.curs.executescript(sql_script)
         
-        #Append sys.path with path in DB sensors for loading sensors
-        sensorpath = os.getenv('DBSENSORS')
-        if(sensorpath): sys.path.append(sensorpath)
-        
     @property
     def sensors_available(self):
         '''
@@ -67,7 +67,7 @@ class DataBearDB:
         sensorlist = []
         self.curs.execute('SELECT * FROM sensors_available')
         for row in self.curs.fetchall():
-            sensorlist.append(row['class_name'])
+            sensorlist.append(row['module_name'])
         return sensorlist
 
     @property
@@ -107,63 +107,59 @@ class DataBearDB:
             processids[row['name']] = row['process_id']
         return processids
 
-    def load_sensor(self,classname):
+    def load_sensor(self,module_name):
         '''
-        Loads sensor measurements into database if not already there.
-        Adds sensor class name to sensors_available table
+        Loads sensor module to the sensors_available table if not already there.
+        Also load sensor measurements into database if not already there.
         '''
         #Check if sensor is already in sensors_available
-        if classname in self.sensors_available:
+        if module_name in self.sensors_available:
             return
-
-        # Import sensor from either databear.sensors or
-        # from sensor in folder specified by DBSENSORS
-        try:
-            impstr = 'databear.sensors.' + classname
-            sensor_module = importlib.import_module(impstr) 
-        except ModuleNotFoundError as mnf:
-            #Check custom sensors folder
-            sensor_module = importlib.import_module(classname)
-
-        sensor_class = getattr(sensor_module,classname)
 
         #Update sensors_available table
         self.curs.execute('INSERT INTO sensors_available '
-                          '(class_name) VALUES (?)',(classname,))
+                          '(sensor_module) VALUES (?)',(module_name,))
         self.conn.commit()
+
+        # Import sensor to load measurements to measurements table
+        # DBSENSORPATH added to sys.path during init
+        sensor_module = importlib.import_module(module_name)
+        
+        # Load class. Class name should be dbsensor
+        sensor_class = getattr(sensor_module,'dbsensor')
 
         #Load sensor measurements to database
         for measurement_name in sensor_class.measurements:
             self.addMeasurement(
-                classname,
+                module_name,
                 measurement_name,
                 sensor_class.units[measurement_name],
                 sensor_class.measurement_description.get(measurement_name,None)
             )
 
-    def addMeasurement(self,classname,measurename,units,description=None):
+    def addMeasurement(self,sensormodule,measurename,units,description=None):
         '''
         Add a measurement to the database
         Returns new rowid
         '''
         addqry = ('INSERT INTO measurements '
-                  '(name,units,description,class_name) '
+                  '(name,units,description,sensor_module) '
                   'VALUES (?,?,?,?)')
-        qryparams = (measurename,units,description,classname)
+        qryparams = (measurename,units,description,sensormodule)
 
         self.curs.execute(addqry,qryparams)
         self.conn.commit()
 
         return self.curs.lastrowid
 
-    def addSensor(self,classname,sensorname,serialnumber,address,virtualport,description=None):
+    def addSensor(self,modulename,sensorname,serialnumber,address,virtualport,description=None):
         '''
         Add a new sensor to the database
         '''
         addqry = ('INSERT INTO sensors '
-                  '(name,serial_number,address,virtualport,class_name,description) '
+                  '(name,serial_number,address,virtualport,module_name,description) '
                   'VALUES (?,?,?,?,?,?)')
-        qryparams = (sensorname,serialnumber,address,virtualport,classname,description)
+        qryparams = (sensorname,serialnumber,address,virtualport,modulename,description)
 
         self.curs.execute(addqry,qryparams)
         self.conn.commit()

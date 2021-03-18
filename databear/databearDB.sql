@@ -1,10 +1,10 @@
 BEGIN TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS "sensors_available" (
-	"sensorclass_id"	INTEGER,
-	"class_name"	TEXT NOT NULL,
-	UNIQUE("class_name"),
-	PRIMARY KEY("sensorclass_id" AUTOINCREMENT)
+	"sensormodule_id"	INTEGER,
+	"sensor_module"	TEXT NOT NULL,
+	UNIQUE("sensor_module"),
+	PRIMARY KEY("sensormodule_id" AUTOINCREMENT)
 );
 
 CREATE TABLE IF NOT EXISTS "data" (
@@ -51,10 +51,10 @@ CREATE TABLE IF NOT EXISTS "sensors" (
 	"serial_number"	TEXT NOT NULL,
 	"address"	INTEGER NOT NULL DEFAULT 0,
 	"virtualport"	INTEGER NOT NULL,
-	"class_name"	TEXT NOT NULL,
+	"module_name"	TEXT NOT NULL,
 	"description"	TEXT,
-	FOREIGN KEY("class_name") REFERENCES "sensors_available"("class_name"),
-	UNIQUE("serial_number","class_name"),
+	FOREIGN KEY("module_name") REFERENCES "sensors_available"("sensor_module"),
+	UNIQUE("serial_number","module_name"),
 	PRIMARY KEY("sensor_id" AUTOINCREMENT)
 );
 CREATE TABLE IF NOT EXISTS "measurements" (
@@ -62,8 +62,8 @@ CREATE TABLE IF NOT EXISTS "measurements" (
 	"name"	TEXT NOT NULL,
 	"units"	TEXT NOT NULL,
 	"description"	TEXT,
-	"class_name"	TEXT,
-	FOREIGN KEY("class_name") REFERENCES "sensors_available"("class_name") ON DELETE CASCADE,
+	"sensor_module"	TEXT,
+	FOREIGN KEY("sensor_module") REFERENCES "sensors_available"("sensor_module") ON DELETE CASCADE,
 	PRIMARY KEY("measurement_id" AUTOINCREMENT)
 );
 CREATE TABLE IF NOT EXISTS "databear_configuration" (
@@ -86,5 +86,5 @@ INSERT INTO "processes" VALUES (2,'Average','Calculate the average value of meas
 INSERT INTO "processes" VALUES (3,'Max','Select the maximum value from measurement in the storage interval');
 INSERT INTO "processes" VALUES (4,'Min','Select the minimum value from measurement in the storage interval');
 INSERT INTO "processes" VALUES (5,'Dump','Select all measurements from the storage interval for storage');
-INSERT INTO "databear_configuration" VALUES("schemaversion", 1);
+INSERT INTO "databear_configuration" VALUES("schemaversion", 2);
 COMMIT;
