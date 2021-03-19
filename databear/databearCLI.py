@@ -177,11 +177,11 @@ def loadYAML(yamlfile):
     #Load logging configuration
     active_sensor_ids = db.active_sensor_ids
     process_ids = db.process_ids
-    sensor_classes = db.sensor_classes
+    sensor_modules = db.sensor_modules
     for logsetting in config['datalogger']['settings']:
             measureid = db.getMeasurementID(
                 logsetting['store'],
-                sensor_classes[logsetting['sensor']])
+                sensor_modules[logsetting['sensor']])
             
             #Check for existing logging config
             oldloggingconfig = db.getLoggingConfigID(

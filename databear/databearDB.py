@@ -67,7 +67,7 @@ class DataBearDB:
         sensorlist = []
         self.curs.execute('SELECT * FROM sensors_available')
         for row in self.curs.fetchall():
-            sensorlist.append(row['module_name'])
+            sensorlist.append(row['sensor_module'])
         return sensorlist
 
     @property
@@ -86,15 +86,15 @@ class DataBearDB:
         return sensorids
 
     @property
-    def sensor_classes(self):
+    def sensor_modules(self):
         '''
         Return a dictionary mapping sensor names to classes
         '''
-        sensorclasses = {}
-        self.curs.execute('SELECT name, class_name FROM sensors')
+        sensormodules = {}
+        self.curs.execute('SELECT name, module_name FROM sensors')
         for row in self.curs.fetchall():
-            sensorclasses[row['name']] = row['class_name']
-        return sensorclasses
+            sensormodules[row['name']] = row['module_name']
+        return sensormodules
 
     @property
     def process_ids(self):
@@ -116,11 +116,6 @@ class DataBearDB:
         if module_name in self.sensors_available:
             return
 
-        #Update sensors_available table
-        self.curs.execute('INSERT INTO sensors_available '
-                          '(sensor_module) VALUES (?)',(module_name,))
-        self.conn.commit()
-
         # Import sensor to load measurements to measurements table
         # DBSENSORPATH added to sys.path during init
         sensor_module = importlib.import_module(module_name)
@@ -136,6 +131,13 @@ class DataBearDB:
                 sensor_class.units[measurement_name],
                 sensor_class.measurement_description.get(measurement_name,None)
             )
+
+        #Update sensors_available table
+        #Do this last to ensure there is no failure loading measurements
+        #prior to making the sensor available
+        self.curs.execute('INSERT INTO sensors_available '
+                          '(sensor_module) VALUES (?)',(module_name,))
+        self.conn.commit()
 
     def addMeasurement(self,sensormodule,measurename,units,description=None):
         '''
@@ -226,13 +228,13 @@ class DataBearDB:
 
         return ids
         
-    def getMeasurementID(self,measurement_name,class_name):
+    def getMeasurementID(self,measurement_name,module_name):
         '''
         Get the measurement id for a given name and sensor class
         '''
-        params = (measurement_name,class_name)
+        params = (measurement_name,module_name)
         self.curs.execute('SELECT measurement_id FROM measurements '
-                          'WHERE name=? and class_name=?',params)
+                          'WHERE name=? and sensor_module=?',params)
         
         row = self.curs.fetchone()
 
@@ -241,16 +243,16 @@ class DataBearDB:
 
         return row['measurement_id']
 
-    def getSensorID(self,sensorname,serialnumber,address,virtualport,classname):
+    def getSensorID(self,sensorname,serialnumber,address,virtualport,modulename):
         '''
         Get sensor id associated with parameters
         Return sensor_id or none
         '''
-        params = (sensorname,serialnumber,address,virtualport,classname)
+        params = (sensorname,serialnumber,address,virtualport,modulename)
         self.curs.execute('SELECT sensor_id FROM sensors '
                           'WHERE name=? AND serial_number=? '
                           'AND address=? AND virtualport=? '
-                          'AND class_name=?',params)
+                          'AND module_name=?',params)
         
         row = self.curs.fetchone()
 
