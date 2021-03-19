@@ -4,11 +4,6 @@ DataBear command line utility
 Use:
 databear <cmd> <option>
 
-Commands:
-run <config.yaml>
-shutdown
-others under development
-
 '''
 import socket
 import json
@@ -82,35 +77,28 @@ def sendCommand(command,argument=None):
 
     return response
 
-def findSensorClasses():
+def findSensors():
     '''
-    Use pkgutil to get list of possible sensor class python scripts, adding each to the database if it's a sensor subclass
+    Load all sensors from DBSENSORPATH and DBSENSORS to sensors available
     '''
-    possibleclasses = []
-    import os
+    from databear import databearDB
     import pkgutil
-    import databear.sensors
-    import traceback
-    databearsensorspackage = databear.sensors
-    for importer, modname, ispkg in pkgutil.iter_modules(databearsensorspackage.__path__):
-        possibleclasses.append(modname)
-
-    # Also check DBSENSORPATH if set
-    if 'DBSENSORPATH' in os.environ:
-        for importer, modname, ispkg in pkgutil.iter_modules([os.environ['DBSENSORPATH']]):
-            possibleclasses.append(modname)
 
     #Connect or create database
-    from databear import databearDB
     db = databearDB.DataBearDB()
 
-    for classname in possibleclasses:
-        try:
-            db.load_sensor(classname)
-        except:
-            print("Failed to load " + classname)
-            traceback.print_exc()
-            pass
+    #Parse list of sensor modules from DBSENSORS
+    if 'DBSENSORS' in os.environ:
+        dbsensors = os.environ['DBSENSORS']
+        sensorlist = dbsensors.split(',')
+
+        for sensor_module in sensorlist:
+            db.load_sensor(sensor_module)
+
+    #Find all modules in DBSENSORPATH
+    if 'DBSENSORPATH' in os.environ:
+        for modinfo in pkgutil.iter_modules([os.environ['DBSENSORPATH']]):
+            db.load_sensor(modinfo[1])
 
 
 def loadYAML(yamlfile):
@@ -222,7 +210,7 @@ def main_cli():
     if cmd=='run':
         runDataBear(option)
     elif cmd=='initialize':
-        findSensorClasses()
+        findSensors()
     else:
         rsp = sendCommand(cmd,option)
         print(rsp)
