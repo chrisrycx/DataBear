@@ -78,8 +78,10 @@ class DataLogger:
 
         #Set up error logging
         logging.basicConfig(
-                format=DataLogger.errorfmt,
-                filename='databear_error.log')
+            level=20,
+            format=DataLogger.errorfmt,
+            filename='databear_error.log'
+            )
 
     def register_sensors(self):
         '''
@@ -119,7 +121,7 @@ class DataLogger:
                 sensorsettings['serial_number'],
                 sensorsettings['address'],
                 sensorsettings['virtualport'],
-                sensorsettings['class_name'],
+                sensorsettings['module_name'],
                 sensorsettings['sensor_config_id']
                 )
             self.scheduleMeasurement(

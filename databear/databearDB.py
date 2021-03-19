@@ -27,10 +27,10 @@ class DataBearDB:
         - Create connection to database
         '''
         try:
-            dbpath = os.environ['DBDATABASE']
+            self.dbpath = os.environ['DBDATABASE']
         except KeyError:
             #DBDATABASE not set, assume databear.db in CWD
-            dbpath = 'databear.db'
+            self.dbpath = 'databear.db'
 
         # Add SENSORSPATH to pythonpath for importing alternative sensors
         if 'DBSENSORPATH' in os.environ:
@@ -43,11 +43,11 @@ class DataBearDB:
             }
 
         # Check if database exists
-        exists = os.path.isfile(dbpath)
+        exists = os.path.isfile(self.dbpath)
 
         # Initialize database sqlite connection object
         # This will create the file if it doesn't exist, hence the check first
-        self.conn = sqlite3.connect(dbpath, check_same_thread=False)
+        self.conn = sqlite3.connect(self.dbpath, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.curs = self.conn.cursor()
         self.path = os.path.dirname(__file__)
@@ -314,7 +314,7 @@ class DataBearDB:
         sensor["address"] = row["address"]
         sensor["virtualport"] = row["virtualport"]
         sensor["measure_interval"] = row["measure_interval"]
-        sensor["class_name"] = row["class_name"]
+        sensor["module_name"] = row["module_name"]
         sensor["sensor_config_id"] = row["sensor_config_id"]
 
         return sensor
