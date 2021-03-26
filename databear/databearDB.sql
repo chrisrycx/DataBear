@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS "data" (
 	FOREIGN KEY("sensor_configid") REFERENCES "sensor_configuration"("sensor_configid"),
 	PRIMARY KEY("data_id" AUTOINCREMENT)
 );
+
+CREATE INDEX IF NOT EXISTS data_index ON data ("dtstamp");
+
 CREATE TABLE IF NOT EXISTS "processes" (
 	"process_id"	INTEGER NOT NULL,
 	"name"	TEXT NOT NULL,
