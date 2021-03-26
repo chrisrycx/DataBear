@@ -453,6 +453,7 @@ class DataLogger:
 
                 #Sleep for maximum of 1 sec
                 if sleeptime > 1: sleeptime = 1
+                if sleeptime < 0: sleeptime = 0
                 time.sleep(sleeptime)
                 
             except KeyboardInterrupt:
