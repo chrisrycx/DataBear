@@ -436,26 +436,25 @@ class DataLogger:
             try:
                 self.logschedule.run_pending()
                 sleeptime = self.logschedule.idle_seconds
-                if sleeptime > 0:
-                    for seconds in range(int(sleeptime)):
-                        # Only sleep for 1 second between each check of messages
-                        # to make sure we respond to them quickly
-                        time.sleep(1)
 
-                        #Check for messages
-                        if self.messages:
-                            msg = self.messages.pop()
-                            if msg == 'shutdown':
-                                #Shut down threads
-                                self.workerpool.shutdown()
-                                self.listen=False
-                                t.join() #Wait for thread to end
-                                print('Shutting down')
-                                # Set exiting to break out of the while loop
-                                exiting = True
-                                # This break only exits the for loop
-                                break
+                #Check for messages
+                if self.messages:
+                    msg = self.messages.pop()
+                    if msg == 'shutdown':
+                        #Shut down threads
+                        self.workerpool.shutdown()
+                        self.listen=False
+                        t.join() #Wait for thread to end
+                        print('Shutting down')
+                        # Set exiting to break out of the while loop
+                        exiting = True
+                        # This break only exits the for loop
+                        break
 
+                #Sleep for maximum of 1 sec
+                if sleeptime > 1: sleeptime = 1
+                time.sleep(sleeptime)
+                
             except KeyboardInterrupt:
                 #Shut down threads
                 self.workerpool.shutdown()

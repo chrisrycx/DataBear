@@ -1,19 +1,16 @@
 '''
 Simulates a generic data streaming sensor
 Outputs data to a serial port at a given frequency
+19200 Baud
 
 Can verify functionality with Tera Term
 
 Output dataframe:
-X<min>:<sec>:<ms>,targetdiffms=<scheduled microsec>Z
+'sendtime=<secs into minute>'
 
 Start up:
 python simDataStream.py <com> <output rate in Hz>
 
-Algorithm
-- Start at next closest second
-- Check clock to see if time to output
-- Output if time
 '''
 
 import serial
