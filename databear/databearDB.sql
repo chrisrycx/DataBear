@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS "data" (
 	FOREIGN KEY("sensor_configid") REFERENCES "sensor_configuration"("sensor_configid"),
 	PRIMARY KEY("data_id" AUTOINCREMENT)
 );
+
+CREATE INDEX IF NOT EXISTS data_index ON data ("dtstamp");
+
 CREATE TABLE IF NOT EXISTS "processes" (
 	"process_id"	INTEGER NOT NULL,
 	"name"	TEXT NOT NULL,
@@ -33,6 +36,9 @@ CREATE TABLE IF NOT EXISTS "sensor_configuration" (
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
 	PRIMARY KEY("sensor_config_id" AUTOINCREMENT)
 );
+CREATE INDEX IF NOT EXISTS scstatus_index ON sensor_configuration ('status');
+CREATE INDEX IF NOT EXISTS scsensorid_index ON sensor_configuration ('sensor_id');
+
 CREATE TABLE IF NOT EXISTS "logging_configuration" (
 	"logging_config_id"	INTEGER NOT NULL,
 	"measurement_id"	INTEGER NOT NULL,
@@ -45,6 +51,9 @@ CREATE TABLE IF NOT EXISTS "logging_configuration" (
 	FOREIGN KEY("sensor_id") REFERENCES "sensors"("sensor_id") ON DELETE CASCADE,
 	PRIMARY KEY("logging_config_id" AUTOINCREMENT)
 );
+CREATE INDEX IF NOT EXISTS lcstatus_index ON logging_configuration ('status');
+CREATE INDEX IF NOT EXISTS lcsensorid_index ON logging_configuration ('sensor_id');
+
 CREATE TABLE IF NOT EXISTS "sensors" (
 	"sensor_id"	INTEGER NOT NULL,
 	"name"	TEXT NOT NULL,
