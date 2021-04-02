@@ -360,7 +360,14 @@ class DataLogger:
         msgraw, address = self.udpsocket.recvfrom(1024)
 
         #Decode message
-        msg = json.loads(msgraw)
+        try:
+            msg = json.loads(msgraw)
+        except:
+            logging.warning('Message not valid json, ignoring {}'.format(msgraw))
+            # Create an empty msg dict so we will send invalid command response
+            msg = {}
+            msg['command'] = 'invalid'
+
         if msg['command'] == 'getdata':
             sensorname = msg['arg']
             data = self.sensors[sensorname].getcurrentdata()
