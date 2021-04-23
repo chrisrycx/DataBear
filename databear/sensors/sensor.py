@@ -12,6 +12,7 @@ class Sensor:
     units = {} #List of units associated with measurement names
     measurement_description = {}
     min_interval = 1  #Minimum interval that sensor can be polled
+    uses_portlock = False # Set to true in all sensor classes that require a portlock (modbus sensors)
     def __init__(self,name,sn,address):
         '''
         Create a new sensor

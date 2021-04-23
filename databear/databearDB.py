@@ -21,10 +21,17 @@ class DataBearDB:
     def __init__(self):
         '''
         Initialize the database manager
-        - Check if databear.db already exists in CWD
-            -- Create if needed
+        - Connect to database in path DBDRIVER
+            -- If none, create
+            -- If not set check CWD or create in CWD
         - Create connection to database
         '''
+        try:
+            self.dbpath = os.environ['DBDATABASE']
+        except KeyError:
+            #DBDATABASE not set, assume databear.db in CWD
+            self.dbpath = 'databear.db'
+
         # Add SENSORSPATH to pythonpath for importing alternative sensors
         if 'DBSENSORPATH' in os.environ:
             sys.path.append(os.environ['DBSENSORPATH'])
@@ -36,11 +43,11 @@ class DataBearDB:
             }
 
         # Check if database exists
-        exists = os.path.isfile('databear.db')
+        exists = os.path.isfile(self.dbpath)
 
         # Initialize database sqlite connection object
         # This will create the file if it doesn't exist, hence the check first
-        self.conn = sqlite3.connect('databear.db')
+        self.conn = sqlite3.connect(self.dbpath, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.curs = self.conn.cursor()
         self.path = os.path.dirname(__file__)
@@ -52,10 +59,6 @@ class DataBearDB:
 
             self.curs.executescript(sql_script)
         
-        #Append sys.path with path in DB sensors for loading sensors
-        sensorpath = os.getenv('DBSENSORS')
-        if(sensorpath): sys.path.append(sensorpath)
-        
     @property
     def sensors_available(self):
         '''
@@ -64,7 +67,7 @@ class DataBearDB:
         sensorlist = []
         self.curs.execute('SELECT * FROM sensors_available')
         for row in self.curs.fetchall():
-            sensorlist.append(row['class_name'])
+            sensorlist.append(row['sensor_module'])
         return sensorlist
 
     @property
@@ -83,15 +86,15 @@ class DataBearDB:
         return sensorids
 
     @property
-    def sensor_classes(self):
+    def sensor_modules(self):
         '''
         Return a dictionary mapping sensor names to classes
         '''
-        sensorclasses = {}
-        self.curs.execute('SELECT name, class_name FROM sensors')
+        sensormodules = {}
+        self.curs.execute('SELECT name, module_name FROM sensors')
         for row in self.curs.fetchall():
-            sensorclasses[row['name']] = row['class_name']
-        return sensorclasses
+            sensormodules[row['name']] = row['module_name']
+        return sensormodules
 
     @property
     def process_ids(self):
@@ -104,63 +107,61 @@ class DataBearDB:
             processids[row['name']] = row['process_id']
         return processids
 
-    def load_sensor(self,classname):
+    def load_sensor(self,module_name):
         '''
-        Loads sensor measurements into database if not already there.
-        Adds sensor class name to sensors_available table
+        Loads sensor module to the sensors_available table if not already there.
+        Also load sensor measurements into database if not already there.
         '''
         #Check if sensor is already in sensors_available
-        if classname in self.sensors_available:
+        if module_name in self.sensors_available:
             return
 
-        # Import sensor from either databear.sensors or
-        # from sensor in folder specified by DBSENSORS
-        try:
-            impstr = 'databear.sensors.' + classname
-            sensor_module = importlib.import_module(impstr) 
-        except ModuleNotFoundError as mnf:
-            #Check custom sensors folder
-            sensor_module = importlib.import_module(classname)
-
-        sensor_class = getattr(sensor_module,classname)
-
-        #Update sensors_available table
-        self.curs.execute('INSERT INTO sensors_available '
-                          '(class_name) VALUES (?)',(classname,))
-        self.conn.commit()
+        # Import sensor to load measurements to measurements table
+        # DBSENSORPATH added to sys.path during init
+        sensor_module = importlib.import_module(module_name)
+        
+        # Load class. Class name should be dbsensor
+        sensor_class = getattr(sensor_module,'dbsensor')
 
         #Load sensor measurements to database
         for measurement_name in sensor_class.measurements:
             self.addMeasurement(
-                classname,
+                module_name,
                 measurement_name,
                 sensor_class.units[measurement_name],
                 sensor_class.measurement_description.get(measurement_name,None)
             )
 
-    def addMeasurement(self,classname,measurename,units,description=None):
+        #Update sensors_available table
+        #Do this last to ensure there is no failure loading measurements
+        #prior to making the sensor available
+        self.curs.execute('INSERT INTO sensors_available '
+                          '(sensor_module) VALUES (?)',(module_name,))
+        self.conn.commit()
+
+    def addMeasurement(self,sensormodule,measurename,units,description=None):
         '''
         Add a measurement to the database
         Returns new rowid
         '''
         addqry = ('INSERT INTO measurements '
-                  '(name,units,description,class_name) '
+                  '(name,units,description,sensor_module) '
                   'VALUES (?,?,?,?)')
-        qryparams = (measurename,units,description,classname)
+        qryparams = (measurename,units,description,sensormodule)
 
         self.curs.execute(addqry,qryparams)
         self.conn.commit()
 
         return self.curs.lastrowid
 
-    def addSensor(self,classname,sensorname,serialnumber,address,virtualport,description=None):
+    def addSensor(self,modulename,sensorname,serialnumber,address,virtualport,description=None):
         '''
         Add a new sensor to the database
         '''
         addqry = ('INSERT INTO sensors '
-                  '(name,serial_number,address,virtualport,class_name,description) '
+                  '(name,serial_number,address,virtualport,module_name,description) '
                   'VALUES (?,?,?,?,?,?)')
-        qryparams = (sensorname,serialnumber,address,virtualport,classname,description)
+        qryparams = (sensorname,serialnumber,address,virtualport,modulename,description)
 
         self.curs.execute(addqry,qryparams)
         self.conn.commit()
@@ -227,13 +228,13 @@ class DataBearDB:
 
         return ids
         
-    def getMeasurementID(self,measurement_name,class_name):
+    def getMeasurementID(self,measurement_name,module_name):
         '''
         Get the measurement id for a given name and sensor class
         '''
-        params = (measurement_name,class_name)
+        params = (measurement_name,module_name)
         self.curs.execute('SELECT measurement_id FROM measurements '
-                          'WHERE name=? and class_name=?',params)
+                          'WHERE name=? and sensor_module=?',params)
         
         row = self.curs.fetchone()
 
@@ -242,16 +243,16 @@ class DataBearDB:
 
         return row['measurement_id']
 
-    def getSensorID(self,sensorname,serialnumber,address,virtualport,classname):
+    def getSensorID(self,sensorname,serialnumber,address,virtualport,modulename):
         '''
         Get sensor id associated with parameters
         Return sensor_id or none
         '''
-        params = (sensorname,serialnumber,address,virtualport,classname)
+        params = (sensorname,serialnumber,address,virtualport,modulename)
         self.curs.execute('SELECT sensor_id FROM sensors '
                           'WHERE name=? AND serial_number=? '
                           'AND address=? AND virtualport=? '
-                          'AND class_name=?',params)
+                          'AND module_name=?',params)
         
         row = self.curs.fetchone()
 
@@ -313,7 +314,7 @@ class DataBearDB:
         sensor["address"] = row["address"]
         sensor["virtualport"] = row["virtualport"]
         sensor["measure_interval"] = row["measure_interval"]
-        sensor["class_name"] = row["class_name"]
+        sensor["module_name"] = row["module_name"]
         sensor["sensor_config_id"] = row["sensor_config_id"]
 
         return sensor

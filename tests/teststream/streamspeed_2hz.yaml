@@ -14,10 +14,10 @@
 #      measure_interval: 1   Measurement interval in seconds. Can be < 1 
 sensors: 
   - name: sims1
-    sensortype: databearSimStream  
+    sensortype: dbsensors.simulators.databearSimStream  
     serialnumber: 'X'
     measure_interval: 0.5
-    virtualport: 'port1'
+    virtualport: 'port2'
     address: 0
 
 #---------------------------------------------------------------------#

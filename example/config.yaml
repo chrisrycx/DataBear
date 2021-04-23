@@ -1,6 +1,6 @@
 #
 # DataBear configuration file
-# Example Logger using databearSim simulated sensor
+# Example Logger using simulated sensor from github.com/chrisrycx/DataBear-Sensors
 #
  
 #-----------------------------------------------------------#
@@ -9,42 +9,41 @@
 # Example:
 # sensors: 
 #  - name: 'mysensor'
-#    sensortype: 'mymethod'  This must match sensor factory registry
-#    settings:   
-#      serialnumber: 'xxxx'
-#      address: 0            Required even for sensors without address (use 0)
-#      virtualport: 'port1'  'port0' is reserved for simulated sensors
-#      measure_interval: 1   Measurement interval in seconds. Can be < 1 
+#    sensortype: module containing sensor class
+#    serialnumber: 'xxxx'
+#    address: 0            Required even for sensors without address (use 0)
+#    virtualport: 'port1'  'port0' is reserved for simulated sensors
+#    measure_interval: 1   Measurement interval in seconds. Can be < 1 
+
 sensors: 
   - name: sim1
-    sensortype: databearSim
-    settings:     #Serial number and measurement are mandatory
-      serialnumber: '1'
-      address: 0
-      virtualport: 'port0'
-      measure_interval: 5   #MEASUREMENT frequency in seconds
+    sensortype: dbsensors.simulators.databearSim
+    serialnumber: 1
+    address: 0
+    virtualport: 'port0'
+    measure_interval: 5 
+
   - name: sim2
-    sensortype: databearSim
-    settings:     
-      serialnumber: '2'
-      address: 0
-      virtualport: 'port0'
-      measure_interval: 5 
+    sensortype: dbsensors.simulators.databearSim
+    serialnumber: 2
+    address: 0
+    virtualport: 'port0'
+    measure_interval: 10    
 
 #-----------------------------------------------------------#
 # Datalogger definition
-# The measurements specified here are defined in the sensor
-# section further down in the config file.
 #
 # Example:
 # datalogger:
-#    name: 'mylogger'    This will be the name of the output CSV
+#    name: 'mylogger'    
 #    settings:
-#    - store: 'mymeasurement'  The measurement to be stored
+#    - store: 'mymeasurement'  The measurement to be stored. This must
+#                              be one of the measurements made by the sensor
 #      sensor: 'mysensor'      Sensor that measurement is associated with
 #      process: 'Dump'         Available options: 'Dump','Sample','Min',
 #                                                 'Max','Average'
 #      storage_interval: 60    Storage interval in seconds       
+
 datalogger:
   name: examplelog
   settings:

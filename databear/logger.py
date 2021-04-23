@@ -40,19 +40,28 @@ class DataLogger:
         dbdriver:
             - An instance of a DB hardware driver
         '''
-        # Add SENSORSPATH to pythonpath for importing alternative sensors
-        if 'DBSENSORPATH' in os.environ:
-            sys.path.append(os.environ['DBSENSORPATH'])
-
         #Initialize attributes
         self.sensors = {}
         self.portlocks = {}
         self.loggersettings = [] #Form (<measurement>,<sensor>)
         self.logschedule = schedule.Scheduler()
 
-        #Load hardware driver
-        drivername = os.environ['DBDRIVER']
-        driver_module = importlib.import_module(drivername)
+        #Load driver env var
+        try:
+            drivername = os.environ['DBDRIVER']
+        except KeyError:
+            print('DBDRIVER not set, searching for driver in CWD')
+            drivername = 'dbdriver'
+
+        #Try loading driver as a package, then path
+        try:
+            driver_module = importlib.import_module(drivername)
+        except ImportError:
+            #Try loading from path
+            spec = importlib.util.spec_from_file_location("dbdriver", drivername)
+            driver_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(driver_module)
+
         self.driver = driver_module.dbdriver()
 
         #Set up database connection
@@ -69,37 +78,26 @@ class DataLogger:
 
         #Set up error logging
         logging.basicConfig(
-                format=DataLogger.errorfmt,
-                filename='databear_error.log')
+            level=20,
+            format=DataLogger.errorfmt,
+            filename='databear_error.log'
+            )
 
     def register_sensors(self):
         '''
-        Register sensor class and load measurements
-        to the measurements table
-        classnames - a list of classnames (which should match module names)
+        Register all sensor classes in sensors_available with the factory
         '''
         #Get sensors from database
-        classnames = self.db.sensors_available
-
-        #Append sys.path with path in DB sensors
-        sensorpath = os.getenv('DBSENSORS')
-        if(sensorpath): sys.path.append(sensorpath)
+        module_names = self.db.sensors_available
 
         #Import all sensor classes
-        for sensorcls in classnames:
-            #Try to import from databear.sensors folder
-            try:
-                impstr = 'databear.sensors.'+sensorcls
-                sensor_module = importlib.import_module(impstr) 
-            except ModuleNotFoundError as mnf:
-                #Check custom sensors folder
-                sensor_module = importlib.import_module(sensorcls)
-
-            sensor_class = getattr(sensor_module,sensorcls)
+        for module_name in module_names:
+            sensor_module = importlib.import_module(module_name)
+            sensor_class = getattr(sensor_module,'dbsensor')
 
             #Register sensor with factory
             sensorfactory.factory.register_sensor(
-                sensorcls,
+                module_name,
                 sensor_class)
 
     def loadconfig(self):
@@ -123,7 +121,7 @@ class DataLogger:
                 sensorsettings['serial_number'],
                 sensorsettings['address'],
                 sensorsettings['virtualport'],
-                sensorsettings['class_name'],
+                sensorsettings['module_name'],
                 sensorsettings['sensor_config_id']
                 )
             self.scheduleMeasurement(
@@ -159,7 +157,7 @@ class DataLogger:
 
         #"Connect" sensor to hardware
         #bus type ports are given thread locks
-        if virtualport[0:3] == 'bus':
+        if sensor.uses_portlock: 
             plock = self.portlocks.get(virtualport)
             if not plock:
                 plock = threading.Lock()
@@ -193,6 +191,26 @@ class DataLogger:
 
         return successflag
     
+    def reload(self):
+        successflag = True
+
+        # First stop all current jobs
+        for job in self.logschedule.jobs:
+            self.logschedule.cancel_job(job)
+
+        # Then stop workerpool threads
+        self.workerpool.shutdown()
+
+        # reload configuration, creating sensors as needed
+        self.loadconfig()
+
+        # lastly recreate workerpool based on new number of sensors
+        self.workerpool = concurrent.futures.ThreadPoolExecutor(
+            # use at least 1 worker
+            max_workers=max(len(self.sensors),1))
+
+        return successflag
+
     def scheduleMeasurement(self,sensorname,interval):
         '''
         Schedule a measurement:
@@ -342,22 +360,44 @@ class DataLogger:
         msgraw, address = self.udpsocket.recvfrom(1024)
 
         #Decode message
-        msg = json.loads(msgraw)
+        try:
+            msg = json.loads(msgraw)
+        except:
+            logging.warning('Message not valid json, ignoring {}'.format(msgraw))
+            # Create an empty msg dict so we will send invalid command response
+            msg = {}
+            msg['command'] = 'invalid'
+
         if msg['command'] == 'getdata':
             sensorname = msg['arg']
             data = self.sensors[sensorname].getcurrentdata()
             #Convert to JSON appropriate
-            datastr = {}
+            response = {}
             for name, val in data.items():
                 if val:
                     dtstr = val[0].strftime('%Y-%m-%d %H:%M')
-                    datastr[name] = (dtstr,val[1])
+                    response[name] = (dtstr,val[1])
                 else:
-                    datastr[name] = val 
+                    response[name] = val 
                     
-            response = {'response':'OK','data':datastr}
         elif msg['command'] == 'status':
-            response = {'response':'OK'}
+            #Get active sensor names
+            sensornames = list(self.sensors.keys())
+            response = {'status':'running','sensors':sensornames}
+        
+        elif msg['command'] == 'getsensor':
+            '''
+            Return {'measurements':[(measure1,units1),(...)]}
+            '''
+            sensorname = msg['arg']
+            measurelist = []
+            for measurename in self.sensors[sensorname].measurements:
+                measurelist.append(
+                    (measurename,self.sensors[sensorname].units[measurename])
+                    )
+
+            response = {'measurements':measurelist}
+
         elif msg['command'] == 'shutdown':
             self.messages.append(msg['command'])
             response = {'response':'OK'}
@@ -367,6 +407,12 @@ class DataLogger:
                 response = {'response':'OK'}
             else:
                 response = {'response':'Sensor not found'}
+        elif msg['command'] == 'reload':
+            success = self.reload()
+            if success:
+                response = {'response':'OK'}
+            else:
+                response = {'response':'Reload failed'}
         else:
             response = {'response':'Invalid Command'}
             
@@ -391,12 +437,12 @@ class DataLogger:
             # use at least 1 worker
             max_workers=max(len(self.sensors),1))
 
-        while True:
+        logging.info('Starting run loop')
+        exiting = False
+        while not exiting:
             try:
                 self.logschedule.run_pending()
                 sleeptime = self.logschedule.idle_seconds
-                if sleeptime > 0:
-                    time.sleep(sleeptime)
 
                 #Check for messages
                 if self.messages:
@@ -407,7 +453,16 @@ class DataLogger:
                         self.listen=False
                         t.join() #Wait for thread to end
                         print('Shutting down')
+                        # Set exiting to break out of the while loop
+                        exiting = True
+                        # This break only exits the for loop
                         break
+
+                #Sleep for maximum of 1 sec
+                if sleeptime > 1: sleeptime = 1
+                if sleeptime < 0: sleeptime = 0
+                time.sleep(sleeptime)
+                
             except KeyboardInterrupt:
                 #Shut down threads
                 self.workerpool.shutdown()
@@ -424,7 +479,7 @@ class DataLogger:
                 raise
 
 
-        #Close CSV after stopping
+        #Close database after stopping
         self.db.close()
       
             

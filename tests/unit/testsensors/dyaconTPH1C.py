@@ -9,7 +9,7 @@ import minimalmodbus as mm
 from databear.errors import MeasureError, SensorConfigError
 from databear.sensors import sensor
 
-class dyaconTPH1C(sensor.BusSensor):
+class dbsensor(sensor.BusSensor):
     hardware_settings = {
         'serial':'RS485',
         'duplex':'half',
@@ -23,6 +23,7 @@ class dyaconTPH1C(sensor.BusSensor):
         'barometric_pressure':'mb'
     }
     min_interval = 1  #Minimum interval that sensor can be polled
+    uses_portlock = True
     registers = {
         'air_temperature':210,
         'relative_humidity':212,
@@ -42,7 +43,6 @@ class dyaconTPH1C(sensor.BusSensor):
         '''
         fails = {} #keep track of measurement failures
         for measure in self.measurements:
-            dt = datetime.datetime.now()
             
             try:
                 val = self.comm.read_float(self.registers[measure])

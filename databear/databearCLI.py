@@ -4,14 +4,10 @@ DataBear command line utility
 Use:
 databear <cmd> <option>
 
-Commands:
-run <config.yaml>
-shutdown
-others under development
-
 '''
 import socket
 import json
+import os
 import sys
 import yaml
 
@@ -43,10 +39,18 @@ def runDataBear(yamlfile=None):
     
     #Run logger in the background
     print('Running databear with python -m databear.logger')
+    subprocess.Popen(
+        [sys.executable,'-m','databear.logger'],
+        stdout=open('databear_error.log','a'),
+        stderr=subprocess.STDOUT)
+    '''
+    my_env = os.environ.copy()
     subprocess.Popen([sys.executable,'-m','databear.logger'],
-            cwd="./",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+            cwd=os.getcwd(), 
+            env=my_env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
+    '''
     
 def updateAvailableSensors():
     '''
@@ -72,6 +76,30 @@ def sendCommand(command,argument=None):
         response = None
 
     return response
+
+def findSensors():
+    '''
+    Load all sensors from DBSENSORPATH and DBSENSORS to sensors available
+    '''
+    from databear import databearDB
+    import pkgutil
+
+    #Connect or create database
+    db = databearDB.DataBearDB()
+
+    #Parse list of sensor modules from DBSENSORS
+    if 'DBSENSORS' in os.environ:
+        dbsensors = os.environ['DBSENSORS']
+        sensorlist = dbsensors.split(',')
+
+        for sensor_module in sensorlist:
+            db.load_sensor(sensor_module)
+
+    #Find all modules in DBSENSORPATH
+    if 'DBSENSORPATH' in os.environ:
+        for modinfo in pkgutil.iter_modules([os.environ['DBSENSORPATH']]):
+            db.load_sensor(modinfo[1])
+
 
 def loadYAML(yamlfile):
     '''
@@ -137,11 +165,11 @@ def loadYAML(yamlfile):
     #Load logging configuration
     active_sensor_ids = db.active_sensor_ids
     process_ids = db.process_ids
-    sensor_classes = db.sensor_classes
+    sensor_modules = db.sensor_modules
     for logsetting in config['datalogger']['settings']:
             measureid = db.getMeasurementID(
                 logsetting['store'],
-                sensor_classes[logsetting['sensor']])
+                sensor_modules[logsetting['sensor']])
             
             #Check for existing logging config
             oldloggingconfig = db.getLoggingConfigID(
@@ -181,6 +209,8 @@ def main_cli():
 
     if cmd=='run':
         runDataBear(option)
+    elif cmd=='initialize':
+        findSensors()
     else:
         rsp = sendCommand(cmd,option)
         print(rsp)

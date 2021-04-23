@@ -1,0 +1,1 @@
+Sensors in this folder can be used as needed in unit testing
