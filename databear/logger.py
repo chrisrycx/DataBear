@@ -111,11 +111,17 @@ class DataLogger:
         #Get list of active sensors and logging
         sensorids = self.db.getSensorIDs(activeonly=True)
         loggingconfigs = self.db.getConfigIDs('logging',activeonly=True)
-        
+
+        #Initialize storage clear intervals
+        clear_intervals = {}
+
         #Configure logger
         for sensorid in sensorids:
             sensorsettings = self.db.getSensorConfig(sensorid)
 
+            #Set default clear interval to 1 hour
+            clear_intervals[sensorsettings['name']] = 3600
+            
             self.addSensor(
                 sensorsettings['name'],
                 sensorsettings['serial_number'],
@@ -138,6 +144,15 @@ class DataLogger:
                 storagesetting['sensor_name'],
                 storagesetting['storage_interval'],
                 storagesetting['process'])
+
+            #Check if storage interval largest
+            if storagesetting['storage_interval'] > clear_intervals[storagesetting['sensor_name']]:
+                clear_intervals[storagesetting['sensor_name']] = storagesetting['storage_interval']
+
+        #Schedule clearing of storage
+        for sensor_name, clear_interval in clear_intervals.items():
+            print('Clear interval: {}, {}'.format(sensor_name,clear_interval))
+            self.logschedule.every(clear_interval).do(self.clearSensor,sensor_name,clear_interval)
                   
     def addSensor(self,name,sn,address,virtualport,sensortype,sensorconfigid):
         '''
@@ -190,6 +205,20 @@ class DataLogger:
                 successflag = 1
 
         return successflag
+
+    def clearSensor(self,sensorname,interval):
+        '''
+        Clear data from sensor data storage
+        Clears all data older than current time - interval
+        interval - largest storage frequency for a sensor
+        '''
+        current_dt = datetime.now()
+        old_dt = current_dt - timedelta(seconds=interval)
+
+        #Clear data
+        measurements = self.sensors[sensorname].measurements
+        for m in measurements:
+            self.sensors[sensorname].cleardata(m,old_dt)
     
     def reload(self):
         successflag = True

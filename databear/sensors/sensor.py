@@ -1,12 +1,13 @@
 '''
 Base class for DataBear sensors
+Version 1.3 - Changed how clear data works
 '''
 from databear.errors import SensorConfigError, MeasureError
 import datetime
 import time
 
 class Sensor:
-    interface_version = '1.2'
+    interface_version = '1.3'
     hardware_settings = {}
     measurements = [] #List of measurement names
     units = {} #List of units associated with measurement names
@@ -19,7 +20,7 @@ class Sensor:
         Inputs
         - name (string): sensor name
         - sn (string): serial number
-        - address (int): default 0
+        - address (int): sensor address, set to 0 if none
         - interval (float): measurement interval in seconds
         '''
         try:
@@ -99,19 +100,22 @@ class Sensor:
             print(name + " missing from " + data)
             raise MeasureError(name, [], "name missing from dictionary")
 
-    def cleardata(self,name,startdt,enddt):
+    def cleardata(self,name,startdt):
         '''
-        Clear data values for a particular measurement
+        Clear data values for a particular measurement that are earlier than startdt
+        startdt: datetime.datetime
+        Assumes that the data is ordered
         Loop through values and remove. Note: This is probably
         inefficient if the data structure is large.
         '''
-        savedata = []
-        data = self.data[name]
-        for val in data:
-            if (val[0]<startdt) or (val[0]>=enddt):
-                savedata.append(val)
+        startloc = 0
+        while self.data[name][startloc][0] < startdt:
+            startloc = startloc + 1
 
-        self.data[name] = savedata
+        if startloc > 0:
+            del self.data[name][:startloc]
+
+        return
 
 
 class BusSensor(Sensor):
