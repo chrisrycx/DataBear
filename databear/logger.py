@@ -120,7 +120,7 @@ class DataLogger:
             sensorsettings = self.db.getSensorConfig(sensorid)
 
             #Set default clear interval to 1 hour
-            clear_intervals[sensorsettings['name']] = 3600
+            clear_intervals[sensorsettings['name']] = 30
             
             self.addSensor(
                 sensorsettings['name'],
@@ -206,7 +206,7 @@ class DataLogger:
 
         return successflag
 
-    def clearSensor(self,sensorname,interval):
+    def clearSensor(self,sensorname,interval,scheduled_time,last_time):
         '''
         Clear data from sensor data storage
         Clears all data older than current time - interval

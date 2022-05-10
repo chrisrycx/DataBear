@@ -27,7 +27,7 @@ class DataBearDB:
         - Create connection to database
         '''
         try:
-            self.dbpath = os.environ['DBDATABASE']
+            self.dbpath = os.environ['DBDATABASE'] + '/databear.db'
         except KeyError:
             #DBDATABASE not set, assume databear.db in CWD
             self.dbpath = 'databear.db'
